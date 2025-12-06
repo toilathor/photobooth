@@ -1,0 +1,27 @@
+name: toilathor_photobooth
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+    sdk: ^3.5.4
+
+dependencies:
+    flutter:
+        sdk: flutter
+    cupertino_icons: ^1.0.8
+    camera: ^0.11.0+2
+    camera_windows: ^0.2.6+2
+    camera_web: ^0.3.5
+    provider: ^6.0.5
+    google_fonts: ^6.3.0
+    gap: ^3.0.1
+
+dev_dependencies:
+    flutter_test:
+        sdk: flutter
+
+    flutter_lints: ^4.0.0
+flutter:
+    uses-material-design: true
