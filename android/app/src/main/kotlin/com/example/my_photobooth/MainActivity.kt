@@ -1,4 +1,4 @@
-package com.example.toilathor_photobooth
+package com.example.my_photobooth
 
 import io.flutter.embedding.android.FlutterActivity
 

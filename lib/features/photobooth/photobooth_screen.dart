@@ -1,8 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:my_photobooth/features/photobooth/photobooth_provider.dart';
+import 'package:my_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
+import 'package:my_photobooth/features/photobooth/widgets/camera_preview_widget.dart';
+import 'package:my_photobooth/features/photobooth/widgets/photo_previews_panel.dart';
+import 'package:my_photobooth/features/photobooth/widgets/photobooth_header.dart';
+import 'package:my_photobooth/features/photobooth/widgets/settings_panel.dart';
 import 'package:provider/provider.dart';
-import 'package:toilathor_photobooth/features/photobooth/photobooth_provider.dart';
 
 class PhotoboothScreen extends StatefulWidget {
   const PhotoboothScreen({super.key});
@@ -11,44 +16,54 @@ class PhotoboothScreen extends StatefulWidget {
   State<PhotoboothScreen> createState() => _PhotoboothScreenState();
 }
 
-class _PhotoboothScreenState extends State<PhotoboothScreen>
-    with WidgetsBindingObserver {
+class _PhotoboothScreenState extends State<PhotoboothScreen> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ChangeNotifierProvider(
       create: (_) => PhotoboothProvider(),
-      builder: (_, child) => Consumer<PhotoboothProvider>(
-        builder: (_, provider, __) {
+      builder: (context, child) => Consumer<PhotoboothProvider>(
+        builder: (context, provider, _) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.miniEndTop,
             floatingActionButton: !provider.isFullscreen
-                ? FloatingActionButton(
-                    child: const Icon(Icons.fullscreen),
+                ? FloatingActionButton.small(
                     onPressed: () => provider.enterFullscreen(),
+                    backgroundColor: colorScheme.secondary,
+                    foregroundColor: colorScheme.primary,
+                    elevation: 8,
+                    child: const Icon(Icons.fullscreen_rounded),
                   )
                 : null,
-            body: Padding(
-              padding: const EdgeInsets.all(64),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Text(
-                      "Toilathor",
-                      style: TextStyle(fontSize: 100),
-                    ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(32),
-                      child: AspectRatio(
-                        aspectRatio: 4 / 3,
-                        child: provider.cameraController == null
-                            ? const SizedBox()
-                            : CameraPreview(provider.cameraController!),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  const PhotoboothHeader(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Expanded(flex: 1, child: SettingsPanel()),
+                          const Gap(24),
+                          Expanded(
+                            flex: 3,
+                            child: provider.cameraController == null
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : _CenterPanel(provider.cameraController!),
+                          ),
+                          const Gap(24),
+                          const Expanded(flex: 1, child: PhotoPreviewsPanel()),
+                        ],
                       ),
                     ),
-                    const Gap(16),
-
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -56,20 +71,22 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
       ),
     );
   }
+}
 
-// @override
-// void didChangeAppLifecycleState(AppLifecycleState state) {
-//   final CameraController? cameraController = controller;
-//
-//   // App state changed before we got the chance to initialize.
-//   if (cameraController == null || !cameraController.value.isInitialized) {
-//     return;
-//   }
-//
-//   if (state == AppLifecycleState.inactive) {
-//     cameraController.dispose();
-//   } else if (state == AppLifecycleState.resumed) {
-//     _initializeCameraController(cameraController.description);
-//   }
-// }
+class _CenterPanel extends StatelessWidget {
+  const _CenterPanel(this.controller);
+
+  final CameraController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(child: CameraPreviewWidget(controller)),
+        const Gap(24),
+        const ActionButtonsWidget(),
+        const Gap(24),
+      ],
+    );
+  }
 }

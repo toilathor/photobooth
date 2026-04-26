@@ -27,9 +27,9 @@ final light = ThemeData(
     onTertiary: Colors.white,
     outline: Color(0xFFD1D5DB),
   ),
-  textTheme: const TextTheme(
+  textTheme: TextTheme(
     headlineLarge: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+      fontFamily: 'Pacifico',
       fontSize: 36,
       fontWeight: FontWeight.w700,
     ),
@@ -41,37 +41,32 @@ final light = ThemeData(
   ),
 );
 
-final dark = ThemeData(
-  brightness: Brightness.dark,
+final weddingTheme = ThemeData(
+  brightness: Brightness.light,
   useMaterial3: true,
-  colorScheme: const ColorScheme(
-    brightness: Brightness.dark,
-    primary: darkPrimary,
-    onPrimary: Color(0xFF660000),
-    primaryContainer: darkPrimaryContainer,
-    onPrimaryContainer: Color(0xFFFFDADA),
-    secondary: Color(0xFFFFDADA),
-    onSecondary: Color(0xFF400000),
-    background: darkBackground,
-    onBackground: Color(0xFFE6E1E5),
-    surface: darkBackground,
-    onSurface: Color(0xFFE6E1E5),
-    error: Color(0xFFFFB4AB),
-    onError: Colors.black,
-    tertiary: Color(0xFFCFBCFF),
-    onTertiary: Color(0xFF3E247D),
-    outline: Color(0xFF8E9094),
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    primary: const Color(0xFF5A0001), // Deep Imperial Red/Burgundy
+    onPrimary: Colors.white, // Pure white for best contrast
+    primaryContainer: const Color(0xFF8B0000),
+    onPrimaryContainer: Colors.white,
+    secondary: const Color(0xFFFFD700), // Bright Gold
+    onSecondary: const Color(0xFF5A0001),
+    surface: const Color(0xFF5A0001),
+    onSurface: Colors.white,
+    error: const Color(0xFFB3261E),
+    onError: Colors.white,
+    tertiary: const Color(0xFFFFD700),
+    onTertiary: const Color(0xFF5A0001),
+    outline: const Color(0xFFFFD700).withValues(alpha: 0.5),
   ),
-  textTheme: const TextTheme(
+  scaffoldBackgroundColor: const Color(0xFF5A0001),
+  textTheme: TextTheme(
     headlineLarge: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+      fontFamily: 'Pacifico',
       fontSize: 36,
       fontWeight: FontWeight.w700,
-    ),
-    titleLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontSize: 20,
-      fontWeight: FontWeight.w700,
+      color: Color(0xFFD4AF37),
     ),
   ),
 );

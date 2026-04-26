@@ -5,8 +5,10 @@
 import FlutterMacOS
 import Foundation
 
-import path_provider_foundation
+import audioplayers_darwin
+import google_sign_in_ios
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
+  AudioplayersDarwinPlugin.register(with: registry.registrar(forPlugin: "AudioplayersDarwinPlugin"))
+  FLTGoogleSignInPlugin.register(with: registry.registrar(forPlugin: "FLTGoogleSignInPlugin"))
 }

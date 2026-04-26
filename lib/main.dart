@@ -1,8 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:toilathor_photobooth/features/photobooth/photobooth_screen.dart';
-import 'package:toilathor_photobooth/helper/constants.dart';
-import 'package:toilathor_photobooth/helper/design.dart';
+import 'package:my_photobooth/features/photobooth/photobooth_screen.dart';
+import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/helper/design.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,9 +19,7 @@ class PhotoboothApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Photobooth',
-      theme: light,
-      darkTheme: dark,
-      // themeMode: _themeMode,
+      theme: weddingTheme,
       themeMode: ThemeMode.light,
       home: const PhotoboothScreen(),
       debugShowCheckedModeBanner: false,

@@ -1,27 +1,40 @@
-name: toilathor_photobooth
+name: my_photobooth
 description: "A new Flutter project."
 publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-    sdk: ^3.5.4
+    sdk: ^3.11.4
 
 dependencies:
     flutter:
         sdk: flutter
     cupertino_icons: ^1.0.8
-    camera: ^0.11.0+2
+    camera: ^0.12.0+1
     camera_windows: ^0.2.6+2
     camera_web: ^0.3.5
     provider: ^6.0.5
-    google_fonts: ^6.3.0
+    google_fonts: ^8.0.2
     gap: ^3.0.1
+
+    googleapis: ^16.0.0
+    google_sign_in: ^7.2.0
+    extension_google_sign_in_as_googleapis_auth: ^3.0.0
+    web: ^1.1.1
+    audioplayers: ^6.6.0
+    animated_text_kit: ^4.3.0
+    image: ^4.8.0
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
 
-    flutter_lints: ^4.0.0
+    flutter_lints: ^6.0.0
+    flutter_launcher_icons: ^0.14.4
+
 flutter:
     uses-material-design: true
+    assets:
+        - assets/sounds/
+        - assets/images/

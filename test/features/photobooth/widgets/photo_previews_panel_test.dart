@@ -1,0 +1,29 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:my_photobooth/features/photobooth/photobooth_provider.dart';
+import 'package:my_photobooth/features/photobooth/widgets/photo_previews_panel.dart';
+import 'package:my_photobooth/helper/constants.dart';
+
+void main() {
+  setUp(() {
+    cameras = [];
+  });
+
+  testWidgets('PhotoPreviewsPanel renders 4 placeholders and status',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider(
+            create: (_) => PhotoboothProvider(),
+            child: const SingleChildScrollView(child: PhotoPreviewsPanel()),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.image_outlined), findsNWidgets(4));
+    expect(find.text('0/4'), findsOneWidget);
+  });
+}

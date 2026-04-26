@@ -1,4 +1,4 @@
-# toilathor_photobooth
+# my_photobooth
 
 A new Flutter project.
 
