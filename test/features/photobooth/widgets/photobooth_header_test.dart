@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_photobooth/features/photobooth/widgets/photobooth_header.dart';
+import 'package:my_photobooth/components/photobooth_header.dart';
 
 void main() {
-  testWidgets('PhotoboothHeader renders correct text',
-      (WidgetTester tester) async {
+  testWidgets('PhotoboothHeader renders correct text', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(body: PhotoboothHeader()),
-      ),
+      const MaterialApp(home: Scaffold(body: PhotoboothHeader())),
     );
 
     expect(find.text('PhotoXinhh'), findsOneWidget);

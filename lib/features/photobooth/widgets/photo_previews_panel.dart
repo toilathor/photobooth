@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_photobooth/features/edit_photo/edit_photo_screen.dart';
-import 'package:my_photobooth/features/photobooth/photobooth_provider.dart';
+import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
+import 'package:my_photobooth/features/edit_photo/edit_photo.screen.dart';
+import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:provider/provider.dart';
 
 class PhotoPreviewsPanel extends StatelessWidget {
@@ -134,6 +135,9 @@ class PhotoPreviewsPanel extends StatelessWidget {
             onPressed:
                 provider.capturedPhotos.length >= provider.selectedPhotoCount
                 ? () {
+                    context.read<EditPhotoProvider>().initForPhotoCount(
+                      provider.capturedPhotos.length,
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute(

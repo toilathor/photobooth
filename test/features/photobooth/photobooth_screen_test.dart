@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_photobooth/features/photobooth/photobooth_screen.dart';
+import 'package:my_photobooth/features/photobooth/photobooth.screen.dart';
 import 'package:my_photobooth/helper/constants.dart';
 
 void main() {

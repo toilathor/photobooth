@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_photobooth/features/photobooth/photobooth_provider.dart';
+import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:provider/provider.dart';
 
 class ActionButtonsWidget extends StatelessWidget {

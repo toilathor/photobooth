@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_photobooth/features/photobooth/photobooth_provider.dart';
+import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/helper/constants.dart';
 
 void main() {
