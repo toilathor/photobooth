@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'dropdown_setting.dart';
 import 'filter_selector.dart';
 import 'photo_selection_dialog.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 
 class SettingsPanel extends StatelessWidget {
   const SettingsPanel({super.key});
@@ -30,7 +31,7 @@ class SettingsPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Cài đặt'.toUpperCase(),
+              t.settings.title.toUpperCase(),
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
@@ -40,7 +41,7 @@ class SettingsPanel extends StatelessWidget {
             ),
             const Gap(16),
             DropdownSetting<int>(
-              label: 'Số ảnh',
+              label: t.settings.photoCount,
               value: provider.selectedPhotoCount,
               items: provider.photoCounts,
               onChanged: provider.isCapturing ? null : (val) {
@@ -65,11 +66,21 @@ class SettingsPanel extends StatelessWidget {
             ),
             const Gap(20),
             DropdownSetting<int>(
-              label: 'Đếm Ngược',
+              label: t.settings.countdown,
               value: provider.countdown,
               items: provider.countdowns,
               onChanged: provider.isCapturing ? null : (val) => provider.setCountdown(val as int),
-              suffix: ' giây',
+              suffix: ' ${t.settings.seconds}',
+            ),
+            const Gap(20),
+            DropdownSetting<AppLocale>(
+              label: t.settings.language,
+              value: provider.currentLocale,
+              items: AppLocale.values,
+              itemLabelBuilder: (locale) => locale == AppLocale.vi ? 'Tiếng Việt' : 'English',
+              onChanged: provider.isCapturing ? null : (val) {
+                if (val != null) provider.setLanguage(val);
+              },
             ),
             const Gap(24),
             const Divider(),

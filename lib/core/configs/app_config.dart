@@ -11,12 +11,12 @@ class AppConfig {
   
   // Filter settings
   static const List<String> filters = [
-    'Bình Thường',
-    'Mono (Retro Effect)',
-    'Đen Trắng',
-    'Mềm Mại',
-    'Dazz Classic',
-    'Dazz Instant',
+    'normal',
+    'mono',
+    'bw',
+    'soft',
+    'dazz_classic',
+    'dazz_instant',
   ];
   
   // Voice countdown sounds

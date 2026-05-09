@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 
 class ActionButtonsWidget extends StatelessWidget {
@@ -19,7 +20,7 @@ class ActionButtonsWidget extends StatelessWidget {
           children: [
             _ActionIcon(
               icon: Icons.touch_app,
-              label: 'Chụp tay',
+              label: t.actions.manual,
               colorScheme: colorScheme,
               onTap: provider.takeManualPhoto,
               isEnabled:
@@ -29,7 +30,7 @@ class ActionButtonsWidget extends StatelessWidget {
             const Gap(32),
             _ActionIcon(
               icon: Icons.camera_alt,
-              label: 'AUTO',
+              label: t.actions.auto,
               colorScheme: colorScheme,
               isPrimary: true,
               onTap: provider.startAutoCapture,
@@ -38,7 +39,7 @@ class ActionButtonsWidget extends StatelessWidget {
             const Gap(32),
             _ActionIcon(
               icon: Icons.refresh,
-              label: 'Chụp Lại',
+              label: t.actions.retake,
               colorScheme: colorScheme,
               onTap: provider.resetCapture,
               isEnabled:
@@ -56,7 +57,7 @@ class ActionButtonsWidget extends StatelessWidget {
               activeThumbColor: colorScheme.secondary,
             ),
             Text(
-              'VIDEO RECAP',
+              t.actions.videoRecap,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,

@@ -10,6 +10,8 @@ environment:
 dependencies:
     flutter:
         sdk: flutter
+    flutter_localizations:
+        sdk: flutter
     cupertino_icons: ^1.0.8
     camera: ^0.12.0+1
     camera_windows: ^0.2.6+2
@@ -29,12 +31,16 @@ dependencies:
     flutter_lints: ^4.0.0
     video_player: ^2.11.1
     path_provider: ^2.1.5
+    slang: any
+    slang_flutter: any
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
 
     flutter_launcher_icons: ^0.14.4
+    build_runner: any
+    slang_build_runner: any
 
 flutter:
     uses-material-design: true

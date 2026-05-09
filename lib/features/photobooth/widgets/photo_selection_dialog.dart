@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 
 class PhotoSelectionDialog extends StatefulWidget {
   final List<XFile> photos;
@@ -26,14 +27,14 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return AlertDialog(
-      title: const Text('Chọn ảnh muốn giữ lại'),
+      title: Text(t.dialogs.photoSelection.title),
       content: SizedBox(
         width: 400,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Vui lòng chọn đúng ${widget.targetCount} ảnh để tiếp tục.',
+              t.dialogs.photoSelection.subtitle(count: widget.targetCount),
               style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
             const Gap(16),
@@ -114,7 +115,7 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
-                child: const Text('HỦY'),
+                child: Text(t.dialogs.photoSelection.cancel),
               ),
               const Gap(8),
               FilledButton.icon(
@@ -132,7 +133,7 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
                 ),
                 icon: const Icon(Icons.check_rounded, size: 20),
                 label: Text(
-                  'XÁC NHẬN (${_selected.length}/${widget.targetCount})',
+                  '${t.dialogs.photoSelection.confirm} (${_selected.length}/${widget.targetCount})',
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.2,

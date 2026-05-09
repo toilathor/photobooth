@@ -1,0 +1,4 @@
+base_locale: vi
+input_directory: lib/i18n
+output_directory: lib/i18n
+output_file_name: strings.g.dart

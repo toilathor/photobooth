@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/core/configs/app_config.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
@@ -78,7 +79,7 @@ class CameraPreviewWidget extends StatelessWidget {
                                       ? AnimatedTextKit(
                                           animatedTexts: [
                                             ScaleAnimatedText(
-                                              'Chuẩn bị',
+                                              t.actions.prepare,
                                               duration: const Duration(
                                                 milliseconds: 1000,
                                               ),

@@ -1,10 +1,12 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
+import 'package:my_photobooth/core/configs/theme_config.dart';
 import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.screen.dart';
-import 'package:my_photobooth/core/configs/app_config.dart';
-import 'package:my_photobooth/core/configs/theme_config.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -13,12 +15,14 @@ Future<void> main() async {
   AppConfig.cameras = await availableCameras();
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
-        ChangeNotifierProvider(create: (_) => EditPhotoProvider()),
-      ],
-      child: const PhotoboothApp(),
+    TranslationProvider(
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
+          ChangeNotifierProvider(create: (_) => EditPhotoProvider()),
+        ],
+        child: const PhotoboothApp(),
+      ),
     ),
   );
 }
@@ -32,6 +36,9 @@ class PhotoboothApp extends StatelessWidget {
       title: 'Photobooth',
       theme: ThemeConfig.weddingTheme,
       themeMode: ThemeMode.light,
+      locale: TranslationProvider.of(context).flutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: const PhotoboothScreen(),
       debugShowCheckedModeBanner: false,
     );

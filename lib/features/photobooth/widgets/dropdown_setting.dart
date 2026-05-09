@@ -8,6 +8,7 @@ class DropdownSetting<T> extends StatelessWidget {
   final List<T> items;
   final ValueChanged<T?>? onChanged;
   final String suffix;
+  final String Function(T)? itemLabelBuilder;
 
   const DropdownSetting({
     super.key,
@@ -16,6 +17,7 @@ class DropdownSetting<T> extends StatelessWidget {
     required this.items,
     this.onChanged,
     this.suffix = '',
+    this.itemLabelBuilder,
   });
 
   @override
@@ -49,7 +51,12 @@ class DropdownSetting<T> extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               items: items
                   .map(
-                    (e) => DropdownMenuItem(value: e, child: Text('$e$suffix')),
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(
+                        '${itemLabelBuilder != null ? itemLabelBuilder!(e) : e}$suffix',
+                      ),
+                    ),
                   )
                   .toList(),
               onChanged: onChanged,

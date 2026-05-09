@@ -1,0 +1,38 @@
+{
+  "settings": {
+    "title": "SETTINGS",
+    "photoCount": "Photo Count",
+    "countdown": "Countdown",
+    "seconds": "s",
+    "language": "Language"
+  },
+  "actions": {
+    "manual": "Manual",
+    "auto": "AUTO",
+    "retake": "Retake",
+    "videoRecap": "VIDEO RECAP",
+    "prepare": "Get Ready"
+  },
+  "preview": {
+    "captured": "CAPTURED $current/$total",
+    "continue_btn": "CONTINUE",
+    "not_enough_photos": "CAPTURE ALL PHOTOS TO CONTINUE"
+  },
+  "dialogs": {
+    "photoSelection": {
+      "title": "Select photos to keep",
+      "subtitle": "Please select exactly $count photos to continue.",
+      "cancel": "CANCEL",
+      "confirm": "CONFIRM"
+    }
+  },
+  "filters": {
+    "title": "Color Filters",
+    "normal": "Normal",
+    "mono": "Mono (Retro Effect)",
+    "bw": "Black & White",
+    "soft": "Soft",
+    "dazz_classic": "Dazz Classic",
+    "dazz_instant": "Dazz Instant"
+  }
+}

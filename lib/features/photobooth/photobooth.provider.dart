@@ -9,6 +9,7 @@ import 'package:my_photobooth/core/configs/asset_config.dart';
 import 'package:my_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js) 'package:my_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
+import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
@@ -30,6 +31,8 @@ class PhotoboothProvider extends ChangeNotifier {
   int currentCountdownValue = 0;
   int currentPhotoIndex = 0;
   
+  AppLocale currentLocale = LocaleSettings.currentLocale;
+
   final VideoService _videoService = VideoService();
   XFile? get videoRecapFile => _videoService.videoRecapFile;
   List<Duration> get photoTimestamps => _videoService.photoTimestamps;
@@ -127,6 +130,12 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void setFilter(String filter) {
     selectedFilter = filter;
+    notifyListeners();
+  }
+
+  void setLanguage(AppLocale locale) {
+    LocaleSettings.setLocale(locale);
+    currentLocale = locale;
     notifyListeners();
   }
 

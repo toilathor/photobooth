@@ -1,0 +1,38 @@
+{
+  "settings": {
+    "title": "CÀI ĐẶT",
+    "photoCount": "Số ảnh",
+    "countdown": "Đếm Ngược",
+    "seconds": "giây",
+    "language": "Ngôn ngữ"
+  },
+  "actions": {
+    "manual": "Chụp tay",
+    "auto": "AUTO",
+    "retake": "Chụp Lại",
+    "videoRecap": "VIDEO RECAP",
+    "prepare": "Chuẩn bị"
+  },
+  "preview": {
+    "captured": "ĐÃ CHỤP $current/$total",
+    "continue_btn": "TIẾP TỤC",
+    "not_enough_photos": "CHỤP ĐỦ ẢNH ĐỂ TIẾP TỤC"
+  },
+  "dialogs": {
+    "photoSelection": {
+      "title": "Chọn ảnh muốn giữ lại",
+      "subtitle": "Vui lòng chọn đúng $count ảnh để tiếp tục.",
+      "cancel": "HỦY",
+      "confirm": "XÁC NHẬN"
+    }
+  },
+  "filters": {
+    "title": "Bộ lọc màu",
+    "normal": "Bình Thường",
+    "mono": "Mono (Retro Effect)",
+    "bw": "Đen Trắng",
+    "soft": "Mềm Mại",
+    "dazz_classic": "Dazz Classic",
+    "dazz_instant": "Dazz Instant"
+  }
+}

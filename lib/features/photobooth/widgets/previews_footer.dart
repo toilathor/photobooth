@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
 import 'package:my_photobooth/features/edit_photo/edit_photo.screen.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 
 class PreviewsFooter extends StatelessWidget {
   const PreviewsFooter({super.key});
@@ -18,7 +19,10 @@ class PreviewsFooter extends StatelessWidget {
       children: [
         const Gap(16),
         Text(
-          'ĐÃ CHỤP ${provider.capturedPhotos.length}/${provider.selectedPhotoCount}',
+          t.preview.captured(
+            current: provider.capturedPhotos.length,
+            total: provider.selectedPhotoCount,
+          ),
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: colorScheme.onSurface,
@@ -58,8 +62,8 @@ class PreviewsFooter extends StatelessWidget {
             ),
             label: Text(
               provider.capturedPhotos.length >= provider.selectedPhotoCount
-                  ? 'TIẾP TỤC'
-                  : 'CHỤP ĐỦ ẢNH ĐỂ TIẾP TỤC',
+                  ? t.preview.continue_btn
+                  : t.preview.not_enough_photos,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,

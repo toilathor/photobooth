@@ -19,6 +19,7 @@
     - [x] Refactor lại hệ thống cấu hình (Configs) để quản lý tập trung.
     - [x] Tách nhỏ các Widget lớn trong `PreviewPanel` và `SettingsPanel` để dễ quản lý.
     - [x] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
+    - [x] Triển khai đa ngôn ngữ (Internationalization - i18n).
 
 ## 🚀 Sắp tới (Upcoming)
 - [ ] **Tính năng Frame & Content**:
@@ -41,8 +42,7 @@
 - [ ] **Refactor & Config**:
 - [ ] **Hệ thống & Hiệu năng**:
     - [ ] Xử lý Cache (ảnh/video tạm) để giảm dung lượng ứng dụng.
-    - [ ] Triển khai đa ngôn ngữ (Internationalization - i18n).
-    - [ ] Chia môi trường phát triển (Dev/Staging/Production).
+    - [ ] Chia môi trường phát triển (Dev/Production).
 - [ ] Viết Unit Test cho logic tính toán vị trí slots trong Frame.
 - [ ] Tối ưu hóa hiệu năng Video Player khi dùng nhiều controller cùng lúc trên Web.
 - [ ] Tối ưu khổ giấy cho bản in một tấm (tiết kiệm giấy in nhiệt).
