@@ -63,7 +63,17 @@ class ImageMergerService {
       // 4. Draw the frame overlay on top
       img.compositeImage(resultImage, frameImage);
 
-      // 5. Encode result to PNG
+      // 5. Draw a thin cut guide border (1px light gray)
+      img.drawRect(
+        resultImage,
+        x1: 0,
+        y1: 0,
+        x2: resultImage.width - 1,
+        y2: resultImage.height - 1,
+        color: img.ColorRgba8(200, 200, 200, 255),
+      );
+
+      // 6. Encode result to PNG
       return Uint8List.fromList(img.encodePng(resultImage));
     } catch (e) {
       debugPrint('Error merging photos: $e');

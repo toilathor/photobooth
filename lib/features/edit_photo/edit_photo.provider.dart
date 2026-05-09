@@ -40,6 +40,7 @@ class EditPhotoProvider with ChangeNotifier {
   List<FrameData> filteredFrames = [];
   late FrameData selectedFrame;
   bool printTwoCopies = false;
+  bool showPaperPreview = false;
 
   EditPhotoProvider() {
     filteredFrames = allFrames;
@@ -61,6 +62,11 @@ class EditPhotoProvider with ChangeNotifier {
 
   void togglePrintTwoCopies(bool value) {
     printTwoCopies = value;
+    notifyListeners();
+  }
+
+  void togglePaperPreview(bool value) {
+    showPaperPreview = value;
     notifyListeners();
   }
 

@@ -12,8 +12,7 @@ class PhotoboothHeader extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            // 'Thuý Hền ❤️ Quang Tọ',
-            "",
+            'Thuý Hền ❤️ Quang Tọ',
             style: GoogleFonts.pacifico(
               fontSize: 36,
               fontWeight: FontWeight.w700,

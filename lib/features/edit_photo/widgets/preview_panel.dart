@@ -9,19 +9,28 @@ class PreviewPanel extends StatelessWidget {
   final List<XFile> photos;
   final FrameData selectedFrame;
   final bool printTwoCopies;
+  final bool showPaperPreview;
   final ValueChanged<bool> onTogglePrintTwoCopies;
+  final ValueChanged<bool> onTogglePaperPreview;
 
   const PreviewPanel({
     super.key,
     required this.photos,
     required this.selectedFrame,
     required this.printTwoCopies,
+    required this.showPaperPreview,
     required this.onTogglePrintTwoCopies,
+    required this.onTogglePaperPreview,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final double frameAspectRatio = selectedFrame.size.width / selectedFrame.size.height;
+    // If aspect ratio > 0.5, it's better to print Landscape (2 photos stacked horizontally or vertically)
+    // For our specific frames: Strips are ~0.33 (Portrait), frame1 is ~0.77 (Landscape)
+    final bool isLandscape = frameAspectRatio > 0.5;
 
     return Expanded(
       flex: 2,
@@ -58,6 +67,21 @@ class PreviewPanel extends StatelessWidget {
                   const Spacer(),
                   // Material 3 Expressive-style Button Group
                   _ExpressiveButtonGroup(
+                    selectedIndex: showPaperPreview ? 1 : 0,
+                    onChanged: (index) => onTogglePaperPreview(index == 1),
+                    items: const [
+                      _ExpressiveItemData(
+                        label: 'Edit',
+                        icon: Icons.edit_outlined,
+                      ),
+                      _ExpressiveItemData(
+                        label: 'Print',
+                        icon: Icons.local_printshop_outlined,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  _ExpressiveButtonGroup(
                     selectedIndex: printTwoCopies ? 1 : 0,
                     onChanged: (index) => onTogglePrintTwoCopies(index == 1),
                     items: const [
@@ -78,39 +102,71 @@ class PreviewPanel extends StatelessWidget {
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: printTwoCopies
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              fit: FlexFit.loose,
-                              child: _PhotoStrip(
-                                photos: photos,
-                                frame: selectedFrame,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              fit: FlexFit.loose,
-                              child: _PhotoStrip(
-                                photos: photos,
-                                frame: selectedFrame,
-                              ),
-                            ),
-                          ],
+                  child: showPaperPreview
+                      ? _VirtualPaper(
+                          isLandscape: isLandscape,
+                          child: printTwoCopies
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: _PhotoStrip(
+                                        photos: photos,
+                                        frame: selectedFrame,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: _PhotoStrip(
+                                        photos: photos,
+                                        frame: selectedFrame,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : _PhotoStrip(
+                                  photos: photos, frame: selectedFrame),
                         )
-                      : _PhotoStrip(photos: photos, frame: selectedFrame),
+                      : Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: printTwoCopies
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: _PhotoStrip(
+                                        photos: photos,
+                                        frame: selectedFrame,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: _PhotoStrip(
+                                        photos: photos,
+                                        frame: selectedFrame,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : _PhotoStrip(
+                                  photos: photos, frame: selectedFrame),
+                        ),
                 ),
               ),
             ),
@@ -231,6 +287,117 @@ class _ExpressiveButton extends StatelessWidget {
   }
 }
 
+class _VirtualPaper extends StatelessWidget {
+  final Widget child;
+  final bool isLandscape;
+
+  const _VirtualPaper({
+    required this.child,
+    required this.isLandscape,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // KP-108IN is 100mm x 148mm (4x6 inch)
+    final double paperAspectRatio = isLandscape ? 148 / 100 : 100 / 148;
+
+    return AspectRatio(
+      aspectRatio: paperAspectRatio,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Perforation Lines
+            if (!isLandscape) ...[
+              Positioned(
+                top: 40,
+                left: 0,
+                right: 0,
+                child: _DashedLine(isVertical: false),
+              ),
+              Positioned(
+                bottom: 40,
+                left: 0,
+                right: 0,
+                child: _DashedLine(isVertical: false),
+              ),
+            ] else ...[
+              Positioned(
+                left: 40,
+                top: 0,
+                bottom: 0,
+                child: _DashedLine(isVertical: true),
+              ),
+              Positioned(
+                right: 40,
+                top: 0,
+                bottom: 0,
+                child: _DashedLine(isVertical: true),
+              ),
+            ],
+            // The actual content (photo strips)
+            Padding(
+              padding: isLandscape
+                  ? const EdgeInsets.symmetric(horizontal: 45, vertical: 8)
+                  : const EdgeInsets.symmetric(vertical: 45, horizontal: 8),
+              child: Center(child: child),
+            ),
+            // Paper size indicator
+            Positioned(
+              bottom: 12,
+              right: 12,
+              child: Text(
+                'CANON KP-108IN (4x6") - ${isLandscape ? "LANDSCAPE" : "PORTRAIT"}',
+                style: const TextStyle(
+                  fontSize: 7,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black26,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedLine extends StatelessWidget {
+  final bool isVertical;
+  const _DashedLine({required this.isVertical});
+
+  @override
+  Widget build(BuildContext context) {
+    return Flex(
+      direction: isVertical ? Axis.vertical : Axis.horizontal,
+      children: List.generate(
+        30,
+        (index) => Expanded(
+          child: Container(
+            width: isVertical ? 1 : null,
+            height: isVertical ? null : 1,
+            margin: isVertical
+                ? const EdgeInsets.symmetric(vertical: 2)
+                : const EdgeInsets.symmetric(horizontal: 2),
+            color: Colors.black.withValues(alpha: 0.1),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PhotoStrip extends StatelessWidget {
   final List<XFile> photos;
   final FrameData frame;
@@ -239,38 +406,43 @@ class _PhotoStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // AspectRatio matches the original frame size precisely.
-    return AspectRatio(
-      aspectRatio: frame.size.width / frame.size.height,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Calculate scale factors
-          final scaleX = constraints.maxWidth / frame.size.width;
-          final scaleY = constraints.maxHeight / frame.size.height;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.1),
+          width: 0.5,
+          style: BorderStyle.solid, // Note: standard Border doesn't support dashed easily, but we can simulate or use solid light color
+        ),
+      ),
+      child: AspectRatio(
+        aspectRatio: frame.size.width / frame.size.height,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final scaleX = constraints.maxWidth / frame.size.width;
+            final scaleY = constraints.maxHeight / frame.size.height;
 
-          return Stack(
-            children: [
-              // Photos layer (bottom)
-              for (int i = 0; i < frame.slots.length; i++)
-                if (i < photos.length)
-                  Positioned(
-                    left: frame.slots[i].left * scaleX,
-                    top: frame.slots[i].top * scaleY,
-                    width: frame.slots[i].width * scaleX,
-                    height: frame.slots[i].height * scaleY,
-                    child: kIsWeb
-                        ? Image.network(photos[i].path, fit: BoxFit.cover)
-                        : Image.file(File(photos[i].path), fit: BoxFit.cover),
+            return Stack(
+              children: [
+                for (int i = 0; i < frame.slots.length; i++)
+                  if (i < photos.length)
+                    Positioned(
+                      left: frame.slots[i].left * scaleX,
+                      top: frame.slots[i].top * scaleY,
+                      width: frame.slots[i].width * scaleX,
+                      height: frame.slots[i].height * scaleY,
+                      child: kIsWeb
+                          ? Image.network(photos[i].path, fit: BoxFit.cover)
+                          : Image.file(File(photos[i].path), fit: BoxFit.cover),
+                    ),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Image.asset(frame.path, fit: BoxFit.fill),
                   ),
-              // Frame layer (top)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Image.asset(frame.path, fit: BoxFit.fill),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
