@@ -136,8 +136,8 @@ class PhotoPreviewsPanel extends StatelessWidget {
                 provider.capturedPhotos.length >= provider.selectedPhotoCount
                 ? () {
                     context.read<EditPhotoProvider>().initForPhotoCount(
-                      provider.capturedPhotos.length,
-                    );
+                          provider.selectedPhotoCount,
+                        );
                     Navigator.push(
                       context,
                       MaterialPageRoute(

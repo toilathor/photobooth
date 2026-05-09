@@ -27,7 +27,7 @@ final light = ThemeData(
     onTertiary: Colors.white,
     outline: Color(0xFFD1D5DB),
   ),
-  textTheme: TextTheme(
+  textTheme: const TextTheme(
     headlineLarge: TextStyle(
       fontFamily: 'Pacifico',
       fontSize: 36,
@@ -61,7 +61,7 @@ final weddingTheme = ThemeData(
     outline: const Color(0xFFFFD700).withValues(alpha: 0.5),
   ),
   scaffoldBackgroundColor: const Color(0xFF5A0001),
-  textTheme: TextTheme(
+  textTheme: const TextTheme(
     headlineLarge: TextStyle(
       fontFamily: 'Pacifico',
       fontSize: 36,

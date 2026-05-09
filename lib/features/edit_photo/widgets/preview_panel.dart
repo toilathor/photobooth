@@ -27,7 +27,8 @@ class PreviewPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final double frameAspectRatio = selectedFrame.size.width / selectedFrame.size.height;
+    final double frameAspectRatio =
+        selectedFrame.size.width / selectedFrame.size.height;
     // If aspect ratio > 0.5, it's better to print Landscape (2 photos stacked horizontally or vertically)
     // For our specific frames: Strips are ~0.33 (Portrait), frame1 is ~0.77 (Landscape)
     final bool isLandscape = frameAspectRatio > 0.5;
@@ -129,7 +130,9 @@ class PreviewPanel extends StatelessWidget {
                                   ],
                                 )
                               : _PhotoStrip(
-                                  photos: photos, frame: selectedFrame),
+                                  photos: photos,
+                                  frame: selectedFrame,
+                                ),
                         )
                       : Container(
                           decoration: BoxDecoration(
@@ -165,7 +168,9 @@ class PreviewPanel extends StatelessWidget {
                                   ],
                                 )
                               : _PhotoStrip(
-                                  photos: photos, frame: selectedFrame),
+                                  photos: photos,
+                                  frame: selectedFrame,
+                                ),
                         ),
                 ),
               ),
@@ -319,26 +324,26 @@ class _VirtualPaper extends StatelessWidget {
           children: [
             // Perforation Lines
             if (!isLandscape) ...[
-              Positioned(
+              const Positioned(
                 top: 40,
                 left: 0,
                 right: 0,
                 child: _DashedLine(isVertical: false),
               ),
-              Positioned(
+              const Positioned(
                 bottom: 40,
                 left: 0,
                 right: 0,
                 child: _DashedLine(isVertical: false),
               ),
             ] else ...[
-              Positioned(
+              const Positioned(
                 left: 40,
                 top: 0,
                 bottom: 0,
                 child: _DashedLine(isVertical: true),
               ),
-              Positioned(
+              const Positioned(
                 right: 40,
                 top: 0,
                 bottom: 0,
@@ -411,7 +416,8 @@ class _PhotoStrip extends StatelessWidget {
         border: Border.all(
           color: Colors.black.withValues(alpha: 0.1),
           width: 0.5,
-          style: BorderStyle.solid, // Note: standard Border doesn't support dashed easily, but we can simulate or use solid light color
+          style: BorderStyle
+              .solid, // Note: standard Border doesn't support dashed easily, but we can simulate or use solid light color
         ),
       ),
       child: AspectRatio(

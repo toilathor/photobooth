@@ -77,6 +77,16 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void setPhotoCount(int count) {
     selectedPhotoCount = count;
+    // Default truncation logic (taking first N)
+    if (capturedPhotos.length > selectedPhotoCount) {
+      capturedPhotos = capturedPhotos.sublist(0, selectedPhotoCount);
+    }
+    notifyListeners();
+  }
+
+  void setPhotoCountWithSelection(int count, List<XFile> selection) {
+    selectedPhotoCount = count;
+    capturedPhotos = List.from(selection);
     notifyListeners();
   }
 
