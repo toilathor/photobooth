@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:my_photobooth/core/configs/filter_config.dart';
 
 class AppConfig {
   static late List<CameraDescription> cameras;
@@ -10,14 +11,7 @@ class AppConfig {
   static const Duration recapClipDuration = Duration(seconds: 2);
 
   // Filter settings
-  static const List<String> filters = [
-    'normal',
-    'mono',
-    'bw',
-    'soft',
-    'dazz_classic',
-    'dazz_instant',
-  ];
+  static List<String> get filters => FilterConfig.availableFilters;
 
   // Voice countdown sounds
   static const Map<int, String> numberSounds = {

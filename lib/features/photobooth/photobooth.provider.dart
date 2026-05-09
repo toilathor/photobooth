@@ -23,7 +23,6 @@ class PhotoboothProvider extends ChangeNotifier {
   int countdown = 3;
   List<XFile> capturedPhotos = [];
   bool isVideoRecap = true;
-  String selectedFilter = '';
 
   bool isCapturing = false;
   bool isAutoCapturing = false;
@@ -41,7 +40,6 @@ class PhotoboothProvider extends ChangeNotifier {
 
   final List<int> photoCounts = AppConfig.photoCounts;
   final List<int> countdowns = AppConfig.countdowns;
-  final List<String> filters = AppConfig.filters;
 
   PhotoboothProvider() {
     if (AppConfig.cameras.isNotEmpty) {
@@ -134,11 +132,6 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void toggleMirror() {
     isMirrored = !isMirrored;
-    notifyListeners();
-  }
-
-  void setFilter(String filter) {
-    selectedFilter = filter;
     notifyListeners();
   }
 
@@ -267,9 +260,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
         XFile photo = await cameraController!.takePicture();
 
-        if (isMirrored) {
-          photo = await _processMirrorImage(photo);
-        }
+        photo = await _applyMirrorEffect(photo);
 
         capturedPhotos.add(photo);
         notifyListeners();
@@ -339,9 +330,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
     try {
       XFile photo = await cameraController!.takePicture();
-      if (isMirrored) {
-        photo = await _processMirrorImage(photo);
-      }
+      photo = await _applyMirrorEffect(photo);
       capturedPhotos.add(photo);
     } catch (e) {
       debugPrint('Error taking photo: $e');
@@ -351,24 +340,43 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<XFile> _processMirrorImage(XFile file) async {
+  Future<XFile> _applyMirrorEffect(XFile file) async {
+    if (!isMirrored) return file;
+
     try {
       final bytes = await file.readAsBytes();
-      final image = img.decodeImage(bytes);
-      if (image == null) return file;
 
-      final flipped = img.flipHorizontal(image);
-      final flippedBytes = img.encodeJpg(flipped);
+      final processedBytes = await compute(_mirrorImageTask, {
+        'bytes': bytes,
+        'isMirrored': isMirrored,
+      });
 
       return XFile.fromData(
-        Uint8List.fromList(flippedBytes),
+        processedBytes,
         name: file.name,
         mimeType: 'image/jpeg',
       );
     } catch (e) {
-      debugPrint('Error processing mirror image: $e');
+      debugPrint('Error processing mirror effect: $e');
       return file;
     }
+  }
+
+  /// Nhiệm vụ xử lý lật ảnh chạy trong Isolate để không làm treo UI.
+  static Uint8List _mirrorImageTask(Map<String, dynamic> params) {
+    final bytes = params['bytes'] as Uint8List;
+    final isMirrored = params['isMirrored'] as bool;
+
+    final image = img.decodeImage(bytes);
+    if (image == null) return bytes;
+
+    // Mirror image horizontally
+    img.Image processedImage = image;
+    if (isMirrored) {
+      processedImage = img.flipHorizontal(image);
+    }
+
+    return img.encodeJpg(processedImage);
   }
 
   void removePhoto(int index) {

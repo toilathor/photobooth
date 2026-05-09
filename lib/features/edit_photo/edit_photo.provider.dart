@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
 import 'package:my_photobooth/core/configs/frame_config.dart';
 import 'package:my_photobooth/models/frame_data.dart';
 
 class EditPhotoProvider with ChangeNotifier {
   bool isProcessing = false;
-  String? selectedFilter;
+  String selectedFilter = 'normal';
+  double filterIntensity = 1.0;
+  final List<String> filters = AppConfig.filters;
   List<StickerItem> stickers = [];
 
   final List<FrameData> allFrames = FrameConfig.allFrames;
@@ -29,6 +32,17 @@ class EditPhotoProvider with ChangeNotifier {
 
   void setSelectedFrame(FrameData frame) {
     selectedFrame = frame;
+    notifyListeners();
+  }
+
+  void setFilter(String filter) {
+    selectedFilter = filter;
+    filterIntensity = 1.0; // Reset intensity when filter changes
+    notifyListeners();
+  }
+
+  void setFilterIntensity(double intensity) {
+    filterIntensity = intensity;
     notifyListeners();
   }
 

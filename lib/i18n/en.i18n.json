@@ -33,7 +33,9 @@
     "watchVideoRecap": "WATCH VIDEO RECAP",
     "printPhoto": "PRINT PHOTO",
     "frame_mode": "WITH FRAME",
-    "full_mode": "FULL VIEW"
+    "full_mode": "FULL VIEW",
+    "frames": "Frames",
+    "filters": "Filters"
   },
   "dialogs": {
     "photoSelection": {
@@ -51,12 +53,7 @@
   },
   "filters": {
     "title": "Filters",
-    "normal": "Normal",
-    "mono": "Mono (Retro)",
-    "bw": "B&W",
-    "soft": "Soft",
-    "dazz_classic": "Dazz Classic",
-    "dazz_instant": "Dazz Instant"
+    "normal": "Normal"
   },
   "video_recap": {
     "title": "VIDEO RECAP",

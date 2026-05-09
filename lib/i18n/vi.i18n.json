@@ -33,7 +33,9 @@
     "watchVideoRecap": "XEM VIDEO RECAP",
     "printPhoto": "IN ẢNH",
     "frame_mode": "GẮN KHUNG",
-    "full_mode": "TOÀN BỘ"
+    "full_mode": "TOÀN BỘ",
+    "frames": "Khung hình",
+    "filters": "Bộ lọc"
   },
   "dialogs": {
     "photoSelection": {
@@ -51,12 +53,7 @@
   },
   "filters": {
     "title": "Bộ lọc màu",
-    "normal": "Bình Thường",
-    "mono": "Mono (Retro Effect)",
-    "bw": "Đen Trắng",
-    "soft": "Mềm Mại",
-    "dazz_classic": "Dazz Classic",
-    "dazz_instant": "Dazz Instant"
+    "normal": "Bình Thường"
   },
   "video_recap": {
     "title": "VIDEO RECAP",

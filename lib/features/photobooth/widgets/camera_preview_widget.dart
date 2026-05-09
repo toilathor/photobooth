@@ -4,8 +4,8 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/core/configs/app_config.dart';
+import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 
@@ -33,121 +33,116 @@ class CameraPreviewWidget extends StatelessWidget {
                   ),
                 ),
               )
-            : SizedBox(
-                width: provider.cameraController!.value.previewSize!.height,
-                height: provider.cameraController!.value.previewSize!.width,
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: provider.isMirrored
-                      ? Matrix4.rotationY(3.14159)
-                      : Matrix4.identity(),
-                  child: CameraPreview(
-                    provider.cameraController!,
+            : Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Layer 1: Filtered & Mirrored Camera Preview
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: provider.isMirrored
+                        ? Matrix4.rotationY(3.14159)
+                        : Matrix4.identity(),
+                    child: CameraPreview(provider.cameraController!),
+                  ),
+
+                  // Layer 2: UI Overlays (Not Filtered, Not Mirrored)
+                  Positioned.fill(
                     child: Stack(
                       children: [
-                        // Important: Reverse the transform for children so they are not mirrored
-                        Transform(
-                          alignment: Alignment.center,
-                          transform: provider.isMirrored
-                              ? Matrix4.rotationY(3.14159)
-                              : Matrix4.identity(),
-                          child: Stack(
-                            children: [
-                              if (AppConfig.cameras.length > 1)
-                                Positioned(
-                                  top: 24,
-                                  left: 24,
-                                  child: _ControlButton(
-                                    icon: Icons.flip_camera_ios_rounded,
-                                    onTap: () => provider.toggleCamera(),
-                                    colorScheme: colorScheme,
-                                  ),
-                                ),
-                              Positioned(
-                                top: 24,
-                                right: 24,
-                                child: _ControlButton(
-                                  icon: Icons.flip_rounded,
-                                  onTap: () => provider.toggleMirror(),
-                                  colorScheme: colorScheme,
-                                  isActive: provider.isMirrored,
-                                ),
-                              ),
-                              if (provider.isCapturing &&
-                                  provider.currentCountdownValue > 0)
-                                Center(
-                                  child: provider.isPreparing
-                                      ? AnimatedTextKit(
-                                          animatedTexts: [
-                                            ScaleAnimatedText(
-                                              t.actions.prepare,
-                                              duration: const Duration(
-                                                milliseconds: 1000,
-                                              ),
-                                              textStyle: GoogleFonts.inter(
-                                                fontSize: 140,
-                                                fontWeight: FontWeight.w900,
-                                                color: colorScheme.secondary,
-                                                shadows: [
-                                                  Shadow(
-                                                    blurRadius: 20,
-                                                    color: Colors.black
-                                                        .withValues(alpha: 0.5),
-                                                    offset: const Offset(0, 4),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                          isRepeatingAnimation: false,
-                                        )
-                                      : AnimatedTextKit(
-                                          key: ValueKey(
-                                            provider.currentCountdownValue,
-                                          ),
-                                          animatedTexts: [
-                                            ScaleAnimatedText(
-                                              '${provider.currentCountdownValue}',
-                                              textStyle: GoogleFonts.outfit(
-                                                fontSize: 140,
-                                                fontWeight: FontWeight.w900,
-                                                color: colorScheme.onSurface,
-                                                shadows: [
-                                                  Shadow(
-                                                    blurRadius: 30,
-                                                    color: Colors.black
-                                                        .withValues(alpha: 0.4),
-                                                    offset: const Offset(0, 10),
-                                                  ),
-                                                ],
-                                              ),
-                                              duration: const Duration(
-                                                milliseconds: 800,
-                                              ),
-                                            ),
-                                          ],
-                                          isRepeatingAnimation: false,
-                                        ),
-                                ),
-                              if (provider.isAutoCapturing)
-                                Positioned(
-                                  bottom: 24,
-                                  left: 0,
-                                  right: 0,
-                                  child: Center(
-                                    child: _CancelButton(
-                                      onTap: () => provider.cancelAutoCapture(),
-                                      colorScheme: colorScheme,
-                                    ),
-                                  ),
-                                ),
-                            ],
+                        if (AppConfig.cameras.length > 1)
+                          Positioned(
+                            top: 24,
+                            left: 24,
+                            child: _ControlButton(
+                              icon: Icons.flip_camera_ios_rounded,
+                              onTap: () => provider.toggleCamera(),
+                              colorScheme: colorScheme,
+                            ),
+                          ),
+                        Positioned(
+                          top: 24,
+                          right: 24,
+                          child: _ControlButton(
+                            icon: Icons.flip_rounded,
+                            onTap: () => provider.toggleMirror(),
+                            colorScheme: colorScheme,
+                            isActive: provider.isMirrored,
                           ),
                         ),
+                        if (provider.isCapturing &&
+                            provider.currentCountdownValue > 0)
+                          Center(
+                            child: provider.isPreparing
+                                ? AnimatedTextKit(
+                                    animatedTexts: [
+                                      ScaleAnimatedText(
+                                        t.actions.prepare,
+                                        duration: const Duration(
+                                          milliseconds: 1000,
+                                        ),
+                                        textStyle: GoogleFonts.inter(
+                                          fontSize: 140,
+                                          fontWeight: FontWeight.w900,
+                                          color: colorScheme.secondary,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 20,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                    isRepeatingAnimation: false,
+                                  )
+                                : AnimatedTextKit(
+                                    key: ValueKey(
+                                      provider.currentCountdownValue,
+                                    ),
+                                    animatedTexts: [
+                                      ScaleAnimatedText(
+                                        '${provider.currentCountdownValue}',
+                                        textStyle: GoogleFonts.outfit(
+                                          fontSize: 140,
+                                          fontWeight: FontWeight.w900,
+                                          color: colorScheme.onSurface,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 30,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                              offset: const Offset(0, 10),
+                                            ),
+                                          ],
+                                        ),
+                                        duration: const Duration(
+                                          milliseconds: 800,
+                                        ),
+                                      ),
+                                    ],
+                                    isRepeatingAnimation: false,
+                                  ),
+                          ),
+                        if (provider.isAutoCapturing)
+                          Positioned(
+                            bottom: 24,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: _CancelButton(
+                                onTap: () => provider.cancelAutoCapture(),
+                                colorScheme: colorScheme,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
       ),
     );

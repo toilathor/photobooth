@@ -14,8 +14,7 @@ void main() {
       final provider = PhotoboothProvider();
       expect(provider.countdown, 3);
       expect(provider.capturedPhotos, isEmpty);
-      expect(provider.isVideoRecap, isFalse);
-      expect(provider.selectedFilter, '');
+      expect(provider.isVideoRecap, isTrue); // Default is true now
     });
 
     test('setCountdown should update countdown', () {
@@ -28,12 +27,9 @@ void main() {
       final provider = PhotoboothProvider();
       provider.toggleVideoRecap(true);
       expect(provider.isVideoRecap, isTrue);
-    });
 
-    test('setFilter should update selectedFilter', () {
-      final provider = PhotoboothProvider();
-      provider.setFilter('Mono (Retro Effect)');
-      expect(provider.selectedFilter, 'Mono (Retro Effect)');
+      provider.toggleVideoRecap(false);
+      expect(provider.isVideoRecap, isFalse);
     });
   });
 }

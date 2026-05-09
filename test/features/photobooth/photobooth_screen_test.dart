@@ -38,7 +38,6 @@ void main() {
       // Now settings elements should be visible in the bottom sheet
       expect(find.text('Layout Ảnh'), findsOneWidget);
       expect(find.text('Đếm Ngược'), findsOneWidget);
-      expect(find.text('Bộ lọc màu'), findsOneWidget);
     },
   );
 }

@@ -28,12 +28,13 @@
     - [x] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
     - [x] Triển khai đa ngôn ngữ (Internationalization - i18n).
     - [x] Xử lý Cache (ảnh/video tạm) để dọn dẹp dung lượng sau mỗi phiên.
+- [x] **Features**:
+    - [x] Bộ lọc màu (Filters) nâng cao, tự động sinh từ package colorfilter_generator.
 
 ## 🚀 Sắp tới (Upcoming)
 - [ ] **Tính năng Frame & Content**:
     - [ ] Hệ thống Frame động lấy dữ liệu từ Google Drive.
     - [ ] Tính năng cho phép người dùng đóng góp Frame mới.
-    - [ ] Bộ lọc màu (Filters) nâng cao, nghệ thuật hơn.
 - [ ] **Cộng đồng (Community)**:
     - [ ] Trang cộng đồng hiển thị các ảnh mẫu người dùng đã chia sẻ để truyền cảm hứng.
 - [ ] **Âm thanh (Audio Settings)**:

@@ -3,6 +3,7 @@ import 'dart:io' show File;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:my_photobooth/core/configs/filter_config.dart';
 import 'package:my_photobooth/features/edit_photo/widgets/video_recap_player.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/models/frame_data.dart';
@@ -17,6 +18,8 @@ class PreviewPanel extends StatelessWidget {
   final ValueChanged<bool> onTogglePaperPreview;
   final XFile? videoRecapFile;
   final List<Duration> photoTimestamps;
+  final String selectedFilter;
+  final double filterIntensity;
 
   const PreviewPanel({
     super.key,
@@ -29,6 +32,8 @@ class PreviewPanel extends StatelessWidget {
     required this.onTogglePaperPreview,
     this.videoRecapFile,
     this.photoTimestamps = const [],
+    required this.selectedFilter,
+    required this.filterIntensity,
   });
 
   @override
@@ -133,6 +138,8 @@ class PreviewPanel extends StatelessWidget {
                                       child: _PhotoStrip(
                                         photos: photos,
                                         frame: selectedFrame,
+                                        selectedFilter: selectedFilter,
+                                        filterIntensity: filterIntensity,
                                       ),
                                     ),
                                     const SizedBox(width: 4),
@@ -141,6 +148,8 @@ class PreviewPanel extends StatelessWidget {
                                       child: _PhotoStrip(
                                         photos: photos,
                                         frame: selectedFrame,
+                                        selectedFilter: selectedFilter,
+                                        filterIntensity: filterIntensity,
                                       ),
                                     ),
                                   ],
@@ -148,6 +157,8 @@ class PreviewPanel extends StatelessWidget {
                               : _PhotoStrip(
                                   photos: photos,
                                   frame: selectedFrame,
+                                  selectedFilter: selectedFilter,
+                                  filterIntensity: filterIntensity,
                                 ),
                         )
                       : Container(
@@ -175,6 +186,8 @@ class PreviewPanel extends StatelessWidget {
                                           child: _PhotoStrip(
                                             photos: photos,
                                             frame: selectedFrame,
+                                            selectedFilter: selectedFilter,
+                                            filterIntensity: filterIntensity,
                                           ),
                                         ),
                                         const SizedBox(width: 4),
@@ -183,6 +196,8 @@ class PreviewPanel extends StatelessWidget {
                                           child: _PhotoStrip(
                                             photos: photos,
                                             frame: selectedFrame,
+                                            selectedFilter: selectedFilter,
+                                            filterIntensity: filterIntensity,
                                           ),
                                         ),
                                       ],
@@ -190,6 +205,8 @@ class PreviewPanel extends StatelessWidget {
                                   : _PhotoStrip(
                                       photos: photos,
                                       frame: selectedFrame,
+                                      selectedFilter: selectedFilter,
+                                      filterIntensity: filterIntensity,
                                     ),
                             ],
                           ),
@@ -449,8 +466,15 @@ class _DashedLine extends StatelessWidget {
 class _PhotoStrip extends StatelessWidget {
   final List<XFile> photos;
   final FrameData frame;
+  final String selectedFilter;
+  final double filterIntensity;
 
-  const _PhotoStrip({required this.photos, required this.frame});
+  const _PhotoStrip({
+    required this.photos,
+    required this.frame,
+    required this.selectedFilter,
+    required this.filterIntensity,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -478,9 +502,17 @@ class _PhotoStrip extends StatelessWidget {
                       top: frame.slots[i].top * scaleY,
                       width: frame.slots[i].width * scaleX,
                       height: frame.slots[i].height * scaleY,
-                      child: kIsWeb
-                          ? Image.network(photos[i].path, fit: BoxFit.cover)
-                          : Image.file(File(photos[i].path), fit: BoxFit.cover),
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.matrix(
+                          FilterConfig.getFilterMatrix(selectedFilter, filterIntensity),
+                        ),
+                        child: kIsWeb
+                            ? Image.network(photos[i].path, fit: BoxFit.cover)
+                            : Image.file(
+                                File(photos[i].path),
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                     ),
                 Positioned.fill(
                   child: IgnorePointer(

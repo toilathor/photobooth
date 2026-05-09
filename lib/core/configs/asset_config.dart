@@ -2,6 +2,7 @@ class AssetConfig {
   // Base paths
   static const String soundPath = 'sounds/';
   static const String framePath = 'assets/frames/';
+  static const String sampleFilter = 'assets/images/sample_filter.png';
 
   // Specific sounds
   static const String soundCamera = 'camera.mp3';

@@ -23,7 +23,8 @@ class ActionButtonsWidget extends StatelessWidget {
               label: t.actions.manual,
               colorScheme: colorScheme,
               onTap: provider.takeManualPhoto,
-              isEnabled: !provider.isAutoCapturing &&
+              isEnabled:
+                  !provider.isAutoCapturing &&
                   provider.capturedPhotos.length < provider.selectedPhotoCount,
             ),
             const Gap(32),
@@ -72,7 +73,8 @@ class ActionButtonsWidget extends StatelessWidget {
                   await provider.clearSession();
                 }
               },
-              isEnabled: !provider.isAutoCapturing &&
+              isEnabled:
+                  !provider.isAutoCapturing &&
                   provider.capturedPhotos.isNotEmpty,
             ),
           ],
@@ -83,8 +85,9 @@ class ActionButtonsWidget extends StatelessWidget {
           children: [
             Switch(
               value: provider.isVideoRecap,
-              onChanged:
-                  provider.isAutoCapturing ? null : provider.toggleVideoRecap,
+              onChanged: provider.isAutoCapturing
+                  ? null
+                  : provider.toggleVideoRecap,
               activeThumbColor: colorScheme.secondary,
             ),
             Text(

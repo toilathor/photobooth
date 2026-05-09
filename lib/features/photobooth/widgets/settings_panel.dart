@@ -6,7 +6,6 @@ import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:provider/provider.dart';
 
 import 'dropdown_setting.dart';
-import 'filter_selector.dart';
 import 'photo_selection_dialog.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 
@@ -80,9 +79,6 @@ class SettingsPanel extends StatelessWidget {
               suffix: ' ${t.settings.seconds}',
             ),
             const Gap(24),
-            const Divider(),
-            const Gap(24),
-            FilterSelector(provider: provider, colorScheme: colorScheme),
           ],
         ),
       ),
