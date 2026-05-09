@@ -17,6 +17,8 @@
 - [x] **Maintenance**: 
     - [x] Rà soát và định rõ kiểu dữ liệu cho các biến đang dùng `dynamic` để tăng tính an toàn (Strong Typing).
     - [x] Refactor lại hệ thống cấu hình (Configs) để quản lý tập trung.
+    - [x] Tách nhỏ các Widget lớn trong `PreviewPanel` và `SettingsPanel` để dễ quản lý.
+    - [x] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
 
 ## 🚀 Sắp tới (Upcoming)
 - [ ] **Tính năng Frame & Content**:
@@ -37,8 +39,6 @@
 
 ## 🛠 Bảo trì (Maintenance)
 - [ ] **Refactor & Config**:
-    - [ ] Tách nhỏ các Widget lớn trong `PreviewPanel` và `SettingsPanel` để dễ quản lý.
-    - [ ] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
 - [ ] **Hệ thống & Hiệu năng**:
     - [ ] Xử lý Cache (ảnh/video tạm) để giảm dung lượng ứng dụng.
     - [ ] Triển khai đa ngôn ngữ (Internationalization - i18n).

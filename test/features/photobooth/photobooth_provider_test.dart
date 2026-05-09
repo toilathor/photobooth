@@ -3,6 +3,8 @@ import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/core/configs/app_config.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  
   setUp(() {
     AppConfig.cameras = []; // Initialize cameras to empty list for testing
   });

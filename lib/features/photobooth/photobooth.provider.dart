@@ -9,6 +9,7 @@ import 'package:my_photobooth/core/configs/asset_config.dart';
 import 'package:my_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js) 'package:my_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
+import 'package:my_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
   CameraController? cameraController;
@@ -28,9 +29,10 @@ class PhotoboothProvider extends ChangeNotifier {
   bool isMirrored = false;
   int currentCountdownValue = 0;
   int currentPhotoIndex = 0;
-  XFile? videoRecapFile;
-  List<Duration> photoTimestamps = [];
-  DateTime? videoStartTime;
+  
+  final VideoService _videoService = VideoService();
+  XFile? get videoRecapFile => _videoService.videoRecapFile;
+  List<Duration> get photoTimestamps => _videoService.photoTimestamps;
 
   final List<int> photoCounts = AppConfig.photoCounts;
   final List<int> countdowns = AppConfig.countdowns;
@@ -149,8 +151,7 @@ class PhotoboothProvider extends ChangeNotifier {
     isCapturing = true;
     isPreparing = true;
     capturedPhotos.clear();
-    videoRecapFile = null;
-    photoTimestamps.clear();
+    _videoService.reset();
     currentPhotoIndex = 0;
     currentCountdownValue = 2; // 2 seconds to prepare
     notifyListeners();
@@ -161,8 +162,7 @@ class PhotoboothProvider extends ChangeNotifier {
         cameraController != null &&
         cameraController!.value.isInitialized) {
       try {
-        await cameraController!.startVideoRecording();
-        videoStartTime = DateTime.now();
+        await _videoService.startRecording(cameraController!);
       } catch (e) {
         debugPrint('Error starting video recording: $e');
       }
@@ -215,9 +215,7 @@ class PhotoboothProvider extends ChangeNotifier {
         _playSound(AssetConfig.soundCamera);
         
         // Record timestamp relative to video start
-        if (videoStartTime != null) {
-          photoTimestamps.add(DateTime.now().difference(videoStartTime!));
-        }
+        _videoService.recordTimestamp();
 
         XFile photo = await cameraController!.takePicture();
 
@@ -242,7 +240,7 @@ class PhotoboothProvider extends ChangeNotifier {
         cameraController != null &&
         cameraController!.value.isRecordingVideo) {
       try {
-        videoRecapFile = await cameraController!.stopVideoRecording();
+        await _videoService.stopRecording(cameraController!);
       } catch (e) {
         debugPrint('Error stopping video recording: $e');
       }
