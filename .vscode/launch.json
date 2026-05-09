@@ -10,10 +10,5 @@
                 "chrome"
             ]
         },
-        {
-            "name": "my_photobooth (Debug)",
-            "request": "launch",
-            "type": "dart"
-        }
     ]
 }   
