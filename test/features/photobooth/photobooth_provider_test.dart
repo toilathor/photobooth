@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
-import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
 
 void main() {
   setUp(() {
-    cameras = []; // Initialize cameras to empty list for testing
+    AppConfig.cameras = []; // Initialize cameras to empty list for testing
   });
 
   group('PhotoboothProvider Tests', () {

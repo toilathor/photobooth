@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
-import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
 
 void main() {
   setUp(() {
-    cameras = [];
+    AppConfig.cameras = [];
   });
 
   testWidgets('ActionButtonsWidget renders all buttons and recap switch',

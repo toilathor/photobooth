@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:my_photobooth/models/frame_data.dart';
-import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
 import 'package:video_player/video_player.dart';
 
 enum RecapViewMode { full, frame }
@@ -75,8 +75,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
         final endTime = i < widget.photoTimestamps.length 
             ? widget.photoTimestamps[i] 
             : controller.value.duration;
-        final startTime = endTime > recapClipDuration 
-            ? endTime - recapClipDuration 
+        final startTime = endTime > AppConfig.recapClipDuration 
+            ? endTime - AppConfig.recapClipDuration 
             : Duration.zero;
 
         await controller.setVolume(0); // Mute slots to avoid echo

@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
-import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
+import 'package:my_photobooth/core/configs/asset_config.dart';
 import 'package:my_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js) 'package:my_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
-import 'package:my_photobooth/models/booth_effect.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
   CameraController? cameraController;
@@ -33,28 +32,14 @@ class PhotoboothProvider extends ChangeNotifier {
   List<Duration> photoTimestamps = [];
   DateTime? videoStartTime;
 
-  final List<int> photoCounts = [1, 3, 4];
-  final List<int> countdowns = [3, 5, 10];
-  final List<String> filters = [
-    'Bình Thường',
-    'Mono (Retro Effect)',
-    'Đen Trắng',
-    'Mềm Mại',
-    'Dazz Classic',
-    'Dazz Instant',
-  ];
-  final List<BoothEffect> effects = const [
-    BoothEffect(name: 'TimeStamp', icon: Icons.timer),
-    BoothEffect(name: 'Light Leak', icon: Icons.wb_sunny),
-    BoothEffect(name: 'Vignette', icon: Icons.adjust),
-    BoothEffect(name: 'Grain', icon: Icons.grain),
-    BoothEffect(name: 'Chromatic', icon: Icons.color_lens),
-  ];
+  final List<int> photoCounts = AppConfig.photoCounts;
+  final List<int> countdowns = AppConfig.countdowns;
+  final List<String> filters = AppConfig.filters;
 
   PhotoboothProvider() {
-    if (cameras.isNotEmpty) {
+    if (AppConfig.cameras.isNotEmpty) {
       cameraController = CameraController(
-        cameras[0],
+        AppConfig.cameras[0],
         ResolutionPreset.max,
         enableAudio: false,
       );
@@ -100,13 +85,13 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> toggleCamera() async {
-    if (cameras.isEmpty || cameras.length < 2 || isSwitchingCamera) return;
+    if (AppConfig.cameras.isEmpty || AppConfig.cameras.length < 2 || isSwitchingCamera) return;
 
     isSwitchingCamera = true;
     notifyListeners();
 
-    _currentCameraIndex = (_currentCameraIndex + 1) % cameras.length;
-    final camera = cameras[_currentCameraIndex];
+    _currentCameraIndex = (_currentCameraIndex + 1) % AppConfig.cameras.length;
+    final camera = AppConfig.cameras[_currentCameraIndex];
 
     if (cameraController != null) {
       await cameraController!.dispose();
@@ -146,24 +131,13 @@ class PhotoboothProvider extends ChangeNotifier {
   Future<void> _playSound(String fileName) async {
     try {
       await _audioPlayer.stop();
-      await _audioPlayer.play(AssetSource('sounds/$fileName'));
+      await _audioPlayer.play(AssetSource(AssetConfig.getSoundPath(fileName)));
     } catch (e) {
       debugPrint('Error playing sound: $e');
     }
   }
 
-  final Map<int, String> _numberSounds = {
-    1: 'mot.mp3',
-    2: 'hai.mp3',
-    3: 'ba.mp3',
-    4: 'bon.mp3',
-    5: 'nam.mp3',
-    6: 'sau.mp3',
-    7: 'bay.mp3',
-    8: 'tam.mp3',
-    9: 'chin.mp3',
-    10: 'muoi.mp3',
-  };
+  final Map<int, String> _numberSounds = AppConfig.numberSounds;
 
   Future<void> startAutoCapture() async {
     if (isCapturing ||
@@ -180,7 +154,7 @@ class PhotoboothProvider extends ChangeNotifier {
     currentPhotoIndex = 0;
     currentCountdownValue = 2; // 2 seconds to prepare
     notifyListeners();
-    _playSound('chuan_bi.mp3');
+    _playSound(AssetConfig.soundPrepare);
 
     // Start Video Recap if enabled
     if (isVideoRecap &&
@@ -238,7 +212,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
       // Capture
       try {
-        _playSound('camera.mp3');
+        _playSound(AssetConfig.soundCamera);
         
         // Record timestamp relative to video start
         if (videoStartTime != null) {
@@ -288,7 +262,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
     isCapturing = true;
     notifyListeners();
-    _playSound('camera.mp3');
+    _playSound(AssetConfig.soundCamera);
 
     try {
       XFile photo = await cameraController!.takePicture();

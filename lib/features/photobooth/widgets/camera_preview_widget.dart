@@ -5,7 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
-import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
 import 'package:provider/provider.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
@@ -51,7 +51,7 @@ class CameraPreviewWidget extends StatelessWidget {
                               : Matrix4.identity(),
                           child: Stack(
                             children: [
-                              if (cameras.length > 1)
+                              if (AppConfig.cameras.length > 1)
                                 Positioned(
                                   top: 24,
                                   left: 24,

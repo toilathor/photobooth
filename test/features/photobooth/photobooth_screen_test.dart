@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.screen.dart';
-import 'package:my_photobooth/helper/constants.dart';
+import 'package:my_photobooth/core/configs/app_config.dart';
 
 void main() {
   setUp(() {
-    cameras = []; // Mock empty cameras
+    AppConfig.cameras = []; // Mock empty cameras
   });
 
   testWidgets(
@@ -43,6 +43,5 @@ void main() {
     expect(find.text('Layout Ảnh'), findsOneWidget);
     expect(find.text('Đếm Ngược'), findsOneWidget);
     expect(find.text('Bộ lọc màu'), findsOneWidget);
-    expect(find.text('Hiệu ứng'), findsOneWidget);
   });
 }

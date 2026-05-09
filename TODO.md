@@ -14,7 +14,9 @@
     - [x] Vô hiệu hóa (Disable) các nút cài đặt và xóa ảnh khi đang chụp để tránh bug.
     - [x] Di chuyển thông tin giấy in (Canon KP-108IN) vào vùng lề xé để không ảnh hưởng ảnh chính.
 - [x] **Error Handling**: Fix lỗi phân tích mã nguồn (Flutter Analyze).
-- [x] **Maintenance**: Rà soát và định rõ kiểu dữ liệu cho các biến đang dùng `dynamic` để tăng tính an toàn (Strong Typing).
+- [x] **Maintenance**: 
+    - [x] Rà soát và định rõ kiểu dữ liệu cho các biến đang dùng `dynamic` để tăng tính an toàn (Strong Typing).
+    - [x] Refactor lại hệ thống cấu hình (Configs) để quản lý tập trung.
 
 ## 🚀 Sắp tới (Upcoming)
 - [ ] **Tính năng Frame & Content**:
@@ -37,7 +39,6 @@
 - [ ] **Refactor & Config**:
     - [ ] Tách nhỏ các Widget lớn trong `PreviewPanel` và `SettingsPanel` để dễ quản lý.
     - [ ] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
-    - [ ] Refactor lại hệ thống cấu hình (Configs) để quản lý tập trung.
 - [ ] **Hệ thống & Hiệu năng**:
     - [ ] Xử lý Cache (ảnh/video tạm) để giảm dung lượng ứng dụng.
     - [ ] Triển khai đa ngôn ngữ (Internationalization - i18n).
