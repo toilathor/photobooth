@@ -1,7 +1,10 @@
 {
+  "header": {
+    "title": "Thuy Hen ❤️ Quang To"
+  },
   "settings": {
     "title": "SETTINGS",
-    "photoCount": "Photo Count",
+    "photoCount": "Photos",
     "countdown": "Countdown",
     "seconds": "s",
     "language": "Language"
@@ -11,12 +14,25 @@
     "auto": "AUTO",
     "retake": "Retake",
     "videoRecap": "VIDEO RECAP",
-    "prepare": "Get Ready"
+    "prepare": "Prepare"
   },
   "preview": {
     "captured": "CAPTURED $current/$total",
     "continue_btn": "CONTINUE",
-    "not_enough_photos": "CAPTURE ALL PHOTOS TO CONTINUE"
+    "not_enough_photos": "NEED MORE PHOTOS",
+    "title": "PREVIEW",
+    "edit_mode": "Edit",
+    "print_mode": "Print",
+    "copy": "copy",
+    "landscape": "LANDSCAPE",
+    "portrait": "PORTRAIT"
+  },
+  "editor": {
+    "title": "CHOOSE FRAME",
+    "watchVideoRecap": "WATCH VIDEO RECAP",
+    "printPhoto": "PRINT PHOTO",
+    "frame_mode": "WITH FRAME",
+    "full_mode": "FULL VIEW"
   },
   "dialogs": {
     "photoSelection": {
@@ -24,13 +40,19 @@
       "subtitle": "Please select exactly $count photos to continue.",
       "cancel": "CANCEL",
       "confirm": "CONFIRM"
+    },
+    "resetSession": {
+      "title": "Start Over?",
+      "content": "All current photos will be deleted. Are you sure you want to start a new session?",
+      "cancel": "CANCEL",
+      "confirm": "START OVER"
     }
   },
   "filters": {
-    "title": "Color Filters",
+    "title": "Filters",
     "normal": "Normal",
-    "mono": "Mono (Retro Effect)",
-    "bw": "Black & White",
+    "mono": "Mono (Retro)",
+    "bw": "B&W",
     "soft": "Soft",
     "dazz_classic": "Dazz Classic",
     "dazz_instant": "Dazz Instant"

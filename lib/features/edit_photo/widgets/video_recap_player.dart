@@ -1,9 +1,11 @@
 import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:my_photobooth/models/frame_data.dart';
 import 'package:my_photobooth/core/configs/app_config.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:my_photobooth/models/frame_data.dart';
 import 'package:video_player/video_player.dart';
 
 enum RecapViewMode { full, frame }
@@ -26,7 +28,7 @@ class VideoRecapPlayer extends StatefulWidget {
 
 class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   RecapViewMode _viewMode = RecapViewMode.frame;
-  
+
   // Controller for full video
   late VideoPlayerController _fullController;
   bool _fullInitialized = false;
@@ -64,24 +66,24 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       final controller = kIsWeb
           ? VideoPlayerController.networkUrl(Uri.parse(widget.videoFile.path))
           : VideoPlayerController.file(File(widget.videoFile.path));
-      
+
       _slotControllers.add(controller);
       _slotsInitialized.add(false);
 
       try {
         await controller.initialize();
-        
+
         // Logic for 1s clip loop
-        final endTime = i < widget.photoTimestamps.length 
-            ? widget.photoTimestamps[i] 
+        final endTime = i < widget.photoTimestamps.length
+            ? widget.photoTimestamps[i]
             : controller.value.duration;
-        final startTime = endTime > AppConfig.recapClipDuration 
-            ? endTime - AppConfig.recapClipDuration 
+        final startTime = endTime > AppConfig.recapClipDuration
+            ? endTime - AppConfig.recapClipDuration
             : Duration.zero;
 
         await controller.setVolume(0); // Mute slots to avoid echo
         await controller.seekTo(startTime);
-        
+
         controller.addListener(() {
           if (controller.value.position >= endTime) {
             controller.seekTo(startTime);
@@ -117,16 +119,16 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: SegmentedButton<RecapViewMode>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: RecapViewMode.frame,
-                label: Text('GẮN KHUNG'),
-                icon: Icon(Icons.grid_view_rounded),
+                label: Text(t.editor.frame_mode),
+                icon: const Icon(Icons.grid_view_rounded),
               ),
               ButtonSegment(
                 value: RecapViewMode.full,
-                label: Text('TOÀN BỘ'),
-                icon: Icon(Icons.fullscreen_rounded),
+                label: Text(t.editor.full_mode),
+                icon: const Icon(Icons.fullscreen_rounded),
               ),
             ],
             selected: {_viewMode},
@@ -139,12 +141,12 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
             ),
           ),
         ),
-        
+
         // Video View Area
         Expanded(
           child: Center(
-            child: _viewMode == RecapViewMode.full 
-                ? _buildFullView() 
+            child: _viewMode == RecapViewMode.full
+                ? _buildFullView()
                 : _buildFrameView(),
           ),
         ),

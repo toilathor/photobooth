@@ -30,12 +30,15 @@ class EditPhotoScreen extends StatelessWidget {
                         PreviewPanel(
                           photos: photoboothProvider.capturedPhotos,
                           selectedFrame: editPhotoProvider.selectedFrame,
+                          availableFrames: editPhotoProvider.filteredFrames,
                           printTwoCopies: editPhotoProvider.printTwoCopies,
                           showPaperPreview: editPhotoProvider.showPaperPreview,
                           onTogglePrintTwoCopies:
                               editPhotoProvider.togglePrintTwoCopies,
                           onTogglePaperPreview:
                               editPhotoProvider.togglePaperPreview,
+                          videoRecapFile: photoboothProvider.videoRecapFile,
+                          photoTimestamps: photoboothProvider.photoTimestamps,
                         ),
                         const Gap(24),
                         EditorPanel(

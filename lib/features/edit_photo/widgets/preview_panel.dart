@@ -3,24 +3,32 @@ import 'dart:io' show File;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:my_photobooth/features/edit_photo/widgets/video_recap_player.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/models/frame_data.dart';
 
 class PreviewPanel extends StatelessWidget {
   final List<XFile> photos;
   final FrameData selectedFrame;
+  final List<FrameData> availableFrames;
   final bool printTwoCopies;
   final bool showPaperPreview;
   final ValueChanged<bool> onTogglePrintTwoCopies;
   final ValueChanged<bool> onTogglePaperPreview;
+  final XFile? videoRecapFile;
+  final List<Duration> photoTimestamps;
 
   const PreviewPanel({
     super.key,
     required this.photos,
     required this.selectedFrame,
+    required this.availableFrames,
     required this.printTwoCopies,
     required this.showPaperPreview,
     required this.onTogglePrintTwoCopies,
     required this.onTogglePaperPreview,
+    this.videoRecapFile,
+    this.photoTimestamps = const [],
   });
 
   @override
@@ -57,7 +65,7 @@ class PreviewPanel extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'XEM TRƯỚC',
+                    t.preview.title,
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
@@ -70,13 +78,13 @@ class PreviewPanel extends StatelessWidget {
                   _ExpressiveButtonGroup(
                     selectedIndex: showPaperPreview ? 1 : 0,
                     onChanged: (index) => onTogglePaperPreview(index == 1),
-                    items: const [
+                    items: [
                       _ExpressiveItemData(
-                        label: 'Edit',
+                        label: t.preview.edit_mode,
                         icon: Icons.edit_outlined,
                       ),
                       _ExpressiveItemData(
-                        label: 'Print',
+                        label: t.preview.print_mode,
                         icon: Icons.local_printshop_outlined,
                       ),
                     ],
@@ -85,13 +93,13 @@ class PreviewPanel extends StatelessWidget {
                   _ExpressiveButtonGroup(
                     selectedIndex: printTwoCopies ? 1 : 0,
                     onChanged: (index) => onTogglePrintTwoCopies(index == 1),
-                    items: const [
+                    items: [
                       _ExpressiveItemData(
-                        label: 'bản',
+                        label: t.preview.copy,
                         icon: Icons.looks_one_outlined,
                       ),
                       _ExpressiveItemData(
-                        label: 'bản',
+                        label: t.preview.copy,
                         icon: Icons.looks_two_outlined,
                       ),
                     ],
@@ -144,33 +152,48 @@ class PreviewPanel extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: printTwoCopies
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(
-                                      fit: FlexFit.loose,
-                                      child: _PhotoStrip(
-                                        photos: photos,
-                                        frame: selectedFrame,
-                                      ),
+                          child: Stack(
+                            children: [
+                              printTwoCopies
+                                  ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          fit: FlexFit.loose,
+                                          child: _PhotoStrip(
+                                            photos: photos,
+                                            frame: selectedFrame,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          fit: FlexFit.loose,
+                                          child: _PhotoStrip(
+                                            photos: photos,
+                                            frame: selectedFrame,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : _PhotoStrip(
+                                      photos: photos,
+                                      frame: selectedFrame,
                                     ),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      fit: FlexFit.loose,
-                                      child: _PhotoStrip(
-                                        photos: photos,
-                                        frame: selectedFrame,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : _PhotoStrip(
-                                  photos: photos,
-                                  frame: selectedFrame,
+                              if (videoRecapFile != null)
+                                Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: _CompactVideoRecapButton(
+                                    videoFile: videoRecapFile!,
+                                    frame: selectedFrame,
+                                    photoTimestamps: photoTimestamps,
+                                  ),
                                 ),
+                            ],
+                          ),
                         ),
                 ),
               ),
@@ -367,7 +390,7 @@ class _VirtualPaper extends StatelessWidget {
                   child: RotatedBox(
                     quarterTurns: 3,
                     child: Text(
-                      'CANON KP-108IN (4x6") - LANDSCAPE',
+                      'CANON KP-108IN (4x6") - ${t.preview.landscape}',
                       style: TextStyle(
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
@@ -385,7 +408,7 @@ class _VirtualPaper extends StatelessWidget {
                 right: 0,
                 child: Center(
                   child: Text(
-                    'CANON KP-108IN (4x6") - PORTRAIT',
+                    'CANON KP-108IN (4x6") - ${t.preview.portrait}',
                     style: TextStyle(
                       fontSize: 8,
                       fontWeight: FontWeight.bold,
@@ -440,8 +463,7 @@ class _PhotoStrip extends StatelessWidget {
         border: Border.all(
           color: Colors.black.withValues(alpha: 0.1),
           width: 0.5,
-          style: BorderStyle
-              .solid, // Note: standard Border doesn't support dashed easily, but we can simulate or use solid light color
+          style: BorderStyle.solid,
         ),
       ),
       child: AspectRatio(
@@ -472,6 +494,71 @@ class _PhotoStrip extends StatelessWidget {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactVideoRecapButton extends StatelessWidget {
+  final XFile videoFile;
+  final FrameData frame;
+  final List<Duration> photoTimestamps;
+
+  const _CompactVideoRecapButton({
+    required this.videoFile,
+    required this.frame,
+    required this.photoTimestamps,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.secondary.withValues(alpha: 0.8),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext context) => Dialog(
+                backgroundColor: Colors.black,
+                insetPadding: const EdgeInsets.all(24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: VideoRecapPlayer(
+                    videoFile: videoFile,
+                    frame: frame,
+                    photoTimestamps: photoTimestamps,
+                  ),
+                ),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Icon(
+              Icons.videocam_rounded,
+              color: colorScheme.onSecondary,
+              size: 20,
+            ),
+          ),
         ),
       ),
     );

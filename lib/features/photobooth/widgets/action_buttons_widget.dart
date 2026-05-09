@@ -41,7 +41,29 @@ class ActionButtonsWidget extends StatelessWidget {
               icon: Icons.refresh,
               label: t.actions.retake,
               colorScheme: colorScheme,
-              onTap: provider.resetCapture,
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(t.dialogs.resetSession.title),
+                    content: Text(t.dialogs.resetSession.content),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(t.dialogs.resetSession.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(t.dialogs.resetSession.confirm),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true && context.mounted) {
+                  await provider.clearSession();
+                }
+              },
               isEnabled:
                   !provider.isCapturing && provider.capturedPhotos.isNotEmpty,
             ),

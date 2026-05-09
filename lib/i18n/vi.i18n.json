@@ -1,4 +1,7 @@
 {
+  "header": {
+    "title": "Thuý Hền ❤️ Quang Tọ"
+  },
   "settings": {
     "title": "CÀI ĐẶT",
     "photoCount": "Số ảnh",
@@ -16,7 +19,20 @@
   "preview": {
     "captured": "ĐÃ CHỤP $current/$total",
     "continue_btn": "TIẾP TỤC",
-    "not_enough_photos": "CHỤP ĐỦ ẢNH ĐỂ TIẾP TỤC"
+    "not_enough_photos": "CHƯA ĐỦ ẢNH",
+    "title": "XEM TRƯỚC",
+    "edit_mode": "Sửa",
+    "print_mode": "In",
+    "copy": "bản",
+    "landscape": "NẰM NGANG",
+    "portrait": "DỌC"
+  },
+  "editor": {
+    "title": "CHỌN KHUNG HÌNH",
+    "watchVideoRecap": "XEM VIDEO RECAP",
+    "printPhoto": "IN ẢNH",
+    "frame_mode": "GẮN KHUNG",
+    "full_mode": "TOÀN BỘ"
   },
   "dialogs": {
     "photoSelection": {
@@ -24,6 +40,12 @@
       "subtitle": "Vui lòng chọn đúng $count ảnh để tiếp tục.",
       "cancel": "HỦY",
       "confirm": "XÁC NHẬN"
+    },
+    "resetSession": {
+      "title": "Bắt đầu lại?",
+      "content": "Toàn bộ ảnh hiện tại sẽ bị xóa. Bạn có chắc chắn muốn bắt đầu phiên mới?",
+      "cancel": "HỦY",
+      "confirm": "BẮT ĐẦU LẠI"
     }
   },
   "filters": {

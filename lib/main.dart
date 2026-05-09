@@ -7,12 +7,17 @@ import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.screen.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:my_photobooth/components/language_switcher.dart';
+import 'package:my_photobooth/services/cache_service.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   AppConfig.cameras = await availableCameras();
+
+  // Dọn dẹp cache khi khởi động
+  await CacheService.clearCache();
 
   runApp(
     TranslationProvider(
@@ -39,6 +44,21 @@ class PhotoboothApp extends StatelessWidget {
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const Positioned(
+              top: 0,
+              left: 0,
+              child: Material(
+                color: Colors.transparent,
+                child: LanguageSwitcher(),
+              ),
+            ),
+          ],
+        );
+      },
       home: const PhotoboothScreen(),
       debugShowCheckedModeBanner: false,
     );

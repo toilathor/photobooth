@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 
 class PhotoboothHeader extends StatelessWidget {
   const PhotoboothHeader({super.key});
@@ -12,7 +13,7 @@ class PhotoboothHeader extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Thuý Hền ❤️ Quang Tọ',
+            t.header.title,
             style: GoogleFonts.pacifico(
               fontSize: 36,
               fontWeight: FontWeight.w700,

@@ -10,6 +10,7 @@ import 'package:my_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js) 'package:my_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
 import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:my_photobooth/services/cache_service.dart';
 import 'package:my_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
@@ -314,8 +315,17 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void resetCapture() {
     capturedPhotos.clear();
+    _videoService.reset();
     currentPhotoIndex = 0;
     isCapturing = false;
+    notifyListeners();
+  }
+
+  /// Hoàn thành phiên hiện tại và dọn dẹp toàn bộ cache.
+  /// Gọi khi người dùng quay lại màn hình chính hoặc bắt đầu phiên mới hoàn toàn.
+  Future<void> clearSession() async {
+    resetCapture();
+    await CacheService.clearCache();
     notifyListeners();
   }
 

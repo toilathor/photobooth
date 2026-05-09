@@ -20,6 +20,7 @@
     - [x] Tách nhỏ các Widget lớn trong `PreviewPanel` và `SettingsPanel` để dễ quản lý.
     - [x] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
     - [x] Triển khai đa ngôn ngữ (Internationalization - i18n).
+    - [x] Xử lý Cache (ảnh/video tạm) để dọn dẹp dung lượng sau mỗi phiên.
 
 ## 🚀 Sắp tới (Upcoming)
 - [ ] **Tính năng Frame & Content**:
@@ -41,8 +42,7 @@
 ## 🛠 Bảo trì (Maintenance)
 - [ ] **Refactor & Config**:
 - [ ] **Hệ thống & Hiệu năng**:
-    - [ ] Xử lý Cache (ảnh/video tạm) để giảm dung lượng ứng dụng.
-    - [ ] Chia môi trường phát triển (Dev/Production).
+    - [ ] Chia môi trường phát triển bản thương mại và bản cá nhân dùng trên tất cả các nền tảng.
 - [ ] Viết Unit Test cho logic tính toán vị trí slots trong Frame.
 - [ ] Tối ưu hóa hiệu năng Video Player khi dùng nhiều controller cùng lúc trên Web.
 - [ ] Tối ưu khổ giấy cho bản in một tấm (tiết kiệm giấy in nhiệt).

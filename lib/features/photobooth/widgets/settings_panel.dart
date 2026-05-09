@@ -72,16 +72,6 @@ class SettingsPanel extends StatelessWidget {
               onChanged: provider.isCapturing ? null : (val) => provider.setCountdown(val as int),
               suffix: ' ${t.settings.seconds}',
             ),
-            const Gap(20),
-            DropdownSetting<AppLocale>(
-              label: t.settings.language,
-              value: provider.currentLocale,
-              items: AppLocale.values,
-              itemLabelBuilder: (locale) => locale == AppLocale.vi ? 'Tiếng Việt' : 'English',
-              onChanged: provider.isCapturing ? null : (val) {
-                if (val != null) provider.setLanguage(val);
-              },
-            ),
             const Gap(24),
             const Divider(),
             const Gap(24),

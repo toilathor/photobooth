@@ -33,6 +33,7 @@ dependencies:
     path_provider: ^2.1.5
     slang: any
     slang_flutter: any
+    animated_toggle_switch: ^0.8.7
 
 dev_dependencies:
     flutter_test:

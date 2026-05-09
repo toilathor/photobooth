@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:my_photobooth/components/primary_button.dart';
 import 'package:my_photobooth/components/secondary_button.dart';
-import 'package:my_photobooth/features/edit_photo/widgets/video_recap_player.dart';
+import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/models/frame_data.dart';
 
 import 'frame_selector.dart';
@@ -47,7 +47,7 @@ class EditorPanel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Text(
-                'CHỌN KHUNG HÌNH',
+                t.editor.title,
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
@@ -65,71 +65,34 @@ class EditorPanel extends StatelessWidget {
             ),
             if (videoRecapFile != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: TextButton.icon(
-                  onPressed: () {
-                    final frameData = availableFrames.firstWhere(
-                      (FrameData f) => f.path == selectedFrame,
-                    );
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) => Dialog(
-                        backgroundColor: Colors.black,
-                        insetPadding: const EdgeInsets.all(24),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: VideoRecapPlayer(
-                            videoFile: videoRecapFile!,
-                            frame: frameData,
-                            photoTimestamps: photoTimestamps,
-                          ),
-                        ),
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  children: [
+                    // Download Button
+                    Expanded(
+                      flex: 1,
+                      child: SecondaryButton(
+                        onTap: () {
+                          // TODO: Implement download logic
+                        },
+                        icon: Icons.file_download_rounded,
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.videocam_rounded),
-                  label: const Text('XEM VIDEO RECAP'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: colorScheme.secondary,
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    // Print Button
+                    Expanded(
+                      flex: 3,
+                      child: PrimaryButton(
+                        onTap: () {
+                          // TODO: Implement print logic
+                        },
+                        label: t.editor.printPhoto,
+                        icon: Icons.local_printshop_rounded,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                children: [
-                  // Download Button
-                  Expanded(
-                    flex: 1,
-                    child: SecondaryButton(
-                      onTap: () {
-                        // TODO: Implement download logic
-                      },
-                      icon: Icons.file_download_rounded,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Print Button
-                  Expanded(
-                    flex: 3,
-                    child: PrimaryButton(
-                      onTap: () {
-                        // TODO: Implement print logic
-                      },
-                      label: 'IN ẢNH',
-                      icon: Icons.local_printshop_rounded,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

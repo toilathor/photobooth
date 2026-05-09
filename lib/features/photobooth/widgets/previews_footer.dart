@@ -60,14 +60,17 @@ class PreviewsFooter extends StatelessWidget {
               elevation: 12,
               shadowColor: colorScheme.secondary.withValues(alpha: 0.4),
             ),
-            label: Text(
-              provider.capturedPhotos.length >= provider.selectedPhotoCount
-                  ? t.preview.continue_btn
-                  : t.preview.not_enough_photos,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
+            label: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                provider.capturedPhotos.length >= provider.selectedPhotoCount
+                    ? t.preview.continue_btn
+                    : t.preview.not_enough_photos,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                ),
               ),
             ),
             icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
