@@ -10,8 +10,9 @@ void main() {
     AppConfig.cameras = [];
   });
 
-  testWidgets('CameraPreviewWidget renders flash and settings icons',
-      (WidgetTester tester) async {
+  testWidgets('CameraPreviewWidget renders flash and settings icons', (
+    WidgetTester tester,
+  ) async {
     final provider = PhotoboothProvider();
     // Lưu ý: Trong test thực tế, bạn có thể cần mock CameraController
     // nếu provider.cameraController là null. Ở đây chúng ta giả định

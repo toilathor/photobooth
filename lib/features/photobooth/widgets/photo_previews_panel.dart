@@ -25,7 +25,8 @@ class PhotoPreviewsPanel extends StatelessWidget {
                       : null,
                   isCapturing: provider.isCapturing,
                   onDelete: () => provider.removePhoto(index),
-                  isNextCapture: provider.isCapturing &&
+                  isNextCapture:
+                      provider.isCapturing &&
                       provider.capturedPhotos.length == index,
                 ),
               ),

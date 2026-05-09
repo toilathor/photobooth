@@ -10,8 +10,9 @@ void main() {
     AppConfig.cameras = [];
   });
 
-  testWidgets('ActionButtonsWidget renders all buttons and recap switch',
-      (WidgetTester tester) async {
+  testWidgets('ActionButtonsWidget renders all buttons and recap switch', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

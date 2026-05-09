@@ -10,8 +10,9 @@ void main() {
     AppConfig.cameras = [];
   });
 
-  testWidgets('PhotoPreviewsPanel renders 4 placeholders and status',
-      (WidgetTester tester) async {
+  testWidgets('PhotoPreviewsPanel renders 4 placeholders and status', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

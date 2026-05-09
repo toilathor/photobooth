@@ -22,16 +22,17 @@ class PhotoboothProvider extends ChangeNotifier {
   int selectedPhotoCount = 4;
   int countdown = 3;
   List<XFile> capturedPhotos = [];
-  bool isVideoRecap = false;
+  bool isVideoRecap = true;
   String selectedFilter = '';
 
   bool isCapturing = false;
+  bool isAutoCapturing = false;
   bool isPreparing = false;
   bool isSwitchingCamera = false;
   bool isMirrored = false;
   int currentCountdownValue = 0;
   int currentPhotoIndex = 0;
-  
+
   AppLocale currentLocale = LocaleSettings.currentLocale;
 
   final VideoService _videoService = VideoService();
@@ -50,18 +51,21 @@ class PhotoboothProvider extends ChangeNotifier {
         enableAudio: false,
       );
     }
-    cameraController?.initialize().then((_) {
-      notifyListeners();
-    }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            break;
-          default:
-            break;
-        }
-      }
-    });
+    cameraController
+        ?.initialize()
+        .then((_) {
+          notifyListeners();
+        })
+        .catchError((Object e) {
+          if (e is CameraException) {
+            switch (e.code) {
+              case 'CameraAccessDenied':
+                break;
+              default:
+                break;
+            }
+          }
+        });
 
     // Listen for fullscreen changes (e.g. Esc key)
     fullscreen.onFullscreenChangeWeb((value) {
@@ -91,7 +95,11 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> toggleCamera() async {
-    if (AppConfig.cameras.isEmpty || AppConfig.cameras.length < 2 || isSwitchingCamera) return;
+    if (AppConfig.cameras.isEmpty ||
+        AppConfig.cameras.length < 2 ||
+        isSwitchingCamera) {
+      return;
+    }
 
     isSwitchingCamera = true;
     notifyListeners();
@@ -151,6 +159,15 @@ class PhotoboothProvider extends ChangeNotifier {
 
   final Map<int, String> _numberSounds = AppConfig.numberSounds;
 
+  bool _shouldCancelCapture = false;
+
+  void cancelAutoCapture() {
+    if (isCapturing) {
+      _shouldCancelCapture = true;
+      notifyListeners();
+    }
+  }
+
   Future<void> startAutoCapture() async {
     if (isCapturing ||
         cameraController == null ||
@@ -159,7 +176,9 @@ class PhotoboothProvider extends ChangeNotifier {
     }
 
     isCapturing = true;
+    isAutoCapturing = true;
     isPreparing = true;
+    _shouldCancelCapture = false;
     capturedPhotos.clear();
     _videoService.reset();
     currentPhotoIndex = 0;
@@ -181,6 +200,11 @@ class PhotoboothProvider extends ChangeNotifier {
     // Preparation Countdown
     Completer<void> prepCompleter = Completer<void>();
     Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_shouldCancelCapture) {
+        timer.cancel();
+        prepCompleter.complete();
+        return;
+      }
       if (currentCountdownValue > 1) {
         currentCountdownValue--;
         notifyListeners();
@@ -192,10 +216,17 @@ class PhotoboothProvider extends ChangeNotifier {
     });
     await prepCompleter.future;
 
+    if (_shouldCancelCapture) {
+      await _cleanupAfterCancellation();
+      return;
+    }
+
     isPreparing = false;
     notifyListeners();
 
     for (int i = 0; i < selectedPhotoCount; i++) {
+      if (_shouldCancelCapture) break;
+
       currentPhotoIndex = i + 1;
       currentCountdownValue = countdown;
       notifyListeners();
@@ -206,6 +237,11 @@ class PhotoboothProvider extends ChangeNotifier {
       // Countdown
       Completer<void> countdownCompleter = Completer<void>();
       Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_shouldCancelCapture) {
+          timer.cancel();
+          countdownCompleter.complete();
+          return;
+        }
         if (currentCountdownValue > 1) {
           currentCountdownValue--;
           notifyListeners();
@@ -220,10 +256,12 @@ class PhotoboothProvider extends ChangeNotifier {
       });
       await countdownCompleter.future;
 
+      if (_shouldCancelCapture) break;
+
       // Capture
       try {
         _playSound(AssetConfig.soundCamera);
-        
+
         // Record timestamp relative to video start
         _videoService.recordTimestamp();
 
@@ -245,6 +283,11 @@ class PhotoboothProvider extends ChangeNotifier {
       }
     }
 
+    if (_shouldCancelCapture) {
+      await _cleanupAfterCancellation();
+      return;
+    }
+
     // Stop Video Recap if it was recording
     if (isVideoRecap &&
         cameraController != null &&
@@ -257,6 +300,28 @@ class PhotoboothProvider extends ChangeNotifier {
     }
 
     isCapturing = false;
+    isAutoCapturing = false;
+    notifyListeners();
+  }
+
+  Future<void> _cleanupAfterCancellation() async {
+    // Stop recording if active
+    if (cameraController != null && cameraController!.value.isRecordingVideo) {
+      try {
+        await _videoService.stopRecording(cameraController!);
+      } catch (e) {
+        debugPrint('Error stopping video recording on cancel: $e');
+      }
+    }
+
+    isCapturing = false;
+    isAutoCapturing = false;
+    isPreparing = false;
+    _shouldCancelCapture = false;
+    capturedPhotos.clear();
+    _videoService.reset();
+    currentCountdownValue = 0;
+    currentPhotoIndex = 0;
     notifyListeners();
   }
 

@@ -14,7 +14,7 @@ class VideoService {
   /// Bắt đầu quay video recap.
   Future<void> startRecording(CameraController controller) async {
     if (!controller.value.isInitialized) return;
-    
+
     try {
       await controller.startVideoRecording();
       _videoStartTime = DateTime.now();
@@ -29,7 +29,7 @@ class VideoService {
   /// Dừng quay video recap và lưu lại file kết quả.
   Future<XFile?> stopRecording(CameraController controller) async {
     if (!controller.value.isRecordingVideo) return null;
-    
+
     try {
       _videoRecapFile = await controller.stopVideoRecording();
       return _videoRecapFile;

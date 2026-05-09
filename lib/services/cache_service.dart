@@ -44,7 +44,9 @@ class CacheService {
     try {
       final Directory tempDir = await getTemporaryDirectory();
       if (await tempDir.exists()) {
-        final List<FileSystemEntity> entities = tempDir.listSync(recursive: true);
+        final List<FileSystemEntity> entities = tempDir.listSync(
+          recursive: true,
+        );
         for (final FileSystemEntity entity in entities) {
           if (entity is File) {
             totalSize += await entity.length();

@@ -79,8 +79,9 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
-                                color: colorScheme.secondary
-                                    .withValues(alpha: 0.3),
+                                color: colorScheme.secondary.withValues(
+                                  alpha: 0.3,
+                                ),
                                 border: Border.all(
                                   color: colorScheme.secondary,
                                   width: 3,
@@ -113,9 +114,16 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  foregroundColor: colorScheme.onSurface.withValues(alpha: 0.8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                 ),
-                child: Text(t.dialogs.photoSelection.cancel),
+                child: Text(
+                  t.dialogs.photoSelection.cancel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
               const Gap(8),
               FilledButton.icon(
@@ -124,19 +132,28 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
                     : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: colorScheme.secondary,
-                  foregroundColor: colorScheme.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  foregroundColor: colorScheme.onSecondary,
+                  disabledBackgroundColor: colorScheme.secondary.withValues(
+                    alpha: 0.2,
                   ),
-                  elevation: 4,
+                  disabledForegroundColor: colorScheme.onSecondary.withValues(
+                    alpha: 0.5,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
                 ),
                 icon: const Icon(Icons.check_rounded, size: 20),
                 label: Text(
                   '${t.dialogs.photoSelection.confirm} (${_selected.length}/${widget.targetCount})',
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),

@@ -87,14 +87,14 @@ class PhotoItemCard extends StatelessWidget {
                   ],
                 )
               : isNextCapture
-                  ? const SkeletonLoader()
-                  : Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: colorScheme.secondary.withValues(alpha: 0.2),
-                        size: 48,
-                      ),
-                    ),
+              ? const SkeletonLoader()
+              : Center(
+                  child: Icon(
+                    Icons.image_outlined,
+                    color: colorScheme.secondary.withValues(alpha: 0.2),
+                    size: 48,
+                  ),
+                ),
         ),
       ),
     );

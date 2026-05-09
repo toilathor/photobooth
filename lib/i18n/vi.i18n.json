@@ -14,7 +14,8 @@
     "auto": "AUTO",
     "retake": "Chụp Lại",
     "videoRecap": "VIDEO RECAP",
-    "prepare": "Chuẩn bị"
+    "prepare": "Chuẩn bị",
+    "cancel": "HỦY"
   },
   "preview": {
     "captured": "ĐÃ CHỤP $current/$total",
@@ -56,5 +57,13 @@
     "soft": "Mềm Mại",
     "dazz_classic": "Dazz Classic",
     "dazz_instant": "Dazz Instant"
+  },
+  "video_recap": {
+    "title": "VIDEO RECAP",
+    "controls": {
+      "play": "Phát",
+      "pause": "Tạm dừng",
+      "restart": "Phát lại"
+    }
   }
 }

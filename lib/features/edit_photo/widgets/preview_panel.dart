@@ -73,6 +73,14 @@ class PreviewPanel extends StatelessWidget {
                       color: colorScheme.secondary,
                     ),
                   ),
+                  if (videoRecapFile != null) ...[
+                    const SizedBox(width: 12),
+                    _CompactVideoRecapButton(
+                      videoFile: videoRecapFile!,
+                      frame: selectedFrame,
+                      photoTimestamps: photoTimestamps,
+                    ),
+                  ],
                   const Spacer(),
                   // Material 3 Expressive-style Button Group
                   _ExpressiveButtonGroup(
@@ -156,7 +164,8 @@ class PreviewPanel extends StatelessWidget {
                             children: [
                               printTwoCopies
                                   ? Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
@@ -182,16 +191,6 @@ class PreviewPanel extends StatelessWidget {
                                       photos: photos,
                                       frame: selectedFrame,
                                     ),
-                              if (videoRecapFile != null)
-                                Positioned(
-                                  top: 12,
-                                  right: 12,
-                                  child: _CompactVideoRecapButton(
-                                    videoFile: videoRecapFile!,
-                                    frame: selectedFrame,
-                                    photoTimestamps: photoTimestamps,
-                                  ),
-                                ),
                             ],
                           ),
                         ),
@@ -319,10 +318,7 @@ class _VirtualPaper extends StatelessWidget {
   final Widget child;
   final bool isLandscape;
 
-  const _VirtualPaper({
-    required this.child,
-    required this.isLandscape,
-  });
+  const _VirtualPaper({required this.child, required this.isLandscape});
 
   @override
   Widget build(BuildContext context) {
@@ -531,23 +527,43 @@ class _CompactVideoRecapButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            showDialog<void>(
+            showGeneralDialog(
               context: context,
-              builder: (BuildContext context) => Dialog(
-                backgroundColor: Colors.black,
-                insetPadding: const EdgeInsets.all(24),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: VideoRecapPlayer(
-                    videoFile: videoFile,
-                    frame: frame,
-                    photoTimestamps: photoTimestamps,
+              barrierDismissible: true,
+              barrierLabel: '',
+              barrierColor: Colors.black87,
+              transitionDuration: const Duration(milliseconds: 400),
+              pageBuilder: (context, anim1, anim2) => Center(
+                child: Container(
+                  constraints: const BoxConstraints(
+                    maxWidth: 900,
+                    maxHeight: 800,
+                  ),
+                  margin: const EdgeInsets.all(32),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: VideoRecapPlayer(
+                      videoFile: videoFile,
+                      frame: frame,
+                      photoTimestamps: photoTimestamps,
+                    ),
                   ),
                 ),
               ),
+              transitionBuilder: (context, anim1, anim2, child) {
+                return FadeTransition(
+                  opacity: anim1,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: anim1,
+                        curve: Curves.easeOutCubic,
+                      ),
+                    ),
+                    child: child,
+                  ),
+                );
+              },
             );
           },
           borderRadius: BorderRadius.circular(20),

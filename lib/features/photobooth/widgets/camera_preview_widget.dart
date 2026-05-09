@@ -21,7 +21,8 @@ class CameraPreviewWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(32),
       child: AspectRatio(
         aspectRatio: 4 / 3,
-        child: provider.cameraController == null ||
+        child:
+            provider.cameraController == null ||
                 !provider.cameraController!.value.isInitialized ||
                 provider.isSwitchingCamera
             ? Container(
@@ -128,6 +129,18 @@ class CameraPreviewWidget extends StatelessWidget {
                                           isRepeatingAnimation: false,
                                         ),
                                 ),
+                              if (provider.isAutoCapturing)
+                                Positioned(
+                                  bottom: 24,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: _CancelButton(
+                                      onTap: () => provider.cancelAutoCapture(),
+                                      colorScheme: colorScheme,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -136,6 +149,70 @@ class CameraPreviewWidget extends StatelessWidget {
                   ),
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _CancelButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final ColorScheme colorScheme;
+
+  const _CancelButton({required this.onTap, required this.colorScheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.red.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withValues(alpha: 0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(24),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      t.actions.cancel,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -173,8 +250,9 @@ class _ControlButton extends StatelessWidget {
                 offset: const Offset(0, 4),
               ),
             ],
-            border:
-                isActive ? Border.all(color: Colors.white, width: 1.5) : null,
+            border: isActive
+                ? Border.all(color: Colors.white, width: 1.5)
+                : null,
           ),
           child: IconButton(
             onPressed: onTap,
@@ -183,9 +261,7 @@ class _ControlButton extends StatelessWidget {
               color: isActive ? colorScheme.primary : Colors.white,
               size: 28,
             ),
-            style: IconButton.styleFrom(
-              padding: const EdgeInsets.all(12),
-            ),
+            style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
           ),
         ),
       ),

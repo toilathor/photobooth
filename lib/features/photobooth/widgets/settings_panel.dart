@@ -44,32 +44,39 @@ class SettingsPanel extends StatelessWidget {
               label: t.settings.photoCount,
               value: provider.selectedPhotoCount,
               items: provider.photoCounts,
-              onChanged: provider.isCapturing ? null : (val) {
-                final newCount = val as int;
-                if (provider.capturedPhotos.length > newCount) {
-                  // Show selection dialog
-                  showDialog<List<XFile>>(
-                    context: context,
-                    builder: (context) => PhotoSelectionDialog(
-                      photos: provider.capturedPhotos,
-                      targetCount: newCount,
-                    ),
-                  ).then((selectedPhotos) {
-                    if (selectedPhotos != null) {
-                      provider.setPhotoCountWithSelection(newCount, selectedPhotos);
-                    }
-                  });
-                } else {
-                  provider.setPhotoCount(newCount);
-                }
-              },
+              onChanged: provider.isAutoCapturing
+                  ? null
+                  : (val) {
+                      final newCount = val as int;
+                      if (provider.capturedPhotos.length > newCount) {
+                        // Show selection dialog
+                        showDialog<List<XFile>>(
+                          context: context,
+                          builder: (context) => PhotoSelectionDialog(
+                            photos: provider.capturedPhotos,
+                            targetCount: newCount,
+                          ),
+                        ).then((selectedPhotos) {
+                          if (selectedPhotos != null) {
+                            provider.setPhotoCountWithSelection(
+                              newCount,
+                              selectedPhotos,
+                            );
+                          }
+                        });
+                      } else {
+                        provider.setPhotoCount(newCount);
+                      }
+                    },
             ),
             const Gap(20),
             DropdownSetting<int>(
               label: t.settings.countdown,
               value: provider.countdown,
               items: provider.countdowns,
-              onChanged: provider.isCapturing ? null : (val) => provider.setCountdown(val as int),
+              onChanged: provider.isAutoCapturing
+                  ? null
+                  : (val) => provider.setCountdown(val as int),
               suffix: ' ${t.settings.seconds}',
             ),
             const Gap(24),

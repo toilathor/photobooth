@@ -23,8 +23,7 @@ class ActionButtonsWidget extends StatelessWidget {
               label: t.actions.manual,
               colorScheme: colorScheme,
               onTap: provider.takeManualPhoto,
-              isEnabled:
-                  !provider.isCapturing &&
+              isEnabled: !provider.isAutoCapturing &&
                   provider.capturedPhotos.length < provider.selectedPhotoCount,
             ),
             const Gap(32),
@@ -34,7 +33,7 @@ class ActionButtonsWidget extends StatelessWidget {
               colorScheme: colorScheme,
               isPrimary: true,
               onTap: provider.startAutoCapture,
-              isEnabled: !provider.isCapturing,
+              isEnabled: !provider.isAutoCapturing,
             ),
             const Gap(32),
             _ActionIcon(
@@ -50,10 +49,19 @@ class ActionButtonsWidget extends StatelessWidget {
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
+                        style: TextButton.styleFrom(
+                          foregroundColor: colorScheme.onSurface.withValues(
+                            alpha: 0.8,
+                          ),
+                        ),
                         child: Text(t.dialogs.resetSession.cancel),
                       ),
-                      TextButton(
+                      FilledButton(
                         onPressed: () => Navigator.pop(context, true),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.secondary,
+                          foregroundColor: colorScheme.onSecondary,
+                        ),
                         child: Text(t.dialogs.resetSession.confirm),
                       ),
                     ],
@@ -64,8 +72,8 @@ class ActionButtonsWidget extends StatelessWidget {
                   await provider.clearSession();
                 }
               },
-              isEnabled:
-                  !provider.isCapturing && provider.capturedPhotos.isNotEmpty,
+              isEnabled: !provider.isAutoCapturing &&
+                  provider.capturedPhotos.isNotEmpty,
             ),
           ],
         ),
@@ -75,7 +83,8 @@ class ActionButtonsWidget extends StatelessWidget {
           children: [
             Switch(
               value: provider.isVideoRecap,
-              onChanged: provider.isCapturing ? null : provider.toggleVideoRecap,
+              onChanged:
+                  provider.isAutoCapturing ? null : provider.toggleVideoRecap,
               activeThumbColor: colorScheme.secondary,
             ),
             Text(

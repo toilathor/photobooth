@@ -5,7 +5,7 @@ class ThemeConfig {
   static const Color lightPrimaryContainer = Color(0xFFFDE0E6);
   static const Color lightSecondary = Color(0xFF800000);
   static const Color lightTertiary = Color(0xFF8A2BE2);
-  
+
   static const Color darkPrimary = Color(0xFFFFB3B3);
   static const Color darkPrimaryContainer = Color(0xFF990000);
   static const Color darkBackground = Color(0xFF1C1B1F);

@@ -63,36 +63,35 @@ class EditorPanel extends StatelessWidget {
                 onFrameSelected: onFrameSelected,
               ),
             ),
-            if (videoRecapFile != null)
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  children: [
-                    // Download Button
-                    Expanded(
-                      flex: 1,
-                      child: SecondaryButton(
-                        onTap: () {
-                          // TODO: Implement download logic
-                        },
-                        icon: Icons.file_download_rounded,
-                      ),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Row(
+                children: [
+                  // QR/Download Button
+                  Expanded(
+                    flex: 1,
+                    child: SecondaryButton(
+                      onTap: () {
+                        // TODO: Implement QR/Download logic
+                      },
+                      icon: Icons.qr_code_2_rounded,
                     ),
-                    const SizedBox(width: 16),
-                    // Print Button
-                    Expanded(
-                      flex: 3,
-                      child: PrimaryButton(
-                        onTap: () {
-                          // TODO: Implement print logic
-                        },
-                        label: t.editor.printPhoto,
-                        icon: Icons.local_printshop_rounded,
-                      ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Print Button
+                  Expanded(
+                    flex: 3,
+                    child: PrimaryButton(
+                      onTap: () {
+                        // TODO: Implement print logic
+                      },
+                      label: t.editor.printPhoto,
+                      icon: Icons.local_printshop_rounded,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
           ],
         ),
       ),

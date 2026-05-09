@@ -34,16 +34,15 @@ class LanguageSwitcher extends StatelessWidget {
         borderWidth: 1.5,
         height: 40,
         onChanged: (val) => provider.setLanguage(val),
-        styleBuilder: (value) => ToggleStyle(
-          indicatorColor: colorScheme.secondary,
-        ),
+        styleBuilder: (value) =>
+            ToggleStyle(indicatorColor: colorScheme.secondary),
         iconBuilder: (value) => value == AppLocale.vi
             ? const Text('🇻🇳', style: TextStyle(fontSize: 16))
             : const Text('🇺🇸', style: TextStyle(fontSize: 16)),
         textBuilder: (value) => value == AppLocale.vi
             ? const Center(
                 child: Text(
-                  'VI',
+                  'EN',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
@@ -53,7 +52,7 @@ class LanguageSwitcher extends StatelessWidget {
               )
             : const Center(
                 child: Text(
-                  'EN',
+                  'VI',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,

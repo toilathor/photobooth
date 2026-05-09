@@ -14,7 +14,8 @@
     "auto": "AUTO",
     "retake": "Retake",
     "videoRecap": "VIDEO RECAP",
-    "prepare": "Prepare"
+    "prepare": "Prepare",
+    "cancel": "CANCEL"
   },
   "preview": {
     "captured": "CAPTURED $current/$total",
@@ -56,5 +57,13 @@
     "soft": "Soft",
     "dazz_classic": "Dazz Classic",
     "dazz_instant": "Dazz Instant"
+  },
+  "video_recap": {
+    "title": "VIDEO RECAP",
+    "controls": {
+      "play": "Play",
+      "pause": "Pause",
+      "restart": "Restart"
+    }
   }
 }

@@ -33,24 +33,37 @@ class FilterSelector extends StatelessWidget {
           runSpacing: 8,
           children: provider.filters.map((filterKey) {
             final isSelected = provider.selectedFilter == filterKey;
-            
+
             // Map key to localized string
             String label;
             switch (filterKey) {
-              case 'normal': label = t.filters.normal; break;
-              case 'mono': label = t.filters.mono; break;
-              case 'bw': label = t.filters.bw; break;
-              case 'soft': label = t.filters.soft; break;
-              case 'dazz_classic': label = t.filters.dazz_classic; break;
-              case 'dazz_instant': label = t.filters.dazz_instant; break;
-              default: label = filterKey;
+              case 'normal':
+                label = t.filters.normal;
+                break;
+              case 'mono':
+                label = t.filters.mono;
+                break;
+              case 'bw':
+                label = t.filters.bw;
+                break;
+              case 'soft':
+                label = t.filters.soft;
+                break;
+              case 'dazz_classic':
+                label = t.filters.dazz_classic;
+                break;
+              case 'dazz_instant':
+                label = t.filters.dazz_instant;
+                break;
+              default:
+                label = filterKey;
             }
 
             return FilterChip(
               label: Text(label),
               selected: isSelected,
-              onSelected: provider.isCapturing 
-                  ? null 
+              onSelected: provider.isAutoCapturing
+                  ? null
                   : (selected) {
                       if (selected) provider.setFilter(filterKey);
                     },

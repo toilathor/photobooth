@@ -7,13 +7,20 @@
 - [x] **Print Preview**: Mô phỏng in trên giấy Canon KP-108IN (Portrait/Landscape).
 - [x] **Cut Guides**: Thêm đường viền hướng dẫn cắt ảnh sau khi in.
 - [x] **Video Recap**: 
-    - [x] Quay video hậu trường tự động.
+    - [x] Quay video hậu trường tự động (Silent).
     - [x] Chế độ xem "Gắn khung" (Frame Mode) với các đoạn clip ngắn lặp lại.
     - [x] Tối ưu hiển thị Video lấp đầy ô trống (BoxFit.cover).
+    - [x] Giao diện Premium Glassmorphism với đầy đủ điều khiển.
+    - [x] Mặc định bật tính năng quay Video Recap.
 - [x] **UX Improvements**:
-    - [x] Vô hiệu hóa (Disable) các nút cài đặt và xóa ảnh khi đang chụp để tránh bug.
-    - [x] Di chuyển thông tin giấy in (Canon KP-108IN) vào vùng lề xé để không ảnh hưởng ảnh chính.
-- [x] **Error Handling**: Fix lỗi phân tích mã nguồn (Flutter Analyze).
+    - [x] Vô hiệu hóa (Disable) các nút khi đang chụp tự động, giữ nguyên khi chụp tay để tránh flicker.
+    - [x] Thêm tính năng HỦY chụp tự động (Cancel Auto Capture).
+    - [x] Di chuyển nút xem Video Recap ra ngoài header của Preview Panel.
+    - [x] Di chuyển thông tin giấy in (Canon KP-108IN) vào vùng lề xé.
+- [x] **Error Handling & Bug Fixes**:
+    - [x] Fix lỗi hiển thị (tương phản màu) của các nút trong Dialog Chụp lại và Dialog Chọn ảnh.
+    - [x] Fix lỗi mất nút In và QR ở màn hình Edit.
+    - [x] Fix lỗi phân tích mã nguồn (Flutter Analyze).
 - [x] **Maintenance**: 
     - [x] Rà soát và định rõ kiểu dữ liệu cho các biến đang dùng `dynamic` để tăng tính an toàn (Strong Typing).
     - [x] Refactor lại hệ thống cấu hình (Configs) để quản lý tập trung.
@@ -44,5 +51,4 @@
 - [ ] **Hệ thống & Hiệu năng**:
     - [ ] Chia môi trường phát triển bản thương mại và bản cá nhân dùng trên tất cả các nền tảng.
 - [ ] Viết Unit Test cho logic tính toán vị trí slots trong Frame.
-- [ ] Tối ưu hóa hiệu năng Video Player khi dùng nhiều controller cùng lúc trên Web.
 - [ ] Tối ưu khổ giấy cho bản in một tấm (tiết kiệm giấy in nhiệt).

@@ -3,12 +3,12 @@ import 'package:camera/camera.dart';
 class AppConfig {
   static late List<CameraDescription> cameras;
   static const String appName = 'Photobooth';
-  
+
   // Photo settings
   static const List<int> photoCounts = [1, 3, 4];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 2);
-  
+
   // Filter settings
   static const List<String> filters = [
     'normal',
@@ -18,7 +18,7 @@ class AppConfig {
     'dazz_classic',
     'dazz_instant',
   ];
-  
+
   // Voice countdown sounds
   static const Map<int, String> numberSounds = {
     1: 'mot.mp3',

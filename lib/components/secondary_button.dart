@@ -4,11 +4,7 @@ class SecondaryButton extends StatelessWidget {
   final VoidCallback onTap;
   final IconData icon;
 
-  const SecondaryButton({
-    super.key,
-    required this.onTap,
-    required this.icon,
-  });
+  const SecondaryButton({super.key, required this.onTap, required this.icon});
 
   @override
   Widget build(BuildContext context) {

@@ -34,13 +34,14 @@ class PreviewsFooter extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: (provider.capturedPhotos.length >=
+            onPressed:
+                (provider.capturedPhotos.length >=
                         provider.selectedPhotoCount &&
                     !provider.isCapturing)
                 ? () {
                     context.read<EditPhotoProvider>().initForPhotoCount(
-                          provider.selectedPhotoCount,
-                        );
+                      provider.selectedPhotoCount,
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute<void>(

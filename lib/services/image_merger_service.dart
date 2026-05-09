@@ -82,7 +82,11 @@ class ImageMergerService {
   }
 
   /// Helper to resize and crop an image to fit target dimensions (BoxFit.cover equivalent)
-  static img.Image _resizeAndCropToFit(img.Image src, int targetWidth, int targetHeight) {
+  static img.Image _resizeAndCropToFit(
+    img.Image src,
+    int targetWidth,
+    int targetHeight,
+  ) {
     final double srcAspect = src.width / src.height;
     final double targetAspect = targetWidth / targetHeight;
 
@@ -101,7 +105,8 @@ class ImageMergerService {
       src,
       width: resizeWidth,
       height: resizeHeight,
-      interpolation: img.Interpolation.average, // Higher quality for downscaling
+      interpolation:
+          img.Interpolation.average, // Higher quality for downscaling
     );
 
     // Crop center
