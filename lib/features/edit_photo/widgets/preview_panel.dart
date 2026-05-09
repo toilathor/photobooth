@@ -3,10 +3,11 @@ import 'dart:io' show File;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:my_photobooth/models/frame_data.dart';
 
 class PreviewPanel extends StatelessWidget {
   final List<XFile> photos;
-  final String selectedFrame;
+  final FrameData selectedFrame;
   final bool printTwoCopies;
   final ValueChanged<bool> onTogglePrintTwoCopies;
 
@@ -96,7 +97,7 @@ class PreviewPanel extends StatelessWidget {
                               fit: FlexFit.loose,
                               child: _PhotoStrip(
                                 photos: photos,
-                                framePath: selectedFrame,
+                                frame: selectedFrame,
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -104,12 +105,12 @@ class PreviewPanel extends StatelessWidget {
                               fit: FlexFit.loose,
                               child: _PhotoStrip(
                                 photos: photos,
-                                framePath: selectedFrame,
+                                frame: selectedFrame,
                               ),
                             ),
                           ],
                         )
-                      : _PhotoStrip(photos: photos, framePath: selectedFrame),
+                      : _PhotoStrip(photos: photos, frame: selectedFrame),
                 ),
               ),
             ),
@@ -232,39 +233,45 @@ class _ExpressiveButton extends StatelessWidget {
 
 class _PhotoStrip extends StatelessWidget {
   final List<XFile> photos;
-  final String framePath;
+  final FrameData frame;
 
-  const _PhotoStrip({required this.photos, required this.framePath});
+  const _PhotoStrip({required this.photos, required this.frame});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Photos layer matches the Frame Image size
-        Positioned.fill(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: photos.map((photo) {
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: AspectRatio(
-                    aspectRatio: 4 / 3,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
-                      child: kIsWeb
-                          ? Image.network(photo.path, fit: BoxFit.cover)
-                          : Image.file(File(photo.path), fit: BoxFit.cover),
-                    ),
+    // AspectRatio matches the original frame size precisely.
+    return AspectRatio(
+      aspectRatio: frame.size.width / frame.size.height,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate scale factors
+          final scaleX = constraints.maxWidth / frame.size.width;
+          final scaleY = constraints.maxHeight / frame.size.height;
+
+          return Stack(
+            children: [
+              // Photos layer (bottom)
+              for (int i = 0; i < frame.slots.length; i++)
+                if (i < photos.length)
+                  Positioned(
+                    left: frame.slots[i].left * scaleX,
+                    top: frame.slots[i].top * scaleY,
+                    width: frame.slots[i].width * scaleX,
+                    height: frame.slots[i].height * scaleY,
+                    child: kIsWeb
+                        ? Image.network(photos[i].path, fit: BoxFit.cover)
+                        : Image.file(File(photos[i].path), fit: BoxFit.cover),
                   ),
+              // Frame layer (top)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Image.asset(frame.path, fit: BoxFit.fill),
                 ),
-              );
-            }).toList(),
-          ),
-        ),
-        // Frame Image defines the size
-        Image.asset(framePath, fit: BoxFit.contain),
-      ],
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

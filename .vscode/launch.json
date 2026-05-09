@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "my_photobooth (Web)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d",
+                "chrome"
+            ]
+        },
+        {
+            "name": "my_photobooth (Debug)",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}   

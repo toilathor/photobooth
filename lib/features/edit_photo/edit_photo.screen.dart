@@ -29,7 +29,7 @@ class EditPhotoScreen extends StatelessWidget {
                       children: [
                         PreviewPanel(
                           photos: photoboothProvider.capturedPhotos,
-                          selectedFrame: editPhotoProvider.selectedFrame.path,
+                          selectedFrame: editPhotoProvider.selectedFrame,
                           printTwoCopies: editPhotoProvider.printTwoCopies,
                           onTogglePrintTwoCopies:
                               editPhotoProvider.togglePrintTwoCopies,
@@ -39,6 +39,8 @@ class EditPhotoScreen extends StatelessWidget {
                           availableFrames: editPhotoProvider.filteredFrames,
                           selectedFrame: editPhotoProvider.selectedFrame.path,
                           onFrameSelected: editPhotoProvider.setSelectedFrame,
+                          photos: photoboothProvider.capturedPhotos,
+                          isProcessing: editPhotoProvider.isProcessing,
                         ),
                       ],
                     ),

@@ -1,7 +1,8 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
 import 'package:my_photobooth/components/primary_button.dart';
 import 'package:my_photobooth/components/secondary_button.dart';
+import 'package:my_photobooth/models/frame_data.dart';
 
 import 'frame_selector.dart';
 
@@ -9,12 +10,16 @@ class EditorPanel extends StatelessWidget {
   final List<FrameData> availableFrames;
   final String selectedFrame;
   final Function(FrameData) onFrameSelected;
+  final List<XFile> photos;
+  final bool isProcessing;
 
   const EditorPanel({
     super.key,
     required this.availableFrames,
     required this.selectedFrame,
     required this.onFrameSelected,
+    required this.photos,
+    required this.isProcessing,
   });
 
   @override
