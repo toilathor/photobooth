@@ -145,7 +145,7 @@ class PhotoPreviewsPanel extends StatelessWidget {
                         );
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (context) => const EditPhotoScreen(),
                       ),
                     );

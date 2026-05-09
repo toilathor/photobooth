@@ -101,7 +101,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   @override
   void dispose() {
     _fullController.dispose();
-    for (var controller in _slotControllers) {
+    for (VideoPlayerController controller in _slotControllers) {
       controller.dispose();
     }
     super.dispose();

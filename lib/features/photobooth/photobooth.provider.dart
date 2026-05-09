@@ -9,6 +9,7 @@ import 'package:my_photobooth/helper/constants.dart';
 import 'package:my_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js) 'package:my_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
+import 'package:my_photobooth/models/booth_effect.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
   CameraController? cameraController;
@@ -42,12 +43,12 @@ class PhotoboothProvider extends ChangeNotifier {
     'Dazz Classic',
     'Dazz Instant',
   ];
-  final List<Map<String, dynamic>> effects = [
-    {'name': 'TimeStamp', 'icon': Icons.timer},
-    {'name': 'Light Leak', 'icon': Icons.wb_sunny},
-    {'name': 'Vignette', 'icon': Icons.adjust},
-    {'name': 'Grain', 'icon': Icons.grain},
-    {'name': 'Chromatic', 'icon': Icons.color_lens},
+  final List<BoothEffect> effects = const [
+    BoothEffect(name: 'TimeStamp', icon: Icons.timer),
+    BoothEffect(name: 'Light Leak', icon: Icons.wb_sunny),
+    BoothEffect(name: 'Vignette', icon: Icons.adjust),
+    BoothEffect(name: 'Grain', icon: Icons.grain),
+    BoothEffect(name: 'Chromatic', icon: Icons.color_lens),
   ];
 
   PhotoboothProvider() {
@@ -258,7 +259,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
       // Small delay between shots
       if (i < selectedPhotoCount - 1) {
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
       }
     }
 

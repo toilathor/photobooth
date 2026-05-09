@@ -6,7 +6,7 @@ import 'frame_item.dart';
 class FrameSelector extends StatelessWidget {
   final List<FrameData> availableFrames;
   final String selectedFrame;
-  final Function(FrameData) onFrameSelected;
+  final void Function(FrameData) onFrameSelected;
 
   const FrameSelector({
     super.key,

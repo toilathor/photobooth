@@ -10,7 +10,7 @@ import 'frame_selector.dart';
 class EditorPanel extends StatelessWidget {
   final List<FrameData> availableFrames;
   final String selectedFrame;
-  final Function(FrameData) onFrameSelected;
+  final void Function(FrameData) onFrameSelected;
   final List<XFile> photos;
   final XFile? videoRecapFile;
   final List<Duration> photoTimestamps;
@@ -69,11 +69,11 @@ class EditorPanel extends StatelessWidget {
                 child: TextButton.icon(
                   onPressed: () {
                     final frameData = availableFrames.firstWhere(
-                      (f) => f.path == selectedFrame,
+                      (FrameData f) => f.path == selectedFrame,
                     );
-                    showDialog(
+                    showDialog<void>(
                       context: context,
-                      builder: (context) => Dialog(
+                      builder: (BuildContext context) => Dialog(
                         backgroundColor: Colors.black,
                         insetPadding: const EdgeInsets.all(24),
                         shape: RoundedRectangleBorder(

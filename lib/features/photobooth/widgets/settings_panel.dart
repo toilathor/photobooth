@@ -38,7 +38,7 @@ class SettingsPanel extends StatelessWidget {
               ),
             ),
             const Gap(16),
-            _DropdownSetting(
+            _DropdownSetting<int>(
               label: 'Số ảnh',
               value: provider.selectedPhotoCount,
               items: provider.photoCounts,
@@ -63,7 +63,7 @@ class SettingsPanel extends StatelessWidget {
               },
             ),
             const Gap(20),
-            _DropdownSetting(
+            _DropdownSetting<int>(
               label: 'Đếm Ngược',
               value: provider.countdown,
               items: provider.countdowns,
@@ -223,11 +223,11 @@ class _PhotoSelectionDialogState extends State<_PhotoSelectionDialog> {
   }
 }
 
-class _DropdownSetting extends StatelessWidget {
+class _DropdownSetting<T> extends StatelessWidget {
   final String label;
-  final dynamic value;
-  final List<dynamic> items;
-  final ValueChanged<dynamic>? onChanged;
+  final T value;
+  final List<T> items;
+  final ValueChanged<T?>? onChanged;
   final String suffix;
 
   const _DropdownSetting({
@@ -263,7 +263,7 @@ class _DropdownSetting extends StatelessWidget {
             color: colorScheme.onPrimary,
           ),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<dynamic>(
+            child: DropdownButton<T>(
               value: value,
               dropdownColor: colorScheme.onPrimary,
               borderRadius: BorderRadius.circular(12),
