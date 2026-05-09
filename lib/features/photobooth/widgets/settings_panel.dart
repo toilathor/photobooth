@@ -42,23 +42,21 @@ class SettingsPanel extends StatelessWidget {
               label: 'Số ảnh',
               value: provider.selectedPhotoCount,
               items: provider.photoCounts,
-              onChanged: (val) async {
+              onChanged: provider.isCapturing ? null : (val) {
                 final newCount = val as int;
                 if (provider.capturedPhotos.length > newCount) {
                   // Show selection dialog
-                  final selectedPhotos = await showDialog<List<XFile>>(
+                  showDialog<List<XFile>>(
                     context: context,
                     builder: (context) => _PhotoSelectionDialog(
                       photos: provider.capturedPhotos,
                       targetCount: newCount,
                     ),
-                  );
-                  if (selectedPhotos != null) {
-                    provider.setPhotoCountWithSelection(
-                      newCount,
-                      selectedPhotos,
-                    );
-                  }
+                  ).then((selectedPhotos) {
+                    if (selectedPhotos != null) {
+                      provider.setPhotoCountWithSelection(newCount, selectedPhotos);
+                    }
+                  });
                 } else {
                   provider.setPhotoCount(newCount);
                 }
@@ -69,7 +67,7 @@ class SettingsPanel extends StatelessWidget {
               label: 'Đếm Ngược',
               value: provider.countdown,
               items: provider.countdowns,
-              onChanged: (val) => provider.setCountdown(val!),
+              onChanged: provider.isCapturing ? null : (val) => provider.setCountdown(val as int),
               suffix: ' giây',
             ),
             const Gap(24),
@@ -229,14 +227,14 @@ class _DropdownSetting extends StatelessWidget {
   final String label;
   final dynamic value;
   final List<dynamic> items;
-  final ValueChanged<dynamic> onChanged;
+  final ValueChanged<dynamic>? onChanged;
   final String suffix;
 
   const _DropdownSetting({
     required this.label,
     required this.value,
     required this.items,
-    required this.onChanged,
+    this.onChanged,
     this.suffix = '',
   });
 
@@ -315,11 +313,15 @@ class _Filters extends StatelessWidget {
           runSpacing: 8,
           children: provider.filters.map((filter) {
             final isSelected = provider.selectedFilter == filter;
-            return ChoiceChip(
+            return FilterChip(
               label: Text(filter),
-              selected: isSelected,
-              onSelected: (_) => provider.setFilter(filter),
-              selectedColor: colorScheme.secondary,
+              selected: provider.selectedFilter == filter,
+              onSelected: provider.isCapturing 
+                  ? null 
+                  : (selected) {
+                      if (selected) provider.setFilter(filter);
+                    },
+              selectedColor: colorScheme.secondary.withValues(alpha: 0.2),
               backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
               labelStyle: TextStyle(
                 color: isSelected ? colorScheme.primary : colorScheme.onSurface,

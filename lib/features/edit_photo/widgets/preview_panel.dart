@@ -357,20 +357,44 @@ class _VirtualPaper extends StatelessWidget {
                   : const EdgeInsets.symmetric(vertical: 45, horizontal: 8),
               child: Center(child: child),
             ),
-            // Paper size indicator
-            Positioned(
-              bottom: 12,
-              right: 12,
-              child: Text(
-                'CANON KP-108IN (4x6") - ${isLandscape ? "LANDSCAPE" : "PORTRAIT"}',
-                style: const TextStyle(
-                  fontSize: 7,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black26,
-                  letterSpacing: 1,
+            // Paper size indicator (Placed in the perforation margin area)
+            if (isLandscape)
+              Positioned(
+                left: 8,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: RotatedBox(
+                    quarterTurns: 3,
+                    child: Text(
+                      'CANON KP-108IN (4x6") - LANDSCAPE',
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black.withValues(alpha: 0.1),
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else
+              Positioned(
+                bottom: 12,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Text(
+                    'CANON KP-108IN (4x6") - PORTRAIT',
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black.withValues(alpha: 0.1),
+                      letterSpacing: 2,
+                    ),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

@@ -52,7 +52,7 @@ class ActionButtonsWidget extends StatelessWidget {
           children: [
             Switch(
               value: provider.isVideoRecap,
-              onChanged: provider.toggleVideoRecap,
+              onChanged: provider.isCapturing ? null : provider.toggleVideoRecap,
               activeThumbColor: colorScheme.secondary,
             ),
             Text(

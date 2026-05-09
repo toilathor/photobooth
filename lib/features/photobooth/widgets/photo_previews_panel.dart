@@ -48,31 +48,29 @@ class PhotoPreviewsPanel extends StatelessWidget {
                                             fit: BoxFit.cover,
                                             loadingBuilder:
                                                 (context, child, progress) {
-                                                  if (progress == null) {
-                                                    return child;
-                                                  }
-                                                  return const _SkeletonLoader();
-                                                },
+                                              if (progress == null) {
+                                                return child;
+                                              }
+                                              return const _SkeletonLoader();
+                                            },
                                           )
                                         : Image.file(
                                             File(
                                               provider
-                                                  .capturedPhotos[index]
-                                                  .path,
+                                                  .capturedPhotos[index].path,
                                             ),
                                             fit: BoxFit.cover,
-                                            frameBuilder:
-                                                (
-                                                  context,
-                                                  child,
-                                                  frame,
-                                                  wasSync,
-                                                ) {
-                                                  if (wasSync) return child;
-                                                  return frame != null
-                                                      ? child
-                                                      : const _SkeletonLoader();
-                                                },
+                                            frameBuilder: (
+                                              context,
+                                              child,
+                                              frame,
+                                              wasSync,
+                                            ) {
+                                              if (wasSync) return child;
+                                              return frame != null
+                                                  ? child
+                                                  : const _SkeletonLoader();
+                                            },
                                           ),
                                   ),
                                 ),
@@ -80,18 +78,24 @@ class PhotoPreviewsPanel extends StatelessWidget {
                                   top: 8,
                                   right: 8,
                                   child: GestureDetector(
-                                    onTap: () => provider.removePhoto(index),
+                                    onTap: provider.isCapturing
+                                        ? null
+                                        : () => provider.removePhoto(index),
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         color: Colors.black.withValues(
-                                          alpha: 0.5,
+                                          alpha:
+                                              provider.isCapturing ? 0.2 : 0.5,
                                         ),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.close,
-                                        color: Colors.white,
+                                        color: provider.isCapturing
+                                            ? Colors.white
+                                                .withValues(alpha: 0.5)
+                                            : Colors.white,
                                         size: 16,
                                       ),
                                     ),
@@ -100,17 +104,17 @@ class PhotoPreviewsPanel extends StatelessWidget {
                               ],
                             )
                           : (provider.isCapturing &&
-                                provider.capturedPhotos.length == index)
-                          ? const _SkeletonLoader()
-                          : Center(
-                              child: Icon(
-                                Icons.image_outlined,
-                                color: colorScheme.secondary.withValues(
-                                  alpha: 0.2,
+                                  provider.capturedPhotos.length == index)
+                              ? const _SkeletonLoader()
+                              : Center(
+                                  child: Icon(
+                                    Icons.image_outlined,
+                                    color: colorScheme.secondary.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    size: 48,
+                                  ),
                                 ),
-                                size: 48,
-                              ),
-                            ),
                     ),
                   ),
                 ),
@@ -132,8 +136,9 @@ class PhotoPreviewsPanel extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed:
-                provider.capturedPhotos.length >= provider.selectedPhotoCount
+            onPressed: (provider.capturedPhotos.length >=
+                        provider.selectedPhotoCount &&
+                    !provider.isCapturing)
                 ? () {
                     context.read<EditPhotoProvider>().initForPhotoCount(
                           provider.selectedPhotoCount,

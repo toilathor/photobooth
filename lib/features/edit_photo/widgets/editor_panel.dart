@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:my_photobooth/components/primary_button.dart';
 import 'package:my_photobooth/components/secondary_button.dart';
+import 'package:my_photobooth/features/edit_photo/widgets/video_recap_player.dart';
 import 'package:my_photobooth/models/frame_data.dart';
 
 import 'frame_selector.dart';
@@ -11,6 +12,8 @@ class EditorPanel extends StatelessWidget {
   final String selectedFrame;
   final Function(FrameData) onFrameSelected;
   final List<XFile> photos;
+  final XFile? videoRecapFile;
+  final List<Duration> photoTimestamps;
   final bool isProcessing;
 
   const EditorPanel({
@@ -19,6 +22,8 @@ class EditorPanel extends StatelessWidget {
     required this.selectedFrame,
     required this.onFrameSelected,
     required this.photos,
+    this.videoRecapFile,
+    this.photoTimestamps = const [],
     required this.isProcessing,
   });
 
@@ -58,6 +63,44 @@ class EditorPanel extends StatelessWidget {
                 onFrameSelected: onFrameSelected,
               ),
             ),
+            if (videoRecapFile != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: TextButton.icon(
+                  onPressed: () {
+                    final frameData = availableFrames.firstWhere(
+                      (f) => f.path == selectedFrame,
+                    );
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        backgroundColor: Colors.black,
+                        insetPadding: const EdgeInsets.all(24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: VideoRecapPlayer(
+                            videoFile: videoRecapFile!,
+                            frame: frameData,
+                            photoTimestamps: photoTimestamps,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.videocam_rounded),
+                  label: const Text('XEM VIDEO RECAP'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: colorScheme.secondary,
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Row(

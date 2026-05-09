@@ -28,6 +28,9 @@ class PhotoboothProvider extends ChangeNotifier {
   bool isMirrored = false;
   int currentCountdownValue = 0;
   int currentPhotoIndex = 0;
+  XFile? videoRecapFile;
+  List<Duration> photoTimestamps = [];
+  DateTime? videoStartTime;
 
   final List<int> photoCounts = [1, 3, 4];
   final List<int> countdowns = [3, 5, 10];
@@ -171,10 +174,24 @@ class PhotoboothProvider extends ChangeNotifier {
     isCapturing = true;
     isPreparing = true;
     capturedPhotos.clear();
+    videoRecapFile = null;
+    photoTimestamps.clear();
     currentPhotoIndex = 0;
     currentCountdownValue = 2; // 2 seconds to prepare
     notifyListeners();
     _playSound('chuan_bi.mp3');
+
+    // Start Video Recap if enabled
+    if (isVideoRecap &&
+        cameraController != null &&
+        cameraController!.value.isInitialized) {
+      try {
+        await cameraController!.startVideoRecording();
+        videoStartTime = DateTime.now();
+      } catch (e) {
+        debugPrint('Error starting video recording: $e');
+      }
+    }
 
     // Preparation Countdown
     Completer<void> prepCompleter = Completer<void>();
@@ -221,6 +238,12 @@ class PhotoboothProvider extends ChangeNotifier {
       // Capture
       try {
         _playSound('camera.mp3');
+        
+        // Record timestamp relative to video start
+        if (videoStartTime != null) {
+          photoTimestamps.add(DateTime.now().difference(videoStartTime!));
+        }
+
         XFile photo = await cameraController!.takePicture();
 
         if (isMirrored) {
@@ -236,6 +259,17 @@ class PhotoboothProvider extends ChangeNotifier {
       // Small delay between shots
       if (i < selectedPhotoCount - 1) {
         await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+
+    // Stop Video Recap if it was recording
+    if (isVideoRecap &&
+        cameraController != null &&
+        cameraController!.value.isRecordingVideo) {
+      try {
+        videoRecapFile = await cameraController!.stopVideoRecording();
+      } catch (e) {
+        debugPrint('Error stopping video recording: $e');
       }
     }
 

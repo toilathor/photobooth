@@ -43,6 +43,8 @@ class EditPhotoScreen extends StatelessWidget {
                           selectedFrame: editPhotoProvider.selectedFrame.path,
                           onFrameSelected: editPhotoProvider.setSelectedFrame,
                           photos: photoboothProvider.capturedPhotos,
+                          videoRecapFile: photoboothProvider.videoRecapFile,
+                          photoTimestamps: photoboothProvider.photoTimestamps,
                           isProcessing: editPhotoProvider.isProcessing,
                         ),
                       ],
