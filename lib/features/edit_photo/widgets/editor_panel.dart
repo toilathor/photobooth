@@ -24,6 +24,7 @@ class EditorPanel extends StatefulWidget {
   final double filterIntensity;
   final void Function(String) onFilterSelected;
   final void Function(double) onFilterIntensityChanged;
+  final VoidCallback? onQRRequested;
 
   const EditorPanel({
     super.key,
@@ -39,6 +40,7 @@ class EditorPanel extends StatefulWidget {
     required this.filterIntensity,
     required this.onFilterSelected,
     required this.onFilterIntensityChanged,
+    this.onQRRequested,
   });
 
   @override
@@ -186,17 +188,16 @@ class _EditorPanelState extends State<EditorPanel> {
               padding: const EdgeInsets.all(24.0),
               child: Row(
                 children: [
-                  // QR/Download Button
-                  Expanded(
-                    flex: 1,
-                    child: SecondaryButton(
-                      onTap: () {
-                        // TODO: Implement QR/Download logic
-                      },
-                      icon: Icons.qr_code_2_rounded,
+                  if (widget.onQRRequested != null) ...[
+                    Expanded(
+                      flex: 1,
+                      child: SecondaryButton(
+                        onTap: widget.onQRRequested!,
+                        icon: Icons.qr_code_2_rounded,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
+                    const SizedBox(width: 16),
+                  ],
                   // Print Button
                   Expanded(
                     flex: 3,

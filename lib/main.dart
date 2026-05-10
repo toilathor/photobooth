@@ -6,6 +6,7 @@ import 'package:my_photobooth/core/configs/theme_config.dart';
 import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
 import 'package:my_photobooth/features/photobooth/photobooth.screen.dart';
+import 'package:my_photobooth/services/storage_factory.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/components/language_switcher.dart';
 import 'package:my_photobooth/services/cache_service.dart';
@@ -18,6 +19,9 @@ Future<void> main() async {
 
   // Dọn dẹp cache khi khởi động
   await CacheService.clearCache();
+
+  // Khởi tạo Storage Service theo cấu hình (Personal: Google Drive, Commercial: None)
+  await StorageFactory.instance.init();
 
   runApp(
     TranslationProvider(

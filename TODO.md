@@ -53,3 +53,8 @@
     - [ ] Chia môi trường phát triển bản thương mại và bản cá nhân dùng trên tất cả các nền tảng.
 - [ ] Viết Unit Test cho logic tính toán vị trí slots trong Frame.
 - [ ] Tối ưu khổ giấy cho bản in một tấm (tiết kiệm giấy in nhiệt).
+
+anh_ban_in_final.jpg: Bản in (có thể 1 hoặc 2 dải tùy chọn, có lề giấy).
+anh_da_ghep_khung.jpg: Bản đơn (luôn luôn 1 dải, không lề giấy).
+video_recap_goc.mp4: Video gốc.
+video_recap_gan_khung.mp4

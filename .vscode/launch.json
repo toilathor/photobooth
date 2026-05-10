@@ -6,8 +6,8 @@
             "request": "launch",
             "type": "dart",
             "args": [
-                "-d",
-                "chrome"
+                "--web-port",
+                "5050"
             ]
         },
     ]

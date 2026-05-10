@@ -8,6 +8,8 @@ import 'package:my_photobooth/features/edit_photo/widgets/video_recap_player.dar
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/models/frame_data.dart';
 
+const double _perforationGap = 20.0;
+
 class PreviewPanel extends StatelessWidget {
   final List<XFile> photos;
   final FrameData selectedFrame;
@@ -20,6 +22,8 @@ class PreviewPanel extends StatelessWidget {
   final List<Duration> photoTimestamps;
   final String selectedFilter;
   final double filterIntensity;
+  final GlobalKey? stripKey;
+  final GlobalKey? paperKey;
 
   const PreviewPanel({
     super.key,
@@ -34,6 +38,8 @@ class PreviewPanel extends StatelessWidget {
     this.photoTimestamps = const [],
     required this.selectedFilter,
     required this.filterIntensity,
+    this.stripKey,
+    this.paperKey,
   });
 
   @override
@@ -125,41 +131,45 @@ class PreviewPanel extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: showPaperPreview
-                      ? _VirtualPaper(
-                          isLandscape: isLandscape,
-                          child: printTwoCopies
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(
-                                      fit: FlexFit.loose,
-                                      child: _PhotoStrip(
-                                        photos: photos,
-                                        frame: selectedFrame,
-                                        selectedFilter: selectedFilter,
-                                        filterIntensity: filterIntensity,
+                      ? RepaintBoundary(
+                          key: paperKey,
+                          child: _VirtualPaper(
+                            isLandscape: isLandscape,
+                            child: printTwoCopies
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        fit: FlexFit.loose,
+                                        child: _PhotoStrip(
+                                          photos: photos,
+                                          frame: selectedFrame,
+                                          selectedFilter: selectedFilter,
+                                          filterIntensity: filterIntensity,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      fit: FlexFit.loose,
-                                      child: _PhotoStrip(
-                                        photos: photos,
-                                        frame: selectedFrame,
-                                        selectedFilter: selectedFilter,
-                                        filterIntensity: filterIntensity,
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        fit: FlexFit.loose,
+                                        child: _PhotoStrip(
+                                          photos: photos,
+                                          frame: selectedFrame,
+                                          selectedFilter: selectedFilter,
+                                          filterIntensity: filterIntensity,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                              : _PhotoStrip(
-                                  photos: photos,
-                                  frame: selectedFrame,
-                                  selectedFilter: selectedFilter,
-                                  filterIntensity: filterIntensity,
-                                ),
+                                    ],
+                                  )
+                                : _PhotoStrip(
+                                    photos: photos,
+                                    frame: selectedFrame,
+                                    selectedFilter: selectedFilter,
+                                    filterIntensity: filterIntensity,
+                                  ),
+                          ),
                         )
                       : Container(
                           decoration: BoxDecoration(
@@ -171,44 +181,42 @@ class PreviewPanel extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Stack(
-                            children: [
-                              printTwoCopies
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          fit: FlexFit.loose,
-                                          child: _PhotoStrip(
-                                            photos: photos,
-                                            frame: selectedFrame,
-                                            selectedFilter: selectedFilter,
-                                            filterIntensity: filterIntensity,
-                                          ),
+                          child: RepaintBoundary(
+                            key: stripKey,
+                            child: printTwoCopies
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        fit: FlexFit.loose,
+                                        child: _PhotoStrip(
+                                          photos: photos,
+                                          frame: selectedFrame,
+                                          selectedFilter: selectedFilter,
+                                          filterIntensity: filterIntensity,
                                         ),
-                                        const SizedBox(width: 4),
-                                        Flexible(
-                                          fit: FlexFit.loose,
-                                          child: _PhotoStrip(
-                                            photos: photos,
-                                            frame: selectedFrame,
-                                            selectedFilter: selectedFilter,
-                                            filterIntensity: filterIntensity,
-                                          ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        fit: FlexFit.loose,
+                                        child: _PhotoStrip(
+                                          photos: photos,
+                                          frame: selectedFrame,
+                                          selectedFilter: selectedFilter,
+                                          filterIntensity: filterIntensity,
                                         ),
-                                      ],
-                                    )
-                                  : _PhotoStrip(
-                                      photos: photos,
-                                      frame: selectedFrame,
-                                      selectedFilter: selectedFilter,
-                                      filterIntensity: filterIntensity,
-                                    ),
-                            ],
+                                      ),
+                                    ],
+                                  )
+                                : _PhotoStrip(
+                                    photos: photos,
+                                    frame: selectedFrame,
+                                    selectedFilter: selectedFilter,
+                                    filterIntensity: filterIntensity,
+                                  ),
                           ),
                         ),
                 ),
@@ -361,26 +369,26 @@ class _VirtualPaper extends StatelessWidget {
             // Perforation Lines
             if (!isLandscape) ...[
               const Positioned(
-                top: 40,
+                top: _perforationGap,
                 left: 0,
                 right: 0,
                 child: _DashedLine(isVertical: false),
               ),
               const Positioned(
-                bottom: 40,
+                bottom: _perforationGap,
                 left: 0,
                 right: 0,
                 child: _DashedLine(isVertical: false),
               ),
             ] else ...[
               const Positioned(
-                left: 40,
+                left: _perforationGap,
                 top: 0,
                 bottom: 0,
                 child: _DashedLine(isVertical: true),
               ),
               const Positioned(
-                right: 40,
+                right: _perforationGap,
                 top: 0,
                 bottom: 0,
                 child: _DashedLine(isVertical: true),
@@ -389,45 +397,47 @@ class _VirtualPaper extends StatelessWidget {
             // The actual content (photo strips)
             Padding(
               padding: isLandscape
-                  ? const EdgeInsets.symmetric(horizontal: 45, vertical: 8)
-                  : const EdgeInsets.symmetric(vertical: 45, horizontal: 8),
+                  ? const EdgeInsets.symmetric(
+                      horizontal: _perforationGap + 4,
+                      vertical: 4,
+                    )
+                  : const EdgeInsets.symmetric(
+                      vertical: _perforationGap + 4,
+                      horizontal: 4,
+                    ),
               child: Center(child: child),
             ),
             // Paper size indicator (Placed in the perforation margin area)
             if (isLandscape)
               Positioned(
                 left: 8,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: RotatedBox(
-                    quarterTurns: 3,
-                    child: Text(
-                      'CANON KP-108IN (4x6") - ${t.preview.landscape}',
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black.withValues(alpha: 0.1),
-                        letterSpacing: 2,
-                      ),
+                top: 8,
+                right: 8,
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: Text(
+                    'CANON KP-108IN (4x6") - ${t.preview.landscape}',
+                    style: TextStyle(
+                      fontSize: 6,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black.withValues(alpha: 0.1),
+                      letterSpacing: 2,
                     ),
                   ),
                 ),
               )
             else
               Positioned(
-                bottom: 12,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Text(
-                    'CANON KP-108IN (4x6") - ${t.preview.portrait}',
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black.withValues(alpha: 0.1),
-                      letterSpacing: 2,
-                    ),
+                bottom: 8,
+                left: 8,
+                right: 8,
+                child: Text(
+                  'CANON KP-108IN (4x6") - ${t.preview.portrait}',
+                  style: TextStyle(
+                    fontSize: 6,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black.withValues(alpha: 0.1),
+                    letterSpacing: 2,
                   ),
                 ),
               ),
@@ -450,8 +460,8 @@ class _DashedLine extends StatelessWidget {
         30,
         (index) => Expanded(
           child: Container(
-            width: isVertical ? 1 : null,
-            height: isVertical ? null : 1,
+            width: isVertical ? 0.5 : null,
+            height: isVertical ? null : 0.5,
             margin: isVertical
                 ? const EdgeInsets.symmetric(vertical: 2)
                 : const EdgeInsets.symmetric(horizontal: 2),
@@ -482,7 +492,7 @@ class _PhotoStrip extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           color: Colors.black.withValues(alpha: 0.1),
-          width: 0.5,
+          width: 0.1,
           style: BorderStyle.solid,
         ),
       ),
@@ -504,7 +514,10 @@ class _PhotoStrip extends StatelessWidget {
                       height: frame.slots[i].height * scaleY,
                       child: ColorFiltered(
                         colorFilter: ColorFilter.matrix(
-                          FilterConfig.getFilterMatrix(selectedFilter, filterIntensity),
+                          FilterConfig.getFilterMatrix(
+                            selectedFilter,
+                            filterIntensity,
+                          ),
                         ),
                         child: kIsWeb
                             ? Image.network(photos[i].path, fit: BoxFit.cover)

@@ -14,29 +14,18 @@ class PhotoboothHeader extends StatelessWidget {
         children: [
           Text(
             t.header.title,
-            style:
-                GoogleFonts.pacifico(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.secondary,
-                ).copyWith(
-                  fontFamilyFallback: [
-                    'Apple Color Emoji',
-                    'Segoe UI Emoji',
-                    'Noto Color Emoji',
-                  ],
-                ),
+            style: GoogleFonts.pacifico(
+              fontSize: 36,
+              fontWeight: FontWeight.w700,
+              color: colorScheme.secondary,
+            ).copyWith(
+              fontFamilyFallback: [
+                'Apple Color Emoji',
+                'Segoe UI Emoji',
+                'Noto Color Emoji',
+              ],
+            ),
           ),
-          // const Gap(4),
-          // Text(
-          //   'TRĂM NĂM TÌNH VIÊN MÃN',
-          //   style: GoogleFonts.inter(
-          //     fontSize: 14,
-          //     fontWeight: FontWeight.w600,
-          //     color: colorScheme.onSurface,
-          //     letterSpacing: 6,
-          //   ),
-          // ),
         ],
       ),
     );

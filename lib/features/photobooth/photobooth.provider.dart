@@ -23,6 +23,7 @@ class PhotoboothProvider extends ChangeNotifier {
   int countdown = 3;
   List<XFile> capturedPhotos = [];
   bool isVideoRecap = true;
+  String? sessionId;
 
   bool isCapturing = false;
   bool isAutoCapturing = false;
@@ -84,6 +85,9 @@ class PhotoboothProvider extends ChangeNotifier {
   void setPhotoCountWithSelection(int count, List<XFile> selection) {
     selectedPhotoCount = count;
     capturedPhotos = List.from(selection);
+    if (capturedPhotos.isNotEmpty && sessionId == null) {
+      sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
+    }
     notifyListeners();
   }
 
@@ -174,6 +178,7 @@ class PhotoboothProvider extends ChangeNotifier {
     _shouldCancelCapture = false;
     capturedPhotos.clear();
     _videoService.reset();
+    sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
     currentPhotoIndex = 0;
     currentCountdownValue = 2; // 2 seconds to prepare
     notifyListeners();
@@ -329,6 +334,7 @@ class PhotoboothProvider extends ChangeNotifier {
     _playSound(AssetConfig.soundCamera);
 
     try {
+      sessionId ??= 'session_${DateTime.now().millisecondsSinceEpoch}';
       XFile photo = await cameraController!.takePicture();
       photo = await _applyMirrorEffect(photo);
       capturedPhotos.add(photo);

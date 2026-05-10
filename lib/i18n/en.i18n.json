@@ -62,5 +62,16 @@
       "pause": "Pause",
       "restart": "Restart"
     }
+  },
+  "google_drive": {
+    "uploading": "Uploading to Google Drive...",
+    "creating_recap": "Creating framed video recap...",
+    "success": "Uploaded successfully!",
+    "error": "Upload error: $error",
+    "qr_title": "SCAN TO DOWNLOAD",
+    "folder_print": "Print Photos",
+    "folder_framed": "Framed Photos",
+    "folder_video_framed": "Framed Videos",
+    "folder_video_full": "Raw Videos"
   }
 }

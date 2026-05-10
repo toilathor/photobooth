@@ -62,5 +62,16 @@
       "pause": "Tạm dừng",
       "restart": "Phát lại"
     }
+  },
+  "google_drive": {
+    "uploading": "Đang tải lên Google Drive...",
+    "creating_recap": "Đang tạo video recap gắn khung...",
+    "success": "Tải lên thành công!",
+    "error": "Lỗi khi tải lên: $error",
+    "qr_title": "QUÉT MÃ ĐỂ TẢI ẢNH",
+    "folder_print": "Ảnh in",
+    "folder_framed": "Ảnh frame",
+    "folder_video_framed": "Video frame",
+    "folder_video_full": "Video gốc"
   }
 }
