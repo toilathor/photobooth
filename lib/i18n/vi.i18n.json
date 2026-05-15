@@ -7,7 +7,8 @@
     "photoCount": "Số ảnh",
     "countdown": "Đếm Ngược",
     "seconds": "giây",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "mirror": "Gương"
   },
   "actions": {
     "manual": "Chụp tay",
@@ -66,6 +67,9 @@
   "google_drive": {
     "uploading": "Đang tải lên Google Drive...",
     "creating_recap": "Đang tạo video recap gắn khung...",
+    "preparing_data": "Đang chuẩn bị dữ liệu...",
+    "uploading_files": "Đang tải tệp $current/$total...",
+    "preparing": "ĐANG CHUẨN BỊ",
     "success": "Tải lên thành công!",
     "error": "Lỗi khi tải lên: $error",
     "qr_title": "QUÉT MÃ ĐỂ TẢI ẢNH",
@@ -73,5 +77,10 @@
     "folder_framed": "Ảnh frame",
     "folder_video_framed": "Video frame",
     "folder_video_full": "Video gốc"
+  },
+  "auth": {
+    "title": "XÁC THỰC TÀI KHOẢN",
+    "description": "Để đảm bảo ảnh được lưu trữ riêng tư và an toàn trên Google Drive của bạn.",
+    "back": "QUAY LẠI"
   }
 }

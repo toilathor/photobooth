@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:my_photobooth/components/photobooth_header.dart';
-import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
+import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:my_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
 import 'package:my_photobooth/features/photobooth/widgets/camera_preview_widget.dart';
 import 'package:my_photobooth/features/photobooth/widgets/photo_previews_panel.dart';

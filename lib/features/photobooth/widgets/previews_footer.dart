@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:my_photobooth/features/edit_photo/edit_photo.provider.dart';
-import 'package:my_photobooth/features/edit_photo/edit_photo.screen.dart';
-import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
+import 'package:my_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
+import 'package:my_photobooth/features/edit_photo/screens/edit_photo.screen.dart';
+import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 
 class PreviewsFooter extends StatelessWidget {
@@ -39,8 +39,13 @@ class PreviewsFooter extends StatelessWidget {
                         provider.selectedPhotoCount &&
                     !provider.isCapturing)
                 ? () {
-                    context.read<EditPhotoProvider>().initForPhotoCount(
-                      provider.selectedPhotoCount,
+                    context.read<EditPhotoProvider>().initWithPhotoboothData(
+                      photos: provider.capturedPhotos,
+                      photoCount: provider.selectedPhotoCount,
+                      isMirrored: provider.isMirrored,
+                      videoFile: provider.videoRecapFile,
+                      timestamps: provider.photoTimestamps,
+                      session: provider.sessionId,
                     );
                     Navigator.push(
                       context,

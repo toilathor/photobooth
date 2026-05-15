@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
+import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:provider/provider.dart';
 
 import 'photo_item_card.dart';
@@ -24,6 +24,7 @@ class PhotoPreviewsPanel extends StatelessWidget {
                       ? provider.capturedPhotos[index]
                       : null,
                   isCapturing: provider.isCapturing,
+                  isMirrored: provider.isMirrored,
                   onDelete: () => provider.removePhoto(index),
                   isNextCapture:
                       provider.isCapturing &&

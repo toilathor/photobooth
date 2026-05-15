@@ -286,6 +286,7 @@ class GoogleDriveService implements StorageService {
     if (lower.endsWith('.png')) return 'image/png';
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
     if (lower.endsWith('.mp4')) return 'video/mp4';
+    if (lower.endsWith('.webm')) return 'video/webm';
     return 'application/octet-stream';
   }
 }

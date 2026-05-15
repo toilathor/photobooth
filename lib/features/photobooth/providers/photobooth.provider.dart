@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:image/image.dart' as img;
 import 'package:my_photobooth/core/configs/app_config.dart';
 import 'package:my_photobooth/core/configs/asset_config.dart';
 import 'package:my_photobooth/helper/fullscreen_noop.dart'
@@ -18,6 +17,7 @@ class PhotoboothProvider extends ChangeNotifier {
   bool isFullscreen = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
   int _currentCameraIndex = 0;
+  bool isMirrored = false;
 
   int selectedPhotoCount = 4;
   int countdown = 3;
@@ -29,7 +29,6 @@ class PhotoboothProvider extends ChangeNotifier {
   bool isAutoCapturing = false;
   bool isPreparing = false;
   bool isSwitchingCamera = false;
-  bool isMirrored = false;
   int currentCountdownValue = 0;
   int currentPhotoIndex = 0;
 
@@ -67,8 +66,8 @@ class PhotoboothProvider extends ChangeNotifier {
         });
 
     // Listen for fullscreen changes (e.g. Esc key)
-    fullscreen.onFullscreenChangeWeb((value) {
-      isFullscreen = value;
+    fullscreen.onFullscreenChangeWeb((dynamic value) {
+      isFullscreen = value as bool;
       notifyListeners();
     });
   }
@@ -265,8 +264,6 @@ class PhotoboothProvider extends ChangeNotifier {
 
         XFile photo = await cameraController!.takePicture();
 
-        photo = await _applyMirrorEffect(photo);
-
         capturedPhotos.add(photo);
         notifyListeners();
       } catch (e) {
@@ -336,7 +333,6 @@ class PhotoboothProvider extends ChangeNotifier {
     try {
       sessionId ??= 'session_${DateTime.now().millisecondsSinceEpoch}';
       XFile photo = await cameraController!.takePicture();
-      photo = await _applyMirrorEffect(photo);
       capturedPhotos.add(photo);
     } catch (e) {
       debugPrint('Error taking photo: $e');
@@ -344,45 +340,6 @@ class PhotoboothProvider extends ChangeNotifier {
 
     isCapturing = false;
     notifyListeners();
-  }
-
-  Future<XFile> _applyMirrorEffect(XFile file) async {
-    if (!isMirrored) return file;
-
-    try {
-      final bytes = await file.readAsBytes();
-
-      final processedBytes = await compute(_mirrorImageTask, {
-        'bytes': bytes,
-        'isMirrored': isMirrored,
-      });
-
-      return XFile.fromData(
-        processedBytes,
-        name: file.name,
-        mimeType: 'image/jpeg',
-      );
-    } catch (e) {
-      debugPrint('Error processing mirror effect: $e');
-      return file;
-    }
-  }
-
-  /// Nhiệm vụ xử lý lật ảnh chạy trong Isolate để không làm treo UI.
-  static Uint8List _mirrorImageTask(Map<String, dynamic> params) {
-    final bytes = params['bytes'] as Uint8List;
-    final isMirrored = params['isMirrored'] as bool;
-
-    final image = img.decodeImage(bytes);
-    if (image == null) return bytes;
-
-    // Mirror image horizontally
-    img.Image processedImage = image;
-    if (isMirrored) {
-      processedImage = img.flipHorizontal(image);
-    }
-
-    return img.encodeJpg(processedImage);
   }
 
   void removePhoto(int index) {

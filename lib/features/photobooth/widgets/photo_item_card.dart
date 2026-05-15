@@ -1,7 +1,9 @@
 import 'dart:io' show File;
+
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
+
 import 'skeleton_loader.dart';
 
 class PhotoItemCard extends StatelessWidget {
@@ -9,6 +11,7 @@ class PhotoItemCard extends StatelessWidget {
   final bool isCapturing;
   final VoidCallback? onDelete;
   final bool isNextCapture;
+  final bool isMirrored;
 
   const PhotoItemCard({
     super.key,
@@ -16,6 +19,7 @@ class PhotoItemCard extends StatelessWidget {
     required this.isCapturing,
     this.onDelete,
     this.isNextCapture = false,
+    this.isMirrored = false,
   });
 
   @override
@@ -40,25 +44,29 @@ class PhotoItemCard extends StatelessWidget {
                     Positioned.fill(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: kIsWeb
-                            ? Image.network(
-                                photo!.path,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return const SkeletonLoader();
-                                },
-                              )
-                            : Image.file(
-                                File(photo!.path),
-                                fit: BoxFit.cover,
-                                frameBuilder: (context, child, frame, wasSync) {
-                                  if (wasSync) return child;
-                                  return frame != null
-                                      ? child
-                                      : const SkeletonLoader();
-                                },
-                              ),
+                        child: Transform.scale(
+                          scaleX: isMirrored ? -1 : 1,
+                          child: kIsWeb
+                              ? Image.network(
+                                  photo!.path,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, progress) {
+                                    if (progress == null) return child;
+                                    return const SkeletonLoader();
+                                  },
+                                )
+                              : Image.file(
+                                  File(photo!.path),
+                                  fit: BoxFit.cover,
+                                  frameBuilder:
+                                      (context, child, frame, wasSync) {
+                                        if (wasSync) return child;
+                                        return frame != null
+                                            ? child
+                                            : const SkeletonLoader();
+                                      },
+                                ),
+                        ),
                       ),
                     ),
                     Positioned(

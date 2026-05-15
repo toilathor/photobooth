@@ -3,7 +3,7 @@
  * Composites a session video into a photobooth frame and records the result.
  */
 
-window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson) {
+window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson, preferredMimeType, isMirrored) {
     const layoutData = JSON.parse(layoutDataJson);
     const { canvasWidth, canvasHeight, slots, timestamps, recapDuration } = layoutData;
     const durationSec = recapDuration || 2.0;
@@ -53,17 +53,24 @@ window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson) {
             const stream = canvas.captureStream(30);
             
             const mimeTypes = [
+                'video/mp4;codecs=avc1',
+                'video/mp4',
                 'video/webm;codecs=vp9,opus',
                 'video/webm;codecs=vp8,opus',
-                'video/webm',
-                'video/mp4'
+                'video/webm'
             ];
             
             let selectedMimeType = '';
-            for (const type of mimeTypes) {
-                if (MediaRecorder.isTypeSupported(type)) {
-                    selectedMimeType = type;
-                    break;
+            
+            // Prioritize preferred mime type if provided and supported
+            if (preferredMimeType && MediaRecorder.isTypeSupported(preferredMimeType)) {
+                selectedMimeType = preferredMimeType;
+            } else {
+                for (const type of mimeTypes) {
+                    if (MediaRecorder.isTypeSupported(type)) {
+                        selectedMimeType = type;
+                        break;
+                    }
                 }
             }
 
@@ -121,7 +128,16 @@ window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson) {
                         sy = (video.videoHeight - sh) / 2;
                     }
 
-                    ctx.drawImage(video, sx, sy, sw, sh, slot.x, slot.y, slot.w, slot.h);
+                    if (isMirrored) {
+                        ctx.save();
+                        // Di chuyển đến vị trí bên phải của ô, lật ngược trục X
+                        ctx.translate(slot.x + slot.w, slot.y);
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, slot.w, slot.h);
+                        ctx.restore();
+                    } else {
+                        ctx.drawImage(video, sx, sy, sw, sh, slot.x, slot.y, slot.w, slot.h);
+                    }
                     
                     if (video.currentTime >= vObj.endTime) {
                         vObj.isDone = true;
@@ -149,6 +165,72 @@ window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson) {
         } catch (error) {
             console.error("Export Error:", error);
             reject(error);
+        }
+    });
+};
+
+window.flipVideo = async function (videoUrl, isMirrored, preferredMimeType) {
+    if (!isMirrored) {
+        const response = await fetch(videoUrl);
+        return await response.blob();
+    }
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            const v = document.createElement('video');
+            v.crossOrigin = "anonymous";
+            v.muted = true;
+            v.src = videoUrl;
+            await new Promise((res) => { v.onloadedmetadata = res; });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = v.videoWidth;
+            canvas.height = v.videoHeight;
+            const ctx = canvas.getContext('2d');
+
+            const stream = canvas.captureStream(30);
+            const recorder = new MediaRecorder(stream, {
+                mimeType: preferredMimeType || 'video/webm',
+                videoBitsPerSecond: 8000000
+            });
+
+            const chunks = [];
+            recorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: recorder.mimeType });
+                resolve(blob);
+            };
+
+            const draw = () => {
+                if (v.ended || v.paused) {
+                    if (recorder.state === "recording") recorder.stop();
+                    return;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+                
+                if (recorder.state === "recording") {
+                    requestAnimationFrame(draw);
+                }
+            };
+
+            recorder.start();
+            v.play();
+            draw();
+
+            v.onended = () => {
+                if (recorder.state === "recording") recorder.stop();
+            };
+
+        } catch (e) {
+            reject(e);
         }
     });
 };

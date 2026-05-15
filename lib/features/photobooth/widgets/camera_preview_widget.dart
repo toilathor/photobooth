@@ -5,7 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_photobooth/core/configs/app_config.dart';
-import 'package:my_photobooth/features/photobooth/photobooth.provider.dart';
+import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 
@@ -36,12 +36,9 @@ class CameraPreviewWidget extends StatelessWidget {
             : Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Layer 1: Filtered & Mirrored Camera Preview
-                  Transform(
-                    alignment: Alignment.center,
-                    transform: provider.isMirrored
-                        ? Matrix4.rotationY(3.14159)
-                        : Matrix4.identity(),
+                  // Layer 1: Filtered Camera Preview
+                  Transform.scale(
+                    scaleX: provider.isMirrored ? -1 : 1,
                     child: CameraPreview(provider.cameraController!),
                   ),
 
@@ -66,7 +63,6 @@ class CameraPreviewWidget extends StatelessWidget {
                             icon: Icons.flip_rounded,
                             onTap: () => provider.toggleMirror(),
                             colorScheme: colorScheme,
-                            isActive: provider.isMirrored,
                           ),
                         ),
                         if (provider.isCapturing &&
@@ -217,13 +213,11 @@ class _ControlButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final ColorScheme colorScheme;
-  final bool isActive;
 
   const _ControlButton({
     required this.icon,
     required this.onTap,
     required this.colorScheme,
-    this.isActive = false,
   });
 
   @override
@@ -234,9 +228,7 @@ class _ControlButton extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
           decoration: BoxDecoration(
-            color: isActive
-                ? colorScheme.secondary.withValues(alpha: 0.9)
-                : colorScheme.secondary.withValues(alpha: 0.6),
+            color: colorScheme.secondary.withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -245,17 +237,10 @@ class _ControlButton extends StatelessWidget {
                 offset: const Offset(0, 4),
               ),
             ],
-            border: isActive
-                ? Border.all(color: Colors.white, width: 1.5)
-                : null,
           ),
           child: IconButton(
             onPressed: onTap,
-            icon: Icon(
-              icon,
-              color: isActive ? colorScheme.primary : Colors.white,
-              size: 28,
-            ),
+            icon: Icon(icon, color: Colors.white, size: 28),
             style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
           ),
         ),

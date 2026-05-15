@@ -4,5 +4,14 @@ import 'dart:js_interop';
 external JSPromise exportRecapVideo(
   JSString videoUrl,
   JSString frameUrl,
-  JSString layoutDataJson,
-);
+  JSString layoutDataJson, [
+  JSString? preferredMimeType,
+  JSBoolean? isMirrored,
+]);
+
+@JS()
+external JSPromise flipVideo(
+  JSString videoUrl,
+  JSBoolean isMirrored, [
+  JSString? preferredMimeType,
+]);

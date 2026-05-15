@@ -7,14 +7,23 @@ import 'package:my_photobooth/core/js/video_exporter_js.dart' as js_bridge;
 import 'package:my_photobooth/models/frame_data.dart';
 import 'package:web/web.dart' as web;
 
+class FramedVideoResult {
+  final Uint8List bytes;
+  final String mimeType;
+
+  FramedVideoResult({required this.bytes, required this.mimeType});
+}
+
 class VideoRecapService {
   /// Xuất video recap đã được gắn vào khung (frame).
   /// Trả về bytes của video kết quả hoặc null nếu có lỗi.
-  static Future<Uint8List?> exportFramedVideo({
+  static Future<FramedVideoResult?> exportFramedVideo({
     required String videoUrl,
     required FrameData frame,
     required List<Duration> timestamps,
     required double recapDurationSeconds,
+    String? preferredMimeType,
+    bool isMirrored = false,
   }) async {
     String? frameBlobUrl;
     try {
@@ -22,7 +31,9 @@ class VideoRecapService {
       final ByteData frameByteData = await rootBundle.load(frame.path);
       final Uint8List frameBytes = frameByteData.buffer.asUint8List();
       final web.Blob frameBlob = web.Blob(
-          [frameBytes.toJS].toJS, web.BlobPropertyBag(type: 'image/png'),);
+        [frameBytes.toJS].toJS,
+        web.BlobPropertyBag(type: 'image/png'),
+      );
       frameBlobUrl = web.URL.createObjectURL(frameBlob);
 
       // 2. Chuẩn bị dữ liệu layout
@@ -48,6 +59,8 @@ class VideoRecapService {
         videoUrl.toJS,
         frameBlobUrl.toJS,
         jsonEncode(layoutData).toJS,
+        preferredMimeType?.toJS,
+        isMirrored.toJS,
       );
 
       final JSAny? result = await promise.toDart;
@@ -57,7 +70,10 @@ class VideoRecapService {
 
       // 4. Chuyển đổi Blob kết quả thành Uint8List
       final JSArrayBuffer arrayBuffer = await videoBlob.arrayBuffer().toDart;
-      return arrayBuffer.toDart.asUint8List();
+      return FramedVideoResult(
+        bytes: arrayBuffer.toDart.asUint8List(),
+        mimeType: videoBlob.type,
+      );
     } catch (e) {
       if (kDebugMode) {
         print('Error exporting framed video recap: $e');
@@ -68,6 +84,37 @@ class VideoRecapService {
       if (frameBlobUrl != null) {
         web.URL.revokeObjectURL(frameBlobUrl);
       }
+    }
+  }
+
+  /// Lật video (flip) theo chiều ngang.
+  static Future<FramedVideoResult?> flipVideo({
+    required String videoUrl,
+    required bool isMirrored,
+    String? preferredMimeType,
+  }) async {
+    try {
+      final JSPromise promise = js_bridge.flipVideo(
+        videoUrl.toJS,
+        isMirrored.toJS,
+        preferredMimeType?.toJS,
+      );
+
+      final JSAny? result = await promise.toDart;
+      if (result == null) return null;
+
+      final web.Blob videoBlob = result as web.Blob;
+      final JSArrayBuffer arrayBuffer = await videoBlob.arrayBuffer().toDart;
+
+      return FramedVideoResult(
+        bytes: arrayBuffer.toDart.asUint8List(),
+        mimeType: videoBlob.type,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error flipping raw video: $e');
+      }
+      return null;
     }
   }
 }

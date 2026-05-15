@@ -12,6 +12,11 @@
     - [x] Tối ưu hiển thị Video lấp đầy ô trống (BoxFit.cover).
     - [x] Giao diện Premium Glassmorphism với đầy đủ điều khiển.
     - [x] Mặc định bật tính năng quay Video Recap.
+    - [x] Sửa video controller trong preview recap.
+- [x] **Mirror Mode**: Tính năng lật gương cho Camera, Ảnh chụp và Video Recap (đồng bộ trên mọi nền tảng).
+- [x] **Sharing (Chia sẻ)**:
+    - [x] Tích hợp Google Drive/Photos API để lưu trữ đám mây.
+    - [x] Tạo QR Code để người dùng quét và tải ảnh/video về điện thoại.
 - [x] **UX Improvements**:
     - [x] Vô hiệu hóa (Disable) các nút khi đang chụp tự động, giữ nguyên khi chụp tay để tránh flicker.
     - [x] Thêm tính năng HỦY chụp tự động (Cancel Auto Capture).
@@ -28,6 +33,7 @@
     - [x] Chuyển đổi các logic xử lý Video sang một Service riêng biệt.
     - [x] Triển khai đa ngôn ngữ (Internationalization - i18n).
     - [x] Xử lý Cache (ảnh/video tạm) để dọn dẹp dung lượng sau mỗi phiên.
+    - [x] Tối ưu khổ giấy cho bản in một tấm (tiết kiệm giấy in nhiệt).
 - [x] **Features**:
     - [x] Bộ lọc màu (Filters) nâng cao, tự động sinh từ package colorfilter_generator.
 
@@ -35,26 +41,18 @@
 - [ ] **Tính năng Frame & Content**:
     - [ ] Hệ thống Frame động lấy dữ liệu từ Google Drive.
     - [ ] Tính năng cho phép người dùng đóng góp Frame mới.
+    - [ ] Cho phép zoom trong màn hình edit trong preview panel
 - [ ] **Cộng đồng (Community)**:
     - [ ] Trang cộng đồng hiển thị các ảnh mẫu người dùng đã chia sẻ để truyền cảm hứng.
-- [ ] **Âm thanh (Audio Settings)**:
-    - [ ] Thêm nút bật/tắt âm thanh đếm ngược và âm thanh hướng dẫn.
 - [ ] **Lệnh in thực tế (Real Printing)**: Kết nối với máy in Canon Selphy hoặc máy in nhiệt qua AirPrint/IPP.
 - [ ] **Tính năng chỉnh sửa nâng cao**:
     - [ ] Thêm sticker/emoji vào ảnh.
 - [ ] **Chia sẻ (Sharing)**:
-    - [ ] Tạo QR Code để người dùng quét và tải ảnh/video về điện thoại.
     - [ ] Tích hợp QR Code trực tiếp lên bản in (giúp tải file gốc/video recap).
-    - [ ] Tích hợp Google Drive/Photos API để lưu trữ đám mây.
 
 ## 🛠 Bảo trì (Maintenance)
 - [ ] **Refactor & Config**:
 - [ ] **Hệ thống & Hiệu năng**:
     - [ ] Chia môi trường phát triển bản thương mại và bản cá nhân dùng trên tất cả các nền tảng.
 - [ ] Viết Unit Test cho logic tính toán vị trí slots trong Frame.
-- [ ] Tối ưu khổ giấy cho bản in một tấm (tiết kiệm giấy in nhiệt).
-
-anh_ban_in_final.jpg: Bản in (có thể 1 hoặc 2 dải tùy chọn, có lề giấy).
-anh_da_ghep_khung.jpg: Bản đơn (luôn luôn 1 dải, không lề giấy).
-video_recap_goc.mp4: Video gốc.
-video_recap_gan_khung.mp4
+- [ ] Tối ưu hoá vòng đời màn chụp

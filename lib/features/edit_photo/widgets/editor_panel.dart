@@ -7,7 +7,7 @@ import 'package:my_photobooth/components/secondary_button.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/models/frame_data.dart';
 
-import '../../../components/filter_selector.dart';
+import 'package:my_photobooth/components/filter_selector.dart';
 import 'frame_selector.dart';
 
 class EditorPanel extends StatefulWidget {

@@ -15,12 +15,14 @@ class VideoRecapPlayer extends StatefulWidget {
   final XFile videoFile;
   final FrameData frame;
   final List<Duration> photoTimestamps;
+  final bool isMirrored;
 
   const VideoRecapPlayer({
     super.key,
     required this.videoFile,
     required this.frame,
     required this.photoTimestamps,
+    this.isMirrored = false,
   });
 
   @override
@@ -29,6 +31,7 @@ class VideoRecapPlayer extends StatefulWidget {
 
 class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   RecapViewMode _viewMode = RecapViewMode.frame;
+  bool _isPlaying = true;
 
   // Controller for full video
   late VideoPlayerController _fullController;
@@ -46,9 +49,10 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   }
 
   Future<void> _initializeFullPlayer() async {
+    final videoPath = widget.videoFile.path;
     _fullController = kIsWeb
-        ? VideoPlayerController.networkUrl(Uri.parse(widget.videoFile.path))
-        : VideoPlayerController.file(File(widget.videoFile.path));
+        ? VideoPlayerController.networkUrl(Uri.parse(videoPath))
+        : VideoPlayerController.file(File(videoPath));
 
     try {
       await _fullController.initialize();
@@ -56,7 +60,9 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       await _fullController.setVolume(0); // Always mute
       if (mounted) {
         setState(() => _fullInitialized = true);
-        _fullController.play();
+        if (_isPlaying && _viewMode == RecapViewMode.full) {
+          _fullController.play();
+        }
       }
     } catch (e) {
       debugPrint('Error initializing full player: $e');
@@ -64,10 +70,14 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   }
 
   Future<void> _initializeSlotPlayers() async {
-    for (int i = 0; i < widget.frame.slots.length; i++) {
+    final videoPath = widget.videoFile.path;
+    final timestamps = widget.photoTimestamps;
+    final slots = widget.frame.slots;
+
+    for (int i = 0; i < slots.length; i++) {
       final controller = kIsWeb
-          ? VideoPlayerController.networkUrl(Uri.parse(widget.videoFile.path))
-          : VideoPlayerController.file(File(widget.videoFile.path));
+          ? VideoPlayerController.networkUrl(Uri.parse(videoPath))
+          : VideoPlayerController.file(File(videoPath));
 
       _slotControllers.add(controller);
       _slotsInitialized.add(false);
@@ -76,8 +86,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
         await controller.initialize();
 
         // Logic for clip loop
-        final endTime = i < widget.photoTimestamps.length
-            ? widget.photoTimestamps[i]
+        final endTime = i < timestamps.length
+            ? timestamps[i]
             : controller.value.duration;
         final startTime = endTime > AppConfig.recapClipDuration
             ? endTime - AppConfig.recapClipDuration
@@ -94,12 +104,58 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
 
         if (mounted) {
           setState(() => _slotsInitialized[i] = true);
-          controller.play();
+          if (_isPlaying && _viewMode == RecapViewMode.frame) {
+            controller.play();
+          }
         }
       } catch (e) {
         debugPrint('Error initializing slot $i player: $e');
       }
     }
+  }
+
+  void _togglePlayback() {
+    setState(() {
+      _isPlaying = !_isPlaying;
+      if (_viewMode == RecapViewMode.full) {
+        if (_isPlaying) {
+          _fullController.play();
+        } else {
+          _fullController.pause();
+        }
+      } else {
+        for (var controller in _slotControllers) {
+          if (_isPlaying) {
+            controller.play();
+          } else {
+            controller.pause();
+          }
+        }
+      }
+    });
+  }
+
+  void _restartPlayback() {
+    setState(() {
+      _isPlaying = true;
+      if (_viewMode == RecapViewMode.full) {
+        _fullController.seekTo(Duration.zero);
+        _fullController.play();
+      } else {
+        final timestamps = widget.photoTimestamps;
+        for (int i = 0; i < _slotControllers.length; i++) {
+          final endTime = i < timestamps.length
+              ? timestamps[i]
+              : _slotControllers[i].value.duration;
+          final startTime = endTime > AppConfig.recapClipDuration
+              ? endTime - AppConfig.recapClipDuration
+              : Duration.zero;
+
+          _slotControllers[i].seekTo(startTime);
+          _slotControllers[i].play();
+        }
+      }
+    });
   }
 
   @override
@@ -227,12 +283,12 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                 for (var controller in _slotControllers) {
                   controller.pause();
                 }
-                if (_fullInitialized) _fullController.play();
+                if (_fullInitialized && _isPlaying) _fullController.play();
               } else {
                 // Pause full player when showing frame slots
                 _fullController.pause();
                 for (var controller in _slotControllers) {
-                  controller.play();
+                  if (_isPlaying) controller.play();
                 }
               }
             },
@@ -252,9 +308,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   }
 
   Widget _buildBottomControls(BuildContext context) {
-    if (_viewMode != RecapViewMode.full) {
-      return const Gap(32); // Keep some padding at the bottom
-    }
+    // Show controls in both modes now
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -268,7 +322,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_fullInitialized)
+          if (_viewMode == RecapViewMode.full && _fullInitialized)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _VideoProgressBar(controller: _fullController),
@@ -278,29 +332,19 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
             children: [
               // Playback Controls
               _ControlButton(
-                icon: _fullController.value.isPlaying
+                icon: _isPlaying
                     ? Icons.pause_rounded
                     : Icons.play_arrow_rounded,
-                label: _fullController.value.isPlaying
+                label: _isPlaying
                     ? t.video_recap.controls.pause
                     : t.video_recap.controls.play,
-                onPressed: () {
-                  setState(() {
-                    _fullController.value.isPlaying
-                        ? _fullController.pause()
-                        : _fullController.play();
-                  });
-                },
+                onPressed: _togglePlayback,
               ),
               const Gap(16),
               _ControlButton(
                 icon: Icons.replay_rounded,
                 label: t.video_recap.controls.restart,
-                onPressed: () {
-                  _fullController.seekTo(Duration.zero);
-                  _fullController.play();
-                  setState(() {});
-                },
+                onPressed: _restartPlayback,
               ),
             ],
           ),
@@ -329,7 +373,10 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       clipBehavior: Clip.antiAlias,
       child: AspectRatio(
         aspectRatio: _fullController.value.aspectRatio,
-        child: VideoPlayer(_fullController),
+        child: Transform.scale(
+          scaleX: widget.isMirrored == kIsWeb ? 1 : -1,
+          child: VideoPlayer(_fullController),
+        ),
       ),
     );
   }
@@ -351,18 +398,19 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
         aspectRatio: widget.frame.size.width / widget.frame.size.height,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final scaleX = constraints.maxWidth / widget.frame.size.width;
-            final scaleY = constraints.maxHeight / widget.frame.size.height;
+            final frame = widget.frame;
+            final scaleX = constraints.maxWidth / frame.size.width;
+            final scaleY = constraints.maxHeight / frame.size.height;
 
             return Stack(
               children: [
                 // Slot Video Players
-                for (int i = 0; i < widget.frame.slots.length; i++)
+                for (int i = 0; i < frame.slots.length; i++)
                   Positioned(
-                    left: widget.frame.slots[i].left * scaleX,
-                    top: widget.frame.slots[i].top * scaleY,
-                    width: widget.frame.slots[i].width * scaleX,
-                    height: widget.frame.slots[i].height * scaleY,
+                    left: frame.slots[i].left * scaleX,
+                    top: frame.slots[i].top * scaleY,
+                    width: frame.slots[i].width * scaleX,
+                    height: frame.slots[i].height * scaleY,
                     child: Container(
                       color: Colors.black,
                       child:
@@ -373,7 +421,12 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                                 child: SizedBox(
                                   width: _slotControllers[i].value.size.width,
                                   height: _slotControllers[i].value.size.height,
-                                  child: VideoPlayer(_slotControllers[i]),
+                                  child: Transform.scale(
+                                    scaleX: widget.isMirrored == kIsWeb
+                                        ? 1
+                                        : -1,
+                                    child: VideoPlayer(_slotControllers[i]),
+                                  ),
                                 ),
                               ),
                             )
@@ -385,7 +438,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                 // Frame Overlay
                 Positioned.fill(
                   child: IgnorePointer(
-                    child: Image.asset(widget.frame.path, fit: BoxFit.fill),
+                    child: Image.asset(frame.path, fit: BoxFit.fill),
                   ),
                 ),
               ],

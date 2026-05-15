@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +9,13 @@ import 'package:my_photobooth/i18n/strings.g.dart';
 class PhotoSelectionDialog extends StatefulWidget {
   final List<XFile> photos;
   final int targetCount;
+  final bool isMirrored;
 
   const PhotoSelectionDialog({
     super.key,
     required this.photos,
     required this.targetCount,
+    this.isMirrored = false,
   });
 
   @override
@@ -66,12 +69,15 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
                         Positioned.fill(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: kIsWeb
-                                ? Image.network(photo.path, fit: BoxFit.cover)
-                                : Image.file(
-                                    File(photo.path),
-                                    fit: BoxFit.cover,
-                                  ),
+                            child: Transform.scale(
+                              scaleX: widget.isMirrored ? -1 : 1,
+                              child: kIsWeb
+                                  ? Image.network(photo.path, fit: BoxFit.cover)
+                                  : Image.file(
+                                      File(photo.path),
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
                           ),
                         ),
                         if (isSelected)

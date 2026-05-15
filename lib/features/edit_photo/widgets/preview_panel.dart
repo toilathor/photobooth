@@ -4,9 +4,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:my_photobooth/core/configs/filter_config.dart';
-import 'package:my_photobooth/features/edit_photo/widgets/video_recap_player.dart';
+import 'video_recap_player.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/models/frame_data.dart';
+import 'package:screenshot/screenshot.dart';
 
 const double _perforationGap = 20.0;
 
@@ -22,8 +23,9 @@ class PreviewPanel extends StatelessWidget {
   final List<Duration> photoTimestamps;
   final String selectedFilter;
   final double filterIntensity;
-  final GlobalKey? stripKey;
-  final GlobalKey? paperKey;
+  final bool isMirrored;
+  final ScreenshotController? stripController;
+  final ScreenshotController? paperController;
 
   const PreviewPanel({
     super.key,
@@ -38,8 +40,9 @@ class PreviewPanel extends StatelessWidget {
     this.photoTimestamps = const [],
     required this.selectedFilter,
     required this.filterIntensity,
-    this.stripKey,
-    this.paperKey,
+    required this.isMirrored,
+    this.stripController,
+    this.paperController,
   });
 
   @override
@@ -90,6 +93,7 @@ class PreviewPanel extends StatelessWidget {
                       videoFile: videoRecapFile!,
                       frame: selectedFrame,
                       photoTimestamps: photoTimestamps,
+                      isMirrored: isMirrored,
                     ),
                   ],
                   const Spacer(),
@@ -131,9 +135,9 @@ class PreviewPanel extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: showPaperPreview
-                      ? RepaintBoundary(
-                          key: paperKey,
-                          child: _VirtualPaper(
+                      ? Screenshot(
+                          controller: paperController ?? ScreenshotController(),
+                          child: VirtualPaper(
                             isLandscape: isLandscape,
                             child: printTwoCopies
                                 ? Row(
@@ -144,30 +148,33 @@ class PreviewPanel extends StatelessWidget {
                                     children: [
                                       Flexible(
                                         fit: FlexFit.loose,
-                                        child: _PhotoStrip(
+                                        child: PhotoStrip(
                                           photos: photos,
                                           frame: selectedFrame,
                                           selectedFilter: selectedFilter,
                                           filterIntensity: filterIntensity,
+                                          isMirrored: isMirrored,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
                                       Flexible(
                                         fit: FlexFit.loose,
-                                        child: _PhotoStrip(
+                                        child: PhotoStrip(
                                           photos: photos,
                                           frame: selectedFrame,
                                           selectedFilter: selectedFilter,
                                           filterIntensity: filterIntensity,
+                                          isMirrored: isMirrored,
                                         ),
                                       ),
                                     ],
                                   )
-                                : _PhotoStrip(
+                                : PhotoStrip(
                                     photos: photos,
                                     frame: selectedFrame,
                                     selectedFilter: selectedFilter,
                                     filterIntensity: filterIntensity,
+                                    isMirrored: isMirrored,
                                   ),
                           ),
                         )
@@ -181,8 +188,9 @@ class PreviewPanel extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: RepaintBoundary(
-                            key: stripKey,
+                          child: Screenshot(
+                            controller:
+                                stripController ?? ScreenshotController(),
                             child: printTwoCopies
                                 ? Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -192,30 +200,33 @@ class PreviewPanel extends StatelessWidget {
                                     children: [
                                       Flexible(
                                         fit: FlexFit.loose,
-                                        child: _PhotoStrip(
+                                        child: PhotoStrip(
                                           photos: photos,
                                           frame: selectedFrame,
                                           selectedFilter: selectedFilter,
                                           filterIntensity: filterIntensity,
+                                          isMirrored: isMirrored,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
                                       Flexible(
                                         fit: FlexFit.loose,
-                                        child: _PhotoStrip(
+                                        child: PhotoStrip(
                                           photos: photos,
                                           frame: selectedFrame,
                                           selectedFilter: selectedFilter,
                                           filterIntensity: filterIntensity,
+                                          isMirrored: isMirrored,
                                         ),
                                       ),
                                     ],
                                   )
-                                : _PhotoStrip(
+                                : PhotoStrip(
                                     photos: photos,
                                     frame: selectedFrame,
                                     selectedFilter: selectedFilter,
                                     filterIntensity: filterIntensity,
+                                    isMirrored: isMirrored,
                                   ),
                           ),
                         ),
@@ -339,11 +350,15 @@ class _ExpressiveButton extends StatelessWidget {
   }
 }
 
-class _VirtualPaper extends StatelessWidget {
+class VirtualPaper extends StatelessWidget {
   final Widget child;
   final bool isLandscape;
 
-  const _VirtualPaper({required this.child, required this.isLandscape});
+  const VirtualPaper({
+    super.key,
+    required this.child,
+    required this.isLandscape,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -473,17 +488,20 @@ class _DashedLine extends StatelessWidget {
   }
 }
 
-class _PhotoStrip extends StatelessWidget {
+class PhotoStrip extends StatelessWidget {
   final List<XFile> photos;
   final FrameData frame;
   final String selectedFilter;
   final double filterIntensity;
+  final bool isMirrored;
 
-  const _PhotoStrip({
+  const PhotoStrip({
+    super.key,
     required this.photos,
     required this.frame,
     required this.selectedFilter,
     required this.filterIntensity,
+    required this.isMirrored,
   });
 
   @override
@@ -519,12 +537,15 @@ class _PhotoStrip extends StatelessWidget {
                             filterIntensity,
                           ),
                         ),
-                        child: kIsWeb
-                            ? Image.network(photos[i].path, fit: BoxFit.cover)
-                            : Image.file(
-                                File(photos[i].path),
-                                fit: BoxFit.cover,
-                              ),
+                        child: Transform.scale(
+                          scaleX: isMirrored ? -1 : 1,
+                          child: kIsWeb
+                              ? Image.network(photos[i].path, fit: BoxFit.cover)
+                              : Image.file(
+                                  File(photos[i].path),
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
                       ),
                     ),
                 Positioned.fill(
@@ -545,11 +566,13 @@ class _CompactVideoRecapButton extends StatelessWidget {
   final XFile videoFile;
   final FrameData frame;
   final List<Duration> photoTimestamps;
+  final bool isMirrored;
 
   const _CompactVideoRecapButton({
     required this.videoFile,
     required this.frame,
     required this.photoTimestamps,
+    required this.isMirrored,
   });
 
   @override
@@ -591,6 +614,7 @@ class _CompactVideoRecapButton extends StatelessWidget {
                       videoFile: videoFile,
                       frame: frame,
                       photoTimestamps: photoTimestamps,
+                      isMirrored: isMirrored,
                     ),
                   ),
                 ),

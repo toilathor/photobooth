@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 import 'package:google_sign_in_web/google_sign_in_web.dart' as web;
+import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:my_photobooth/services/storage_factory.dart';
 
 class GoogleSignInWebButton extends StatefulWidget {
   const GoogleSignInWebButton({super.key});
@@ -62,11 +66,51 @@ void showWebLoginDialog(
   BuildContext context, {
   required VoidCallback onLoginSuccess,
 }) {
-  final colorScheme = Theme.of(context).colorScheme;
-
   showDialog<void>(
     context: context,
-    builder: (context) => Dialog(
+    barrierDismissible: false,
+    builder: (context) =>
+        _WebLoginDialogContent(onLoginSuccess: onLoginSuccess),
+  );
+}
+
+class _WebLoginDialogContent extends StatefulWidget {
+  final VoidCallback onLoginSuccess;
+
+  const _WebLoginDialogContent({required this.onLoginSuccess});
+
+  @override
+  State<_WebLoginDialogContent> createState() => __WebLoginDialogContentState();
+}
+
+class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
+  StreamSubscription<dynamic>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = StorageFactory.instance.onCurrentUserChanged.listen((user) {
+      if (user != null) {
+        // Đăng nhập thành công
+        if (mounted) {
+          Navigator.pop(context);
+          widget.onLoginSuccess();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
         width: 380,
@@ -103,7 +147,7 @@ void showWebLoginDialog(
             ),
             const Gap(32),
             Text(
-              'XÁC THỰC TÀI KHOẢN',
+              t.auth.title,
               style: GoogleFonts.plusJakartaSans(
                 color: colorScheme.secondary,
                 fontSize: 16,
@@ -116,7 +160,7 @@ void showWebLoginDialog(
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'Để đảm bảo ảnh được lưu trữ riêng tư và an toàn trên Google Drive của bạn.',
+                t.auth.description,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -132,7 +176,7 @@ void showWebLoginDialog(
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'QUAY LẠI',
+                t.auth.back,
                 style: GoogleFonts.plusJakartaSans(
                   color: colorScheme.onSurface.withValues(alpha: 0.3),
                   fontSize: 12,
@@ -145,6 +189,6 @@ void showWebLoginDialog(
           ],
         ),
       ),
-    ),
-  );
+    );
+  }
 }
