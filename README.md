@@ -1,17 +1,17 @@
 # my_photobooth
 
-A new Flutter project.
+# Build Web 
+flutter build web --base-href "/photobooth/"
 
-## Getting Started
+Copy build/web to somewhere else
 
-This project is a starting point for a Flutter application.
+```sh
+# if not exists gh-pages
+git switch --orphan gh-pages
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# photobooth
+# copy build/web to current directory
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/toilathor/photobooth.git
+git push -u origin gh-pages
+```

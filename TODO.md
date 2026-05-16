@@ -55,4 +55,3 @@
 - [ ] **Hệ thống & Hiệu năng**:
     - [ ] Chia môi trường phát triển bản thương mại và bản cá nhân dùng trên tất cả các nền tảng.
 - [ ] Viết Unit Test cho logic tính toán vị trí slots trong Frame.
-- [ ] Tối ưu hoá vòng đời màn chụp
