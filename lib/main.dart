@@ -1,16 +1,17 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:my_photobooth/components/language_switcher.dart';
 import 'package:my_photobooth/core/configs/app_config.dart';
 import 'package:my_photobooth/core/configs/theme_config.dart';
 import 'package:my_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:my_photobooth/features/photobooth/screens/photobooth.screen.dart';
-import 'package:my_photobooth/services/storage_factory.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/components/language_switcher.dart';
 import 'package:my_photobooth/services/cache_service.dart';
+import 'package:my_photobooth/services/storage_factory.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,17 +50,27 @@ class PhotoboothApp extends StatelessWidget {
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
-        return Stack(
-          children: [
-            if (child != null) child,
-            const Positioned(
-              top: 0,
-              left: 0,
-              child: Material(
-                color: Colors.transparent,
-                child: LanguageSwitcher(),
-              ),
-            ),
+        final bool isDesktop = MediaQuery.of(context).size.width >= 850;
+        return ResponsiveBreakpoints.builder(
+          child: Stack(
+            children: [
+              if (child != null) child,
+              if (isDesktop)
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: LanguageSwitcher(),
+                  ),
+                ),
+            ],
+          ),
+          breakpoints: [
+            const Breakpoint(start: 0, end: 450, name: MOBILE),
+            const Breakpoint(start: 451, end: 850, name: TABLET),
+            const Breakpoint(start: 851, end: 1920, name: DESKTOP),
+            const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
           ],
         );
       },

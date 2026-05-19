@@ -43,7 +43,10 @@ class PreviewPanel extends StatelessWidget {
     required this.isMirrored,
     this.stripController,
     this.paperController,
+    this.isMobile = false,
   });
+
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
@@ -55,85 +58,153 @@ class PreviewPanel extends StatelessWidget {
     // For our specific frames: Strips are ~0.33 (Portrait), frame1 is ~0.77 (Landscape)
     final bool isLandscape = frameAspectRatio > 0.5;
 
-    return Expanded(
-      flex: 2,
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.onSurface.withValues(alpha: 0.02),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: colorScheme.secondary.withValues(alpha: 0.05),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.onSurface.withValues(alpha: 0.02),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.secondary.withValues(alpha: 0.05),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.visibility_outlined,
-                    size: 18,
-                    color: colorScheme.secondary.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    t.preview.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      letterSpacing: 2,
-                      color: colorScheme.secondary,
-                    ),
-                  ),
-                  if (videoRecapFile != null) ...[
-                    const SizedBox(width: 12),
-                    _CompactVideoRecapButton(
-                      videoFile: videoRecapFile!,
-                      frame: selectedFrame,
-                      photoTimestamps: photoTimestamps,
-                      isMirrored: isMirrored,
-                    ),
-                  ],
-                  const Spacer(),
-                  // Material 3 Expressive-style Button Group
-                  _ExpressiveButtonGroup(
-                    selectedIndex: showPaperPreview ? 1 : 0,
-                    onChanged: (index) => onTogglePaperPreview(index == 1),
-                    items: [
-                      _ExpressiveItemData(
-                        label: t.preview.edit_mode,
-                        icon: Icons.edit_outlined,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: isMobile
+                ? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0)
+                : const EdgeInsets.all(24.0),
+            child: isMobile
+                ? Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.visibility_outlined,
+                            size: 18,
+                            color: colorScheme.secondary.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            t.preview.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              letterSpacing: 2,
+                              color: colorScheme.secondary,
+                            ),
+                          ),
+                          if (videoRecapFile != null) ...[
+                            const SizedBox(width: 12),
+                            _CompactVideoRecapButton(
+                              videoFile: videoRecapFile!,
+                              frame: selectedFrame,
+                              photoTimestamps: photoTimestamps,
+                              isMirrored: isMirrored,
+                            ),
+                          ],
+                        ],
                       ),
-                      _ExpressiveItemData(
-                        label: t.preview.print_mode,
-                        icon: Icons.local_printshop_outlined,
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _ExpressiveButtonGroup(
+                            selectedIndex: showPaperPreview ? 1 : 0,
+                            onChanged: (index) => onTogglePaperPreview(index == 1),
+                            items: [
+                              _ExpressiveItemData(
+                                label: t.preview.edit_mode,
+                                icon: Icons.edit_outlined,
+                              ),
+                              _ExpressiveItemData(
+                                label: t.preview.print_mode,
+                                icon: Icons.local_printshop_outlined,
+                              ),
+                            ],
+                          ),
+                          _ExpressiveButtonGroup(
+                            selectedIndex: printTwoCopies ? 1 : 0,
+                            onChanged: (index) => onTogglePrintTwoCopies(index == 1),
+                            items: [
+                              _ExpressiveItemData(
+                                label: t.preview.copy,
+                                icon: Icons.looks_one_outlined,
+                              ),
+                              _ExpressiveItemData(
+                                label: t.preview.copy,
+                                icon: Icons.looks_two_outlined,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Icon(
+                        Icons.visibility_outlined,
+                        size: 18,
+                        color: colorScheme.secondary.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        t.preview.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          letterSpacing: 2,
+                          color: colorScheme.secondary,
+                        ),
+                      ),
+                      if (videoRecapFile != null) ...[
+                        const SizedBox(width: 12),
+                        _CompactVideoRecapButton(
+                          videoFile: videoRecapFile!,
+                          frame: selectedFrame,
+                          photoTimestamps: photoTimestamps,
+                          isMirrored: isMirrored,
+                        ),
+                      ],
+                      const Spacer(),
+                      // Material 3 Expressive-style Button Group
+                      _ExpressiveButtonGroup(
+                        selectedIndex: showPaperPreview ? 1 : 0,
+                        onChanged: (index) => onTogglePaperPreview(index == 1),
+                        items: [
+                          _ExpressiveItemData(
+                            label: t.preview.edit_mode,
+                            icon: Icons.edit_outlined,
+                          ),
+                          _ExpressiveItemData(
+                            label: t.preview.print_mode,
+                            icon: Icons.local_printshop_outlined,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      _ExpressiveButtonGroup(
+                        selectedIndex: printTwoCopies ? 1 : 0,
+                        onChanged: (index) => onTogglePrintTwoCopies(index == 1),
+                        items: [
+                          _ExpressiveItemData(
+                            label: t.preview.copy,
+                            icon: Icons.looks_one_outlined,
+                          ),
+                          _ExpressiveItemData(
+                            label: t.preview.copy,
+                            icon: Icons.looks_two_outlined,
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(width: 8),
-                  _ExpressiveButtonGroup(
-                    selectedIndex: printTwoCopies ? 1 : 0,
-                    onChanged: (index) => onTogglePrintTwoCopies(index == 1),
-                    items: [
-                      _ExpressiveItemData(
-                        label: t.preview.copy,
-                        icon: Icons.looks_one_outlined,
-                      ),
-                      _ExpressiveItemData(
-                        label: t.preview.copy,
-                        icon: Icons.looks_two_outlined,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          ),
+          isMobile
+              ? Container(
+                  height: 380,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: showPaperPreview
                       ? Screenshot(
                           controller: paperController ?? ScreenshotController(),
@@ -230,11 +301,111 @@ class PreviewPanel extends StatelessWidget {
                                   ),
                           ),
                         ),
+                )
+              : Expanded(
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                      child: showPaperPreview
+                          ? Screenshot(
+                              controller: paperController ?? ScreenshotController(),
+                              child: VirtualPaper(
+                                isLandscape: isLandscape,
+                                child: printTwoCopies
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            fit: FlexFit.loose,
+                                            child: PhotoStrip(
+                                              photos: photos,
+                                              frame: selectedFrame,
+                                              selectedFilter: selectedFilter,
+                                              filterIntensity: filterIntensity,
+                                              isMirrored: isMirrored,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Flexible(
+                                            fit: FlexFit.loose,
+                                            child: PhotoStrip(
+                                              photos: photos,
+                                              frame: selectedFrame,
+                                              selectedFilter: selectedFilter,
+                                              filterIntensity: filterIntensity,
+                                              isMirrored: isMirrored,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : PhotoStrip(
+                                        photos: photos,
+                                        frame: selectedFrame,
+                                        selectedFilter: selectedFilter,
+                                        filterIntensity: filterIntensity,
+                                        isMirrored: isMirrored,
+                                      ),
+                              ),
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Screenshot(
+                                controller:
+                                    stripController ?? ScreenshotController(),
+                                child: printTwoCopies
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            fit: FlexFit.loose,
+                                            child: PhotoStrip(
+                                              photos: photos,
+                                              frame: selectedFrame,
+                                              selectedFilter: selectedFilter,
+                                              filterIntensity: filterIntensity,
+                                              isMirrored: isMirrored,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Flexible(
+                                            fit: FlexFit.loose,
+                                            child: PhotoStrip(
+                                              photos: photos,
+                                              frame: selectedFrame,
+                                              selectedFilter: selectedFilter,
+                                              filterIntensity: filterIntensity,
+                                              isMirrored: isMirrored,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : PhotoStrip(
+                                        photos: photos,
+                                        frame: selectedFrame,
+                                        selectedFilter: selectedFilter,
+                                        filterIntensity: filterIntensity,
+                                        isMirrored: isMirrored,
+                                      ),
+                              ),
+                            ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

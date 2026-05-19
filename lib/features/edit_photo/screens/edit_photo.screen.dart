@@ -13,6 +13,7 @@ import 'package:my_photobooth/features/edit_photo/widgets/qr_share_dialog.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:my_photobooth/services/storage_factory.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:screenshot/screenshot.dart';
 
 class EditPhotoScreen extends StatefulWidget {
@@ -366,6 +367,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bool isMobile = ResponsiveBreakpoints.of(context).smallerThan(DESKTOP);
 
     return Consumer<EditPhotoProvider>(
       builder: (context, editPhotoProvider, child) {
@@ -373,53 +375,108 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
           backgroundColor: colorScheme.surface,
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: isMobile
+                  ? const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0)
+                  : const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   const PhotoboothHeader(),
                   Expanded(
-                    child: Row(
-                      children: [
-                        PreviewPanel(
-                          stripController: _stripController,
-                          paperController: _paperController,
-                          photos: editPhotoProvider.capturedPhotos,
-                          selectedFrame: editPhotoProvider.selectedFrame,
-                          availableFrames: editPhotoProvider.filteredFrames,
-                          printTwoCopies: editPhotoProvider.printTwoCopies,
-                          showPaperPreview: editPhotoProvider.showPaperPreview,
-                          onTogglePrintTwoCopies:
-                              editPhotoProvider.togglePrintTwoCopies,
-                          onTogglePaperPreview:
-                              editPhotoProvider.togglePaperPreview,
-                          videoRecapFile: editPhotoProvider.videoRecapFile,
-                          photoTimestamps: editPhotoProvider.photoTimestamps,
-                          selectedFilter: editPhotoProvider.selectedFilter,
-                          filterIntensity: editPhotoProvider.filterIntensity,
-                          isMirrored: editPhotoProvider.isMirrored,
-                        ),
-                        const Gap(24),
-                        EditorPanel(
-                          availableFrames: editPhotoProvider.filteredFrames,
-                          selectedFrame: editPhotoProvider.selectedFrame.path,
-                          onFrameSelected: editPhotoProvider.setSelectedFrame,
-                          photos: editPhotoProvider.capturedPhotos,
-                          videoRecapFile: editPhotoProvider.videoRecapFile,
-                          photoTimestamps: editPhotoProvider.photoTimestamps,
-                          isProcessing: editPhotoProvider.isProcessing,
-                          filters: editPhotoProvider.filters,
-                          selectedFilter: editPhotoProvider.selectedFilter,
-                          filterIntensity: editPhotoProvider.filterIntensity,
-                          onFilterSelected: editPhotoProvider.setFilter,
-                          onFilterIntensityChanged:
-                              editPhotoProvider.setFilterIntensity,
-                          onQRRequested:
-                              StorageConfig.activeStorage == StorageType.none
-                              ? null
-                              : () => _handleQRRequest(context),
-                        ),
-                      ],
-                    ),
+                    child: isMobile
+                        ? SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                PreviewPanel(
+                                  stripController: _stripController,
+                                  paperController: _paperController,
+                                  photos: editPhotoProvider.capturedPhotos,
+                                  selectedFrame: editPhotoProvider.selectedFrame,
+                                  availableFrames: editPhotoProvider.filteredFrames,
+                                  printTwoCopies: editPhotoProvider.printTwoCopies,
+                                  showPaperPreview: editPhotoProvider.showPaperPreview,
+                                  onTogglePrintTwoCopies:
+                                      editPhotoProvider.togglePrintTwoCopies,
+                                  onTogglePaperPreview:
+                                      editPhotoProvider.togglePaperPreview,
+                                  videoRecapFile: editPhotoProvider.videoRecapFile,
+                                  photoTimestamps: editPhotoProvider.photoTimestamps,
+                                  selectedFilter: editPhotoProvider.selectedFilter,
+                                  filterIntensity: editPhotoProvider.filterIntensity,
+                                  isMirrored: editPhotoProvider.isMirrored,
+                                  isMobile: true,
+                                ),
+                                const Gap(16),
+                                EditorPanel(
+                                  availableFrames: editPhotoProvider.filteredFrames,
+                                  selectedFrame: editPhotoProvider.selectedFrame.path,
+                                  onFrameSelected: editPhotoProvider.setSelectedFrame,
+                                  photos: editPhotoProvider.capturedPhotos,
+                                  videoRecapFile: editPhotoProvider.videoRecapFile,
+                                  photoTimestamps: editPhotoProvider.photoTimestamps,
+                                  isProcessing: editPhotoProvider.isProcessing,
+                                  filters: editPhotoProvider.filters,
+                                  selectedFilter: editPhotoProvider.selectedFilter,
+                                  filterIntensity: editPhotoProvider.filterIntensity,
+                                  onFilterSelected: editPhotoProvider.setFilter,
+                                  onFilterIntensityChanged:
+                                      editPhotoProvider.setFilterIntensity,
+                                  onQRRequested:
+                                      StorageConfig.activeStorage == StorageType.none
+                                      ? null
+                                      : () => _handleQRRequest(context),
+                                  isMobile: true,
+                                ),
+                              ],
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: PreviewPanel(
+                                  stripController: _stripController,
+                                  paperController: _paperController,
+                                  photos: editPhotoProvider.capturedPhotos,
+                                  selectedFrame: editPhotoProvider.selectedFrame,
+                                  availableFrames: editPhotoProvider.filteredFrames,
+                                  printTwoCopies: editPhotoProvider.printTwoCopies,
+                                  showPaperPreview: editPhotoProvider.showPaperPreview,
+                                  onTogglePrintTwoCopies:
+                                      editPhotoProvider.togglePrintTwoCopies,
+                                  onTogglePaperPreview:
+                                      editPhotoProvider.togglePaperPreview,
+                                  videoRecapFile: editPhotoProvider.videoRecapFile,
+                                  photoTimestamps: editPhotoProvider.photoTimestamps,
+                                  selectedFilter: editPhotoProvider.selectedFilter,
+                                  filterIntensity: editPhotoProvider.filterIntensity,
+                                  isMirrored: editPhotoProvider.isMirrored,
+                                ),
+                              ),
+                              const Gap(24),
+                              Expanded(
+                                flex: 3,
+                                child: EditorPanel(
+                                  availableFrames: editPhotoProvider.filteredFrames,
+                                  selectedFrame: editPhotoProvider.selectedFrame.path,
+                                  onFrameSelected: editPhotoProvider.setSelectedFrame,
+                                  photos: editPhotoProvider.capturedPhotos,
+                                  videoRecapFile: editPhotoProvider.videoRecapFile,
+                                  photoTimestamps: editPhotoProvider.photoTimestamps,
+                                  isProcessing: editPhotoProvider.isProcessing,
+                                  filters: editPhotoProvider.filters,
+                                  selectedFilter: editPhotoProvider.selectedFilter,
+                                  filterIntensity: editPhotoProvider.filterIntensity,
+                                  onFilterSelected: editPhotoProvider.setFilter,
+                                  onFilterIntensityChanged:
+                                      editPhotoProvider.setFilterIntensity,
+                                  onQRRequested:
+                                      StorageConfig.activeStorage == StorageType.none
+                                      ? null
+                                      : () => _handleQRRequest(context),
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ],
               ),

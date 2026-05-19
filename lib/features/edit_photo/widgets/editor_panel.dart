@@ -41,7 +41,10 @@ class EditorPanel extends StatefulWidget {
     required this.onFilterSelected,
     required this.onFilterIntensityChanged,
     this.onQRRequested,
+    this.isMobile = false,
   });
+
+  final bool isMobile;
 
   @override
   State<EditorPanel> createState() => _EditorPanelState();
@@ -54,166 +57,241 @@ class _EditorPanelState extends State<EditorPanel> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Expanded(
-      flex: 3,
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.onSurface.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: colorScheme.secondary.withValues(alpha: 0.1),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.onSurface.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.secondary.withValues(alpha: 0.1),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: Text(
-                t.editor.title,
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  letterSpacing: 2,
-                  color: colorScheme.secondary,
-                ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: widget.isMobile
+                ? const EdgeInsets.fromLTRB(16, 16, 16, 12)
+                : const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            child: Text(
+              t.editor.title,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w900,
+                fontSize: 16,
+                letterSpacing: 2,
+                color: colorScheme.secondary,
               ),
             ),
+          ),
 
-            // Tab Switcher
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    _TabButton(
-                      label: t.editor.frames,
-                      icon: Icons.filter_frames_rounded,
-                      isSelected: _selectedTabIndex == 0,
-                      onTap: () => setState(() => _selectedTabIndex = 0),
-                      colorScheme: colorScheme,
-                    ),
-                    _TabButton(
-                      label: t.editor.filters,
-                      icon: Icons.auto_awesome_rounded,
-                      isSelected: _selectedTabIndex == 1,
-                      onTap: () => setState(() => _selectedTabIndex = 1),
-                      colorScheme: colorScheme,
-                    ),
-                  ],
-                ),
+          // Tab Switcher
+          Padding(
+            padding: widget.isMobile
+                ? const EdgeInsets.symmetric(horizontal: 16)
+                : const EdgeInsets.symmetric(horizontal: 24),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: colorScheme.onSurface.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
               ),
-            ),
-
-            const Gap(16),
-
-            // Tab Content
-            Expanded(
-              child: IndexedStack(
-                index: _selectedTabIndex,
-                children: [
-                  // Frames Tab
-                  FrameSelector(
-                    availableFrames: widget.availableFrames,
-                    selectedFrame: widget.selectedFrame,
-                    onFrameSelected: widget.onFrameSelected,
-                  ),
-
-                  // Filters Tab
-                  Column(
-                    children: [
-                      Expanded(
-                        child: FilterSelector(
-                          filters: widget.filters,
-                          selectedFilter: widget.selectedFilter,
-                          onFilterSelected: widget.onFilterSelected,
-                          colorScheme: colorScheme,
-                          previewImagePath: widget.photos.isNotEmpty
-                              ? widget.photos.first.path
-                              : null,
-                        ),
-                      ),
-                      if (widget.selectedFilter != 'normal') ...[
-                        const Gap(24),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.tonality_rounded,
-                                color: colorScheme.onSurface.withValues(
-                                  alpha: 0.5,
-                                ),
-                                size: 20,
-                              ),
-                              const Gap(12),
-                              Expanded(
-                                child: Slider(
-                                  value: widget.filterIntensity,
-                                  onChanged: widget.onFilterIntensityChanged,
-                                  activeColor: colorScheme.secondary,
-                                  inactiveColor: colorScheme.onSurface
-                                      .withValues(alpha: 0.1),
-                                ),
-                              ),
-                              const Gap(12),
-                              SizedBox(
-                                width: 40,
-                                child: Text(
-                                  '${(widget.filterIntensity * 100).toInt()}%',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.secondary,
-                                  ),
-                                  textAlign: TextAlign.end,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(24.0),
               child: Row(
                 children: [
-                  if (widget.onQRRequested != null) ...[
-                    Expanded(
-                      flex: 1,
-                      child: SecondaryButton(
-                        onTap: widget.onQRRequested!,
-                        icon: Icons.qr_code_2_rounded,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                  // Print Button
-                  Expanded(
-                    flex: 3,
-                    child: PrimaryButton(
-                      onTap: () {
-                        // TODO: Implement print logic
-                      },
-                      label: t.editor.printPhoto,
-                      icon: Icons.local_printshop_rounded,
-                    ),
+                  _TabButton(
+                    label: t.editor.frames,
+                    icon: Icons.filter_frames_rounded,
+                    isSelected: _selectedTabIndex == 0,
+                    onTap: () => setState(() => _selectedTabIndex = 0),
+                    colorScheme: colorScheme,
+                  ),
+                  _TabButton(
+                    label: t.editor.filters,
+                    icon: Icons.auto_awesome_rounded,
+                    isSelected: _selectedTabIndex == 1,
+                    onTap: () => setState(() => _selectedTabIndex = 1),
+                    colorScheme: colorScheme,
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          const Gap(16),
+
+          // Tab Content
+          widget.isMobile
+              ? SizedBox(
+                  height: 180,
+                  child: IndexedStack(
+                    index: _selectedTabIndex,
+                    children: [
+                      // Frames Tab
+                      FrameSelector(
+                        availableFrames: widget.availableFrames,
+                        selectedFrame: widget.selectedFrame,
+                        onFrameSelected: widget.onFrameSelected,
+                      ),
+
+                      // Filters Tab
+                      Column(
+                        children: [
+                          Expanded(
+                            child: FilterSelector(
+                              filters: widget.filters,
+                              selectedFilter: widget.selectedFilter,
+                              onFilterSelected: widget.onFilterSelected,
+                              colorScheme: colorScheme,
+                              previewImagePath: widget.photos.isNotEmpty
+                                  ? widget.photos.first.path
+                                  : null,
+                            ),
+                          ),
+                          if (widget.selectedFilter != 'normal') ...[
+                            const Gap(16),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.tonality_rounded,
+                                    color: colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    size: 20,
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: Slider(
+                                      value: widget.filterIntensity,
+                                      onChanged: widget.onFilterIntensityChanged,
+                                      activeColor: colorScheme.secondary,
+                                      inactiveColor: colorScheme.onSurface
+                                          .withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  SizedBox(
+                                    width: 40,
+                                    child: Text(
+                                      '${(widget.filterIntensity * 100).toInt()}%',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.secondary,
+                                      ),
+                                      textAlign: TextAlign.end,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              : Expanded(
+                  child: IndexedStack(
+                    index: _selectedTabIndex,
+                    children: [
+                      // Frames Tab
+                      FrameSelector(
+                        availableFrames: widget.availableFrames,
+                        selectedFrame: widget.selectedFrame,
+                        onFrameSelected: widget.onFrameSelected,
+                      ),
+
+                      // Filters Tab
+                      Column(
+                        children: [
+                          Expanded(
+                            child: FilterSelector(
+                              filters: widget.filters,
+                              selectedFilter: widget.selectedFilter,
+                              onFilterSelected: widget.onFilterSelected,
+                              colorScheme: colorScheme,
+                              previewImagePath: widget.photos.isNotEmpty
+                                  ? widget.photos.first.path
+                                  : null,
+                            ),
+                          ),
+                          if (widget.selectedFilter != 'normal') ...[
+                            const Gap(24),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.tonality_rounded,
+                                    color: colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    size: 20,
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: Slider(
+                                      value: widget.filterIntensity,
+                                      onChanged: widget.onFilterIntensityChanged,
+                                      activeColor: colorScheme.secondary,
+                                      inactiveColor: colorScheme.onSurface
+                                          .withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  SizedBox(
+                                    width: 40,
+                                    child: Text(
+                                      '${(widget.filterIntensity * 100).toInt()}%',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.secondary,
+                                      ),
+                                      textAlign: TextAlign.end,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+          Padding(
+            padding: widget.isMobile
+                ? const EdgeInsets.all(16.0)
+                : const EdgeInsets.all(24.0),
+            child: Row(
+              children: [
+                if (widget.onQRRequested != null) ...[
+                  Expanded(
+                    flex: 1,
+                    child: SecondaryButton(
+                      onTap: widget.onQRRequested!,
+                      icon: Icons.qr_code_2_rounded,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+                // Print Button
+                Expanded(
+                  flex: 3,
+                  child: PrimaryButton(
+                    onTap: () {
+                      // TODO: Implement print logic
+                    },
+                    label: t.editor.printPhoto,
+                    icon: Icons.local_printshop_rounded,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -12,6 +12,7 @@ class PhotoItemCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final bool isNextCapture;
   final bool isMirrored;
+  final EdgeInsetsGeometry? margin;
 
   const PhotoItemCard({
     super.key,
@@ -20,6 +21,7 @@ class PhotoItemCard extends StatelessWidget {
     this.onDelete,
     this.isNextCapture = false,
     this.isMirrored = false,
+    this.margin,
   });
 
   @override
@@ -30,7 +32,7 @@ class PhotoItemCard extends StatelessWidget {
       child: AspectRatio(
         aspectRatio: 4 / 3,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: margin ?? const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             color: colorScheme.onSurface.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),

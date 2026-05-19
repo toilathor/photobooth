@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:my_photobooth/core/configs/asset_config.dart';
 import 'package:my_photobooth/core/configs/filter_config.dart';
 import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class FilterSelector extends StatelessWidget {
   final List<String> filters;
@@ -25,13 +26,22 @@ class FilterSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile =
+        ResponsiveBreakpoints.of(context).smallerThan(DESKTOP);
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    final int crossAxisCount = isMobile
+        ? (screenWidth / 90).clamp(4, 6).floor()
+        : (screenWidth / 350).clamp(2, 6).floor();
+
     return GridView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: filters.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: (MediaQuery.of(context).size.width / 250).floor(),
+        crossAxisCount: crossAxisCount,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
+        childAspectRatio: isMobile ? 0.72 : 0.85,
       ),
       itemBuilder: (context, index) {
         final filterKey = filters[index];

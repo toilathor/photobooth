@@ -5,7 +5,9 @@ import 'package:my_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 
 class LanguageSwitcher extends StatelessWidget {
-  const LanguageSwitcher({super.key});
+  final bool isMobile;
+
+  const LanguageSwitcher({super.key, this.isMobile = false});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +15,7 @@ class LanguageSwitcher extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: isMobile ? EdgeInsets.zero : const EdgeInsets.all(16),
       child: AnimatedToggleSwitch<AppLocale>.dual(
         current: provider.currentLocale,
         first: AppLocale.vi,
@@ -22,39 +24,41 @@ class LanguageSwitcher extends StatelessWidget {
           borderColor: colorScheme.secondary.withValues(alpha: 0.3),
           backgroundColor: colorScheme.surface.withValues(alpha: 0.8),
           indicatorColor: colorScheme.secondary,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: isMobile
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         spacing: 0,
         borderWidth: 1.5,
-        height: 40,
+        height: isMobile ? 32 : 40,
         onChanged: (val) => provider.setLanguage(val),
         styleBuilder: (value) =>
             ToggleStyle(indicatorColor: colorScheme.secondary),
         iconBuilder: (value) => value == AppLocale.vi
-            ? const Text('🇻🇳', style: TextStyle(fontSize: 16))
-            : const Text('🇺🇸', style: TextStyle(fontSize: 16)),
+            ? Text('🇻🇳', style: TextStyle(fontSize: isMobile ? 12 : 16))
+            : Text('🇺🇸', style: TextStyle(fontSize: isMobile ? 12 : 16)),
         textBuilder: (value) => value == AppLocale.vi
-            ? const Center(
+            ? Center(
                 child: Text(
                   'EN',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: isMobile ? 8 : 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
                   ),
                 ),
               )
-            : const Center(
+            : Center(
                 child: Text(
                   'VI',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: isMobile ? 8 : 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
                   ),
