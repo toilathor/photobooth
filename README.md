@@ -1,7 +1,7 @@
 # my_photobooth
 
 # Build Web 
-flutter build web --base-href "/photobooth/"
+flutter build web --base-href "/photobooth/" --wasm
 
 Copy build/web to somewhere else
 
