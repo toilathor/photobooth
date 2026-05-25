@@ -43,7 +43,7 @@ class PhotoboothApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Photobooth',
+      title: AppConfig.appName,
       theme: AppConfig.theme,
       themeMode: ThemeMode.light,
       locale: TranslationProvider.of(context).flutterLocale,

@@ -1,5 +1,6 @@
 import 'storage_service_interface.dart';
 import 'google_drive_service.dart';
+import 'no_op_storage_service.dart';
 import '../core/configs/storage_config.dart';
 
 class StorageFactory {
@@ -13,9 +14,13 @@ class StorageFactory {
         _instance = GoogleDriveService();
         break;
       case StorageType.none:
-        // Bạn có thể tạo một MockStorageService nếu muốn
-        throw UnimplementedError('Storage is disabled in Commercial version');
+        _instance = NoOpStorageService();
+        break;
     }
     return _instance!;
   }
+
+  /// Kiểm tra storage có được kích hoạt hay không
+  static bool get isEnabled =>
+      StorageConfig.activeStorage != StorageType.none;
 }

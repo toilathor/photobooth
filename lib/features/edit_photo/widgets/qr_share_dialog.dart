@@ -133,7 +133,7 @@ class QRShareDialog extends StatelessWidget {
                             shape: BoxShape.circle,
                             image: const DecorationImage(
                               image: AssetImage(
-                                'assets/images/ic_launcher.jpg',
+                                'assets/images/ic_launcher.png',
                               ),
                               fit: BoxFit.cover,
                             ),

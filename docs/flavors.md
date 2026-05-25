@@ -12,7 +12,7 @@ Below is the comparison of settings applied in each flavor:
 
 | Attribute | Personal (Cá nhân) | Commercial (Thương mại) |
 | :--- | :--- | :--- |
-| **Application / Bundle ID** | `vn.thphotobooth` | `vn.photobooth` |
+| **Application / Bundle ID** | `vn.toilathor.thphotobooth` | `vn.toilathor.photobooth` |
 | **App Display Name (Short)** | `TH PhotoBooth` | `PhotoBooth` |
 | **App Title (Full/Web/Desktop)**| `TH PhotoBooth - Lưu giữ mọi khoảnh khắc` | `PhotoBooth - Lưu giữ mọi khoảnh khắc` |
 | **Header Title** | `Thuý Hền ❤️ Quang Tọ` | `PhotoBooth` |

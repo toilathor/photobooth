@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -20,8 +21,8 @@ class PhotoboothHeader extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: isMobile ? 8.0 : 16.0,
-        horizontal: isMobile ? 12.0 : 24.0,
+          vertical: isMobile ? 8.0 : 16.0,
+          horizontal: isMobile ? 12.0 : 24.0,
       ),
       child: Row(
         children: [
@@ -36,7 +37,9 @@ class PhotoboothHeader extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  t.header.title,
+                  AppConfig.flavor == AppFlavor.personal 
+                      ? t.header.titlePersonal
+                      : t.header.titleCommercial,
                   style: GoogleFonts.pacifico(
                     fontSize: isMobile ? 24 : 36,
                     fontWeight: FontWeight.w700,

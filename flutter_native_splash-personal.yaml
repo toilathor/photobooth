@@ -7,38 +7,38 @@ flutter_native_splash:
   #! FOR ALL PLATFORMS, except Android 12+:
 
   # General background color (commented because background_image is used):
-  #color: "#5A0001"
-  #color_dark: "#1C1B1F"
-  #color_android: "#5A0001"
-  #color_dark_android: "#1C1B1F"
-  #color_ios: "#5A0001"
-  #color_dark_ios: "#1C1B1F"
-  #color_web: "#5A0001"
-  #color_dark_web: "#1C1B1F"
+  color: "#440708"
+  color_dark: "#440708"
+  color_android: "#440708"
+  color_dark_android: "#440708"
+  color_ios: "#440708"
+  color_dark_ios: "#440708"
+  color_web: "#440708"
+  color_dark_web: "#440708"
 
   # General background image (except Android 12+):
-  background_image: "assets/images/background_personal.png"
-  background_image_dark: "assets/images/background_personal_dark.png"
+  # background_image: "assets/images/background_personal.png"
+  # background_image_dark: "assets/images/background_personal_dark.png"
 
   # Platform-specific background images:
-  background_image_android: "assets/images/background_personal.png"
-  background_image_dark_android: "assets/images/background_personal_dark.png"
-  background_image_ios: "assets/images/background_personal.png"
-  background_image_dark_ios: "assets/images/background_personal_dark.png"
-  background_image_web: "assets/images/background_personal.png"
-  background_image_dark_web: "assets/images/background_personal_dark.png"
+  # background_image_android: "assets/images/background_personal.png"
+  # background_image_dark_android: "assets/images/background_personal_dark.png"
+  # background_image_ios: "assets/images/background_personal.png"
+  # background_image_dark_ios: "assets/images/background_personal_dark.png"
+  # background_image_web: "assets/images/background_personal.png"
+  # background_image_dark_web: "assets/images/background_personal_dark.png"
 
   # General image (except Android 12+):
-  image: "assets/images/ic_launcher.jpg"
-  image_dark: "assets/images/ic_launcher.jpg"
+  image: "assets/images/ic_launcher.png"
+  image_dark: "assets/images/ic_launcher.png"
 
   # Platform-specific images:
-  image_android: "assets/images/ic_launcher.jpg"
-  image_dark_android: "assets/images/ic_launcher.jpg"
-  image_ios: "assets/images/ic_launcher.jpg"
-  image_dark_ios: "assets/images/ic_launcher.jpg"
-  image_web: "assets/images/ic_launcher.jpg"
-  image_dark_web: "assets/images/ic_launcher.jpg"
+  image_android: "assets/images/ic_launcher.png"
+  image_dark_android: "assets/images/ic_launcher_dark.png"
+  image_ios: "assets/images/ic_launcher.png"
+  image_dark_ios: "assets/images/ic_launcher_dark.png"
+  image_web: "assets/images/ic_launcher.png"
+  image_dark_web: "assets/images/ic_launcher_dark.png"
 
   # Image alignment (default: center):
   android_gravity: center
@@ -77,11 +77,11 @@ flutter_native_splash:
   #========================================================================
   #! ANDROID 12+ configuration:
   android_12:
-    color: "#5A0001"
+    color: "#440708"
     color_dark: "#1C1B1F"
-    image: "assets/images/ic_launcher_personal_foreground.png"
-    image_dark: "assets/images/ic_launcher_personal_foreground.png"
-    icon_background_color: "#5A0001"
+    image: "assets/images/ic_launcher.png"
+    image_dark: "assets/images/ic_launcher_dark.png"
+    icon_background_color: "#440708"
     icon_background_color_dark: "#1C1B1F"
     branding: "assets/images/branding_personal.png"
     branding_dark: "assets/images/branding_personal_dark.png"

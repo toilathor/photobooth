@@ -2,31 +2,84 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "TH PhotoBooth (Web)",
+            "name": "Web - Personal",
             "request": "launch",
             "type": "dart",
             "args": [
                 "--web-port",
-                "5050"
+                "5050",
+                "--flavor",
+                "personal",
+                "--web-launch-url",
+                "http://localhost:5050/?flavor=personal"
             ]
         },
         {
-            "name": "TH PhotoBooth (Personal - Android)",
+            "name": "Web - Commercial",
             "request": "launch",
             "type": "dart",
             "args": [
-                "--android",
-                "-dart-define=config=personal"
+                "--web-port",
+                "5050",
+                "--flavor",
+                "commercial",
+                "--web-launch-url",
+                "http://localhost:5050/?flavor=commercial"
             ]
         },
         {
-            "name": "TH PhotoBooth (Commercial - Android)",
+            "name": "Android - Personal",
             "request": "launch",
             "type": "dart",
             "args": [
-                "--android",
-                "-dart-define=config=commercial"
+                "--flavor",
+                "personal"
+            ]
+        },
+        {
+            "name": "Android - Commercial",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "commercial"
+            ]
+        },
+        {
+            "name": "iOS - Personal",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "personal"
+            ]
+        },
+        {
+            "name": "iOS - Commercial",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "commercial"
+            ]
+        },
+        {
+            "name": "macOS - Personal",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "personal"
+            ]
+        },
+        {
+            "name": "macOS - Commercial",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "commercial"
             ]
         }
     ]
-}   
+}

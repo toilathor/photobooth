@@ -7,38 +7,38 @@ flutter_native_splash:
   #! FOR ALL PLATFORMS, except Android 12+:
 
   # General background color (commented because background_image is used):
-  #color: "#0C1117"
-  #color_dark: "#070B0E"
-  #color_android: "#0C1117"
-  #color_dark_android: "#070B0E"
-  #color_ios: "#0C1117"
-  #color_dark_ios: "#070B0E"
-  #color_web: "#0C1117"
-  #color_dark_web: "#070B0E"
+  color: "#101116"
+  color_dark: "#101116"
+  color_android: "#101116"
+  color_dark_android: "#101116"
+  color_ios: "#101116"
+  color_dark_ios: "#101116"
+  color_web: "#101116"
+  color_dark_web: "#101116"
 
   # General background image (except Android 12+):
-  background_image: "assets/images/background_commercial.png"
-  background_image_dark: "assets/images/background_commercial_dark.png"
+  # background_image: "assets/images/background_commercial.png"
+  # background_image_dark: "assets/images/background_commercial_dark.png"
 
   # Platform-specific background images:
-  background_image_android: "assets/images/background_commercial.png"
-  background_image_dark_android: "assets/images/background_commercial_dark.png"
-  background_image_ios: "assets/images/background_commercial.png"
-  background_image_dark_ios: "assets/images/background_commercial_dark.png"
-  background_image_web: "assets/images/background_commercial.png"
-  background_image_dark_web: "assets/images/background_commercial_dark.png"
+  # background_image_android: "assets/images/background_commercial.png"
+  # background_image_dark_android: "assets/images/background_commercial_dark.png"
+  # background_image_ios: "assets/images/background_commercial.png"
+  # background_image_dark_ios: "assets/images/background_commercial_dark.png"
+  # background_image_web: "assets/images/background_commercial.png"
+  # background_image_dark_web: "assets/images/background_commercial_dark.png"
 
   # General image (except Android 12+):
   image: "assets/images/ic_launcher_commercial.png"
-  image_dark: "assets/images/ic_launcher_commercial.png"
+  image_dark: "assets/images/ic_launcher_commercial_dark.png"
 
   # Platform-specific images:
   image_android: "assets/images/ic_launcher_commercial.png"
-  image_dark_android: "assets/images/ic_launcher_commercial.png"
+  image_dark_android: "assets/images/ic_launcher_commercial_dark.png"
   image_ios: "assets/images/ic_launcher_commercial.png"
-  image_dark_ios: "assets/images/ic_launcher_commercial.png"
+  image_dark_ios: "assets/images/ic_launcher_commercial_dark.png"
   image_web: "assets/images/ic_launcher_commercial.png"
-  image_dark_web: "assets/images/ic_launcher_commercial.png"
+  image_dark_web: "assets/images/ic_launcher_commercial_dark.png"
 
   # Image alignment (default: center):
   android_gravity: center
@@ -77,11 +77,11 @@ flutter_native_splash:
   #========================================================================
   #! ANDROID 12+ configuration:
   android_12:
-    color: "#0C1117"
+    color: "#101116"
     color_dark: "#070B0E"
-    image: "assets/images/ic_launcher_commercial_foreground.png"
-    image_dark: "assets/images/ic_launcher_commercial_foreground.png"
-    icon_background_color: "#0C1117"
+    image: "assets/images/ic_launcher_commercial.png"
+    image_dark: "assets/images/ic_launcher_commercial_dark.png"
+    icon_background_color: "#101116"
     icon_background_color_dark: "#070B0E"
     branding: "assets/images/branding_commercial.png"
     branding_dark: "assets/images/branding_commercial_dark.png"

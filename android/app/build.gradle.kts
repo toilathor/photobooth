@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "vn.thphotobooth"
+    namespace = "vn.toilathor.photobooth"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,14 +20,27 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "vn.thphotobooth"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    flavorDimensions.add("default")
+
+    productFlavors {
+        create("personal") {
+            dimension = "default"
+            applicationId = "vn.toilathor.thphotobooth"
+            manifestPlaceholders["appName"] = "TH PhotoBooth"
+        }
+        create("commercial") {
+            dimension = "default"
+            applicationId = "vn.toilathor.photobooth"
+            manifestPlaceholders["appName"] = "PhotoBooth"
+        }
     }
 
     buildTypes {

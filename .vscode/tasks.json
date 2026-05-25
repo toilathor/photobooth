@@ -1,0 +1,31 @@
+{
+    // "version": "2.0.0",
+    // "tasks": [
+    //     {
+    //         "label": "Switch Flavor: Personal",
+    //         "type": "shell",
+    //         "command": "dart",
+    //         "args": ["run", "tool/switch_flavor.dart", "personal"],
+    //         "group": "build",
+    //         "presentation": {
+    //             "reveal": "silent",
+    //             "panel": "shared",
+    //             "clear": true
+    //         },
+    //         "problemMatcher": []
+    //     },
+    //     {
+    //         "label": "Switch Flavor: Commercial",
+    //         "type": "shell",
+    //         "command": "dart",
+    //         "args": ["run", "tool/switch_flavor.dart", "commercial"],
+    //         "group": "build",
+    //         "presentation": {
+    //             "reveal": "silent",
+    //             "panel": "shared",
+    //             "clear": true
+    //         },
+    //         "problemMatcher": []
+    //     }
+    // ]
+}
