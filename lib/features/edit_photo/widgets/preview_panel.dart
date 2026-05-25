@@ -3,10 +3,10 @@ import 'dart:io' show File;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:my_photobooth/core/configs/filter_config.dart';
+import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'video_recap_player.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/models/frame_data.dart';
 import 'package:screenshot/screenshot.dart';
 
 const double _perforationGap = 20.0;

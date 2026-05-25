@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:my_photobooth/core/configs/app_config.dart';
-import 'package:my_photobooth/core/configs/asset_config.dart';
-import 'package:my_photobooth/helper/fullscreen_noop.dart'
-    if (dart.library.js) 'package:my_photobooth/helper/fullscreen_web.dart'
+import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/core/configs/asset_config.dart';
+import 'package:th_photobooth/helper/fullscreen_noop.dart'
+    if (dart.library.js) 'package:th_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/services/cache_service.dart';
-import 'package:my_photobooth/services/video_service.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/services/cache_service.dart';
+import 'package:th_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
   CameraController? cameraController;

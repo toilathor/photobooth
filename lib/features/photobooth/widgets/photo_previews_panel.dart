@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:provider/provider.dart';
 
 import 'photo_item_card.dart';

@@ -4,7 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 
 class PhotoSelectionDialog extends StatefulWidget {
   final List<XFile> photos;

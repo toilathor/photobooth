@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:my_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/frame_data.dart';
 
 import 'frame_item.dart';
 

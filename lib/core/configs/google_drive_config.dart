@@ -7,5 +7,5 @@ class GoogleDriveConfig {
   ];
 
   // Tên thư mục sẽ tạo trên Google Drive để lưu ảnh
-  static const String folderName = 'My Photobooth Photos';
+  static const String folderName = 'TH PhotoBooth Photos';
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_photobooth/core/configs/asset_config.dart';
-import 'package:my_photobooth/core/configs/filter_config.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/core/configs/asset_config.dart';
+import 'package:th_photobooth/core/configs/filter_config.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class FilterSelector extends StatelessWidget {

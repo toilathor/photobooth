@@ -3,8 +3,8 @@ import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:my_photobooth/core/js/video_exporter_js.dart' as js_bridge;
-import 'package:my_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/core/js/video_exporter_js.dart' as js_bridge;
+import 'package:th_photobooth/models/frame_data.dart';
 import 'package:web/web.dart' as web;
 
 class FramedVideoResult {

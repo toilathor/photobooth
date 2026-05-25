@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
-import 'package:my_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
-import 'package:my_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
 
 void main() {
   setUp(() {

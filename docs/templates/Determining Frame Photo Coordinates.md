@@ -4,9 +4,9 @@ Note: _This is purely the output of the chat conversation and does not contain a
 
 ### User Input
 
-tôi chưa có phương án để xác định vị trí của khung ảnh để ghép ảnh vào đúng ô@[/Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame.png] ví dự fame này
+tôi chưa có phương án để xác định vị trí của khung ảnh để ghép ảnh vào đúng ô@[/Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame.png] ví dự fame này
 
-*Listed directory [frames](file:///Users/toilathor/DEV/toilathor/my_photobooth/assets/frames) *
+*Listed directory [frames](file:///Users/toilathor/DEV/toilathor/th_photobooth/assets/frames) *
 
 ### Planner Response
 
@@ -114,9 +114,9 @@ Bạn có muốn tôi giúp lấy toạ độ tự động bằng script (cần 
 
 ### User Input
 
--@[/Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame.png] frame 4 ảnh
--@[/Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame1.png] frame 1 ảnh
--@[/Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame2.png] frame 3 ảnh
+-@[/Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame.png] frame 4 ảnh
+-@[/Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame1.png] frame 1 ảnh
+-@[/Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame2.png] frame 3 ảnh
 hãy thử triển khai
 
 *User accepted the command `cat << 'EOF' > /tmp/extract_slots.py
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     for p in sys.argv[1:]:
         find_transparent_rects(p)
 EOF
-python3 /tmp/extract_slots.py /Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame.png /Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame1.png /Users/toilathor/DEV/toilathor/my_photobooth/assets/frames/frame2.png
+python3 /tmp/extract_slots.py /Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame.png /Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame1.png /Users/toilathor/DEV/toilathor/th_photobooth/assets/frames/frame2.png
 `*
 
 *User accepted the command `grep 'image:' pubspec.yaml`*
@@ -416,25 +416,25 @@ EOF
 dart run extract_slots.dart
 rm extract_slots.dart`*
 
-*Viewed [edit_photo.provider.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/edit_photo.provider.dart) *
+*Viewed [edit_photo.provider.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/edit_photo.provider.dart) *
 
-*Viewed [preview_panel.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/widgets/preview_panel.dart) *
-
-*Grep searched codebase*
-
-*Edited relevant file*
+*Viewed [preview_panel.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/widgets/preview_panel.dart) *
 
 *Grep searched codebase*
 
-*Viewed [edit_photo.screen.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/edit_photo.screen.dart) *
+*Edited relevant file*
+
+*Grep searched codebase*
+
+*Viewed [edit_photo.screen.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/edit_photo.screen.dart) *
 
 *Edited relevant file*
 
 *Edited relevant file*
 
-*Viewed [editor_panel.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/widgets/editor_panel.dart) *
+*Viewed [editor_panel.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/widgets/editor_panel.dart) *
 
-*Viewed [frame_selector.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/widgets/frame_selector.dart) *
+*Viewed [frame_selector.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/widgets/frame_selector.dart) *
 
 *User accepted the command `flutter analyze`*
 
@@ -453,11 +453,11 @@ Bây giờ bạn có thể thử chạy lại ứng dụng để xem kết quả
 
 ### User Input
 
-@[/Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/edit_photo.provider.dart:L3-L15] tách ra @[/Users/toilathor/DEV/toilathor/my_photobooth/lib/models] 
+@[/Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/edit_photo.provider.dart:L3-L15] tách ra @[/Users/toilathor/DEV/toilathor/th_photobooth/lib/models] 
 
 *Edited relevant file*
 
-*Viewed [edit_photo.provider.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/edit_photo.provider.dart) *
+*Viewed [edit_photo.provider.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/edit_photo.provider.dart) *
 
 *Grep searched codebase*
 
@@ -465,13 +465,13 @@ Bây giờ bạn có thể thử chạy lại ứng dụng để xem kết quả
 
 *Edited relevant file*
 
-*Viewed [preview_panel.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/widgets/preview_panel.dart) *
+*Viewed [preview_panel.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/widgets/preview_panel.dart) *
 
 *Edited relevant file*
 
-*Viewed [editor_panel.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/widgets/editor_panel.dart) *
+*Viewed [editor_panel.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/widgets/editor_panel.dart) *
 
-*Viewed [frame_selector.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/widgets/frame_selector.dart) *
+*Viewed [frame_selector.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/widgets/frame_selector.dart) *
 
 *Edited relevant file*
 
@@ -495,11 +495,11 @@ Toàn bộ code vẫn build bình thường và cấu trúc đã gọn gàng hơ
 
 ### User Input
 
-tạo white frame cho frame 3 và 4 để sau đội thiết kế frame sẽ phải dự vào tiêu chuẩn này để thiết kế. Viết vào file md nhé@[/Users/toilathor/DEV/toilathor/my_photobooth/docs] 
+tạo white frame cho frame 3 và 4 để sau đội thiết kế frame sẽ phải dự vào tiêu chuẩn này để thiết kế. Viết vào file md nhé@[/Users/toilathor/DEV/toilathor/th_photobooth/docs] 
 
 *Edited relevant file*
 
-*Viewed [edit_photo.provider.dart](file:///Users/toilathor/DEV/toilathor/my_photobooth/lib/features/edit_photo/edit_photo.provider.dart) *
+*Viewed [edit_photo.provider.dart](file:///Users/toilathor/DEV/toilathor/th_photobooth/lib/features/edit_photo/edit_photo.provider.dart) *
 
 *User accepted the command `mkdir -p docs`*
 

@@ -2,13 +2,13 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:provider/provider.dart';
 
 import 'dropdown_setting.dart';
 import 'photo_selection_dialog.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/components/language_switcher.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/components/language_switcher.dart';
 
 class SettingsPanel extends StatelessWidget {
   final bool isBottomSheet;

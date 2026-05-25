@@ -1,4 +1,4 @@
-# my_photobooth
+# TH PhotoBooth - Lưu giữ mọi khoảnh khắc
 
 # Build Web 
 flutter build web --base-href "/photobooth/" --wasm

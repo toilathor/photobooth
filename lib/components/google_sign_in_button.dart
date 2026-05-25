@@ -6,8 +6,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 import 'package:google_sign_in_web/google_sign_in_web.dart' as web;
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/services/storage_factory.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/services/storage_factory.dart';
 
 class GoogleSignInWebButton extends StatefulWidget {
   const GoogleSignInWebButton({super.key});

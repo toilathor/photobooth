@@ -1,15 +1,15 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:my_photobooth/components/language_switcher.dart';
-import 'package:my_photobooth/core/configs/app_config.dart';
-import 'package:my_photobooth/core/configs/theme_config.dart';
-import 'package:my_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
-import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
-import 'package:my_photobooth/features/photobooth/screens/photobooth.screen.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/services/cache_service.dart';
-import 'package:my_photobooth/services/storage_factory.dart';
+import 'package:th_photobooth/components/language_switcher.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/core/configs/theme_config.dart';
+import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/features/photobooth/screens/photobooth.screen.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/services/cache_service.dart';
+import 'package:th_photobooth/services/storage_factory.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -54,7 +54,7 @@ class PhotoboothApp extends StatelessWidget {
         return ResponsiveBreakpoints.builder(
           child: Stack(
             children: [
-              if (child != null) child,
+              ?child,
               if (isDesktop)
                 const Positioned(
                   top: 0,

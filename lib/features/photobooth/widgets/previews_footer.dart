@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:my_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
-import 'package:my_photobooth/features/edit_photo/screens/edit_photo.screen.dart';
-import 'package:my_photobooth/features/photobooth/providers/photobooth.provider.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
+import 'package:th_photobooth/features/edit_photo/screens/edit_photo.screen.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 
 class PreviewsFooter extends StatelessWidget {
   const PreviewsFooter({super.key});

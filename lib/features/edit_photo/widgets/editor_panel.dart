@@ -2,12 +2,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_photobooth/components/primary_button.dart';
-import 'package:my_photobooth/components/secondary_button.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/components/primary_button.dart';
+import 'package:th_photobooth/components/secondary_button.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/models/frame_data.dart';
 
-import 'package:my_photobooth/components/filter_selector.dart';
+import 'package:th_photobooth/components/filter_selector.dart';
 import 'frame_selector.dart';
 
 class EditorPanel extends StatefulWidget {

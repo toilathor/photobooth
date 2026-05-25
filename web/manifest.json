@@ -1,6 +1,6 @@
 {
-    "name": "my_photobooth",
-    "short_name": "my_photobooth",
+    "name": "TH PhotoBooth - Lưu giữ mọi khoảnh khắc",
+    "short_name": "TH PhotoBooth",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",

@@ -4,9 +4,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:my_photobooth/core/configs/app_config.dart';
-import 'package:my_photobooth/i18n/strings.g.dart';
-import 'package:my_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/models/frame_data.dart';
 import 'package:video_player/video_player.dart';
 
 enum RecapViewMode { full, frame }

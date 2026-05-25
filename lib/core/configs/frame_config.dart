@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/frame_data.dart';
 
 class FrameConfig {
   static const List<FrameData> allFrames = [
