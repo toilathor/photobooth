@@ -1,9 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 
+import 'package:flutter/material.dart';
+import 'package:th_photobooth/core/configs/theme_config.dart';
+
 class AppConfig {
   static late List<CameraDescription> cameras;
   static const String appName = 'TH PhotoBooth';
+  static ThemeData get theme => ThemeConfig.weddingTheme;
 
   // Photo settings
   static const List<int> photoCounts = [1, 3, 4];

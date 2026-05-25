@@ -1,0 +1,37 @@
+# To switch/generate, run: dart run tool/switch_flavor.dart commercial
+# Reference: tools/flutter_launcher_icons/flutter_launcher_icons-sandbox.yaml
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path_android: "assets/images/ic_launcher_commercial.png"
+  min_sdk_android: 21
+
+  # For adaptive icons (Android 8.0+).
+  adaptive_icon_background: "#0C1117"
+  adaptive_icon_foreground: "assets/images/ic_launcher_commercial_foreground.png"
+  adaptive_icon_foreground_inset: 16
+  adaptive_icon_monochrome: "assets/images/ic_launcher_commercial_monochrome.png"
+
+  ios: true
+  image_path_ios: "assets/images/ic_launcher_commercial.png"
+  remove_alpha_ios: true
+
+  # For iOS 18+ dark/tinted icons
+  image_path_ios_dark_transparent: "assets/images/ic_launcher_commercial_foreground.png"
+  image_path_ios_tinted_grayscale: "assets/images/ic_launcher_commercial_monochrome.png"
+  desaturate_tinted_to_grayscale_ios: true
+
+  web:
+    generate: true
+    image_path: "assets/images/ic_launcher_commercial.png"
+    background_color: "#ffffff"
+    theme_color: "#ffffff"
+
+  windows:
+    generate: true
+    image_path: "assets/images/ic_launcher_commercial.png"
+    icon_size: 48
+
+  macos:
+    generate: true
+    image_path: "assets/images/ic_launcher_commercial.png"
