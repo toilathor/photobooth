@@ -255,5 +255,22 @@ void main(List<String> args) async {
     print('Warning: Icon config not found: $iconConfigFile');
   }
 
+  // 10. Native Splash Screen
+  final String splashConfigFile = 'flutter_native_splash-$flavor.yaml';
+  final splashFile = File(splashConfigFile);
+  if (splashFile.existsSync()) {
+    File('flutter_native_splash.yaml').writeAsStringSync(splashFile.readAsStringSync());
+    print('Copied $splashConfigFile to flutter_native_splash.yaml');
+    
+    print('Generating native splash screen...');
+    final splashGenRes = Process.runSync('dart', ['run', 'flutter_native_splash:create']);
+    print(splashGenRes.stdout);
+    if (splashGenRes.stderr.toString().isNotEmpty) {
+      print(splashGenRes.stderr);
+    }
+  } else {
+    print('Warning: Splash config not found: $splashConfigFile');
+  }
+
   print('Flavor switch completed successfully!');
 }

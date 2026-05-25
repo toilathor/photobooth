@@ -1,0 +1,87 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: true
+
+  #======================================================================
+  #! FOR ALL PLATFORMS, except Android 12+:
+
+  # General background color (commented because background_image is used):
+  #color: "#0C1117"
+  #color_dark: "#070B0E"
+  #color_android: "#0C1117"
+  #color_dark_android: "#070B0E"
+  #color_ios: "#0C1117"
+  #color_dark_ios: "#070B0E"
+  #color_web: "#0C1117"
+  #color_dark_web: "#070B0E"
+
+  # General background image (except Android 12+):
+  background_image: "assets/images/background_commercial.png"
+  background_image_dark: "assets/images/background_commercial_dark.png"
+
+  # Platform-specific background images:
+  background_image_android: "assets/images/background_commercial.png"
+  background_image_dark_android: "assets/images/background_commercial_dark.png"
+  background_image_ios: "assets/images/background_commercial.png"
+  background_image_dark_ios: "assets/images/background_commercial_dark.png"
+  background_image_web: "assets/images/background_commercial.png"
+  background_image_dark_web: "assets/images/background_commercial_dark.png"
+
+  # General image (except Android 12+):
+  image: "assets/images/ic_launcher_commercial.png"
+  image_dark: "assets/images/ic_launcher_commercial.png"
+
+  # Platform-specific images:
+  image_android: "assets/images/ic_launcher_commercial.png"
+  image_dark_android: "assets/images/ic_launcher_commercial.png"
+  image_ios: "assets/images/ic_launcher_commercial.png"
+  image_dark_ios: "assets/images/ic_launcher_commercial.png"
+  image_web: "assets/images/ic_launcher_commercial.png"
+  image_dark_web: "assets/images/ic_launcher_commercial.png"
+
+  # Image alignment (default: center):
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+  web_image_mode: center
+
+  # General branding (except Android 12+):
+  branding: "assets/images/branding_commercial.png"
+  branding_dark: "assets/images/branding_commercial_dark.png"
+
+  # Platform-specific branding:
+  branding_android: "assets/images/branding_commercial.png"
+  branding_dark_android: "assets/images/branding_commercial_dark.png"
+  branding_ios: "assets/images/branding_commercial.png"
+  branding_dark_ios: "assets/images/branding_commercial_dark.png"
+  branding_web: "assets/images/branding_commercial.png"
+  branding_dark_web: "assets/images/branding_commercial_dark.png"
+
+  # Branding position:
+  branding_mode: bottom
+  branding_bottom_padding: 24
+  branding_bottom_padding_android: 24
+  branding_bottom_padding_ios: 24
+
+  # Android screen orientation:
+  #android_screen_orientation: sensorPortrait
+
+  # Hide notification bar on Android (iOS handles this by default):
+  fullscreen: true
+
+  # iOS Info.plist file overrides if customized:
+  #info_plist_files:
+  #  - 'ios/Runner/Info-Debug.plist'
+  #  - 'ios/Runner/Info-Release.plist'
+
+  #========================================================================
+  #! ANDROID 12+ configuration:
+  android_12:
+    color: "#0C1117"
+    color_dark: "#070B0E"
+    image: "assets/images/ic_launcher_commercial_foreground.png"
+    image_dark: "assets/images/ic_launcher_commercial_foreground.png"
+    icon_background_color: "#0C1117"
+    icon_background_color_dark: "#070B0E"
+    branding: "assets/images/branding_commercial.png"
+    branding_dark: "assets/images/branding_commercial_dark.png"

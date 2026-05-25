@@ -10,5 +10,23 @@
                 "5050"
             ]
         },
+        {
+            "name": "TH PhotoBooth (Personal - Android)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--android",
+                "-dart-define=config=personal"
+            ]
+        },
+        {
+            "name": "TH PhotoBooth (Commercial - Android)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--android",
+                "-dart-define=config=commercial"
+            ]
+        }
     ]
 }   
