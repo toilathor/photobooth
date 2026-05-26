@@ -1,0 +1,36 @@
+def keystoreProperties = new Properties()
+def localPropertiesFile = file('../../env/android/keystore.properties')
+
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
+android {
+    signingConfigs {
+        debug {
+            if (keystoreProperties.containsKey('keyAlias') && keystoreProperties.containsKey('storeFile')) {
+                keyAlias = keystoreProperties.getProperty('keyAlias')
+                keyPassword = keystoreProperties.getProperty('keyPassword')
+                storeFile = file(keystoreProperties.getProperty('storeFile'))
+                storePassword = keystoreProperties.getProperty('storePassword')
+                v1SigningEnabled = true
+                v2SigningEnabled = true
+                storeType "pkcs12"
+            }
+        }
+
+        release {
+            if (keystoreProperties.containsKey('keyAlias') && keystoreProperties.containsKey('storeFile')) {
+                keyAlias = keystoreProperties.getProperty('keyAlias')
+                keyPassword = keystoreProperties.getProperty('keyPassword')
+                storeFile = file(keystoreProperties.getProperty('storeFile'))
+                storePassword = keystoreProperties.getProperty('storePassword')
+                v1SigningEnabled = true
+                v2SigningEnabled = true
+                storeType "pkcs12"
+            }
+        }
+    }
+}
