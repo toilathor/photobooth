@@ -6,6 +6,7 @@ import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.
 import 'package:th_photobooth/features/edit_photo/screens/edit_photo.screen.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/components/primary_button.dart';
 
 class PreviewsFooter extends StatelessWidget {
   const PreviewsFooter({super.key});
@@ -15,26 +16,33 @@ class PreviewsFooter extends StatelessWidget {
     final provider = context.watch<PhotoboothProvider>();
     final colorScheme = Theme.of(context).colorScheme;
 
+    final bool isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const Gap(16),
-        Text(
-          t.preview.captured(
-            current: provider.capturedPhotos.length,
-            total: provider.selectedPhotoCount,
+        if (!isLandscape) ...[
+          const Gap(16),
+          Text(
+            t.preview.captured(
+              current: provider.capturedPhotos.length,
+              total: provider.selectedPhotoCount,
+            ),
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+              fontSize: 14,
+              letterSpacing: 2,
+            ),
           ),
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-            fontSize: 14,
-            letterSpacing: 2,
-          ),
-        ),
-        const Gap(24),
+          const Gap(24),
+        ] else
+          const Gap(8),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed:
+          child: PrimaryButton(
+            onTap:
                 (provider.capturedPhotos.length >=
                         provider.selectedPhotoCount &&
                     !provider.isCapturing)
@@ -55,34 +63,14 @@ class PreviewsFooter extends StatelessWidget {
                     );
                   }
                 : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.secondary,
-              foregroundColor: colorScheme.primary,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              fixedSize: const Size(double.infinity, 60),
-              elevation: 12,
-              shadowColor: colorScheme.secondary.withValues(alpha: 0.4),
-            ),
-            label: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                provider.capturedPhotos.length >= provider.selectedPhotoCount
+            height: isLandscape ? 48 : 60,
+            label: provider.capturedPhotos.length >= provider.selectedPhotoCount
                     ? t.preview.continue_btn
                     : t.preview.not_enough_photos,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-            icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
+            icon: Icons.arrow_forward_ios_rounded,
           ),
         ),
-        const Gap(16),
+        Gap(isLandscape ? 4 : 16),
       ],
     );
   }

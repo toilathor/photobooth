@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DropdownSetting<T> extends StatelessWidget {
   final String label;
@@ -36,18 +36,19 @@ class DropdownSetting<T> extends StatelessWidget {
         ),
         const Gap(8),
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             border: Border.all(
-              color: colorScheme.secondary.withValues(alpha: 0.4),
+              color: colorScheme.outline.withValues(alpha: 0.5),
             ),
             borderRadius: BorderRadius.circular(12),
-            color: colorScheme.onPrimary,
+            color: colorScheme.surface,
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
               value: value,
-              dropdownColor: colorScheme.onPrimary,
+              dropdownColor: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               items: items
                   .map(
@@ -55,6 +56,7 @@ class DropdownSetting<T> extends StatelessWidget {
                       value: e,
                       child: Text(
                         '${itemLabelBuilder != null ? itemLabelBuilder!(e) : e}$suffix',
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   )
@@ -64,9 +66,12 @@ class DropdownSetting<T> extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: colorScheme.primary,
+                color: colorScheme.onSurface,
               ),
-              icon: Icon(Icons.keyboard_arrow_down, color: colorScheme.primary),
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ),
         ),

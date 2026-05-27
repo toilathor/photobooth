@@ -3,11 +3,13 @@ import 'dart:io' show File;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
-import 'video_recap_player.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
-import 'package:screenshot/screenshot.dart';
+import 'package:th_photobooth/components/expressive_button_group.dart';
+
+import 'video_recap_player.dart';
 
 const double _perforationGap = 20.0;
 
@@ -100,6 +102,7 @@ class PreviewPanel extends StatelessWidget {
                               frame: selectedFrame,
                               photoTimestamps: photoTimestamps,
                               isMirrored: isMirrored,
+                              isMobile: isMobile,
                             ),
                           ],
                         ],
@@ -108,29 +111,31 @@ class PreviewPanel extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _ExpressiveButtonGroup(
+                          ExpressiveButtonGroup(
                             selectedIndex: showPaperPreview ? 1 : 0,
-                            onChanged: (index) => onTogglePaperPreview(index == 1),
+                            onChanged: (index) =>
+                                onTogglePaperPreview(index == 1),
                             items: [
-                              _ExpressiveItemData(
+                              ExpressiveItemData(
                                 label: t.preview.edit_mode,
                                 icon: Icons.edit_outlined,
                               ),
-                              _ExpressiveItemData(
+                              ExpressiveItemData(
                                 label: t.preview.print_mode,
                                 icon: Icons.local_printshop_outlined,
                               ),
                             ],
                           ),
-                          _ExpressiveButtonGroup(
+                          ExpressiveButtonGroup(
                             selectedIndex: printTwoCopies ? 1 : 0,
-                            onChanged: (index) => onTogglePrintTwoCopies(index == 1),
+                            onChanged: (index) =>
+                                onTogglePrintTwoCopies(index == 1),
                             items: [
-                              _ExpressiveItemData(
+                              ExpressiveItemData(
                                 label: t.preview.copy,
                                 icon: Icons.looks_one_outlined,
                               ),
-                              _ExpressiveItemData(
+                              ExpressiveItemData(
                                 label: t.preview.copy,
                                 icon: Icons.looks_two_outlined,
                               ),
@@ -164,34 +169,36 @@ class PreviewPanel extends StatelessWidget {
                           frame: selectedFrame,
                           photoTimestamps: photoTimestamps,
                           isMirrored: isMirrored,
+                          isMobile: isMobile,
                         ),
                       ],
                       const Spacer(),
                       // Material 3 Expressive-style Button Group
-                      _ExpressiveButtonGroup(
+                      ExpressiveButtonGroup(
                         selectedIndex: showPaperPreview ? 1 : 0,
                         onChanged: (index) => onTogglePaperPreview(index == 1),
                         items: [
-                          _ExpressiveItemData(
+                          ExpressiveItemData(
                             label: t.preview.edit_mode,
                             icon: Icons.edit_outlined,
                           ),
-                          _ExpressiveItemData(
+                          ExpressiveItemData(
                             label: t.preview.print_mode,
                             icon: Icons.local_printshop_outlined,
                           ),
                         ],
                       ),
                       const SizedBox(width: 8),
-                      _ExpressiveButtonGroup(
+                      ExpressiveButtonGroup(
                         selectedIndex: printTwoCopies ? 1 : 0,
-                        onChanged: (index) => onTogglePrintTwoCopies(index == 1),
+                        onChanged: (index) =>
+                            onTogglePrintTwoCopies(index == 1),
                         items: [
-                          _ExpressiveItemData(
+                          ExpressiveItemData(
                             label: t.preview.copy,
                             icon: Icons.looks_one_outlined,
                           ),
-                          _ExpressiveItemData(
+                          ExpressiveItemData(
                             label: t.preview.copy,
                             icon: Icons.looks_two_outlined,
                           ),
@@ -308,12 +315,14 @@ class PreviewPanel extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                       child: showPaperPreview
                           ? Screenshot(
-                              controller: paperController ?? ScreenshotController(),
+                              controller:
+                                  paperController ?? ScreenshotController(),
                               child: VirtualPaper(
                                 isLandscape: isLandscape,
                                 child: printTwoCopies
                                     ? Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.min,
@@ -365,7 +374,8 @@ class PreviewPanel extends StatelessWidget {
                                     stripController ?? ScreenshotController(),
                                 child: printTwoCopies
                                     ? Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.min,
@@ -411,115 +421,6 @@ class PreviewPanel extends StatelessWidget {
   }
 }
 
-class _ExpressiveItemData {
-  final String label;
-  final IconData icon;
-
-  const _ExpressiveItemData({required this.label, required this.icon});
-}
-
-class _ExpressiveButtonGroup extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onChanged;
-  final List<_ExpressiveItemData> items;
-
-  const _ExpressiveButtonGroup({
-    required this.selectedIndex,
-    required this.onChanged,
-    required this.items,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: colorScheme.onSurface.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(items.length, (index) {
-          final isSelected = selectedIndex == index;
-          return _ExpressiveButton(
-            data: items[index],
-            isSelected: isSelected,
-            onTap: () => onChanged(index),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _ExpressiveButton extends StatelessWidget {
-  final _ExpressiveItemData data;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ExpressiveButton({
-    required this.data,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.secondary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.secondary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              data.icon,
-              size: 18,
-              color: isSelected
-                  ? colorScheme.onSecondary
-                  : colorScheme.secondary.withValues(alpha: 0.5),
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubic,
-              child: SizedBox(width: isSelected ? 8 : 0),
-            ),
-            if (isSelected)
-              Text(
-                data.label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  color: colorScheme.onSecondary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class VirtualPaper extends StatelessWidget {
   final Widget child;
@@ -738,12 +639,14 @@ class _CompactVideoRecapButton extends StatelessWidget {
   final FrameData frame;
   final List<Duration> photoTimestamps;
   final bool isMirrored;
+  final bool isMobile;
 
   const _CompactVideoRecapButton({
     required this.videoFile,
     required this.frame,
     required this.photoTimestamps,
     required this.isMirrored,
+    required this.isMobile,
   });
 
   @override
@@ -772,24 +675,29 @@ class _CompactVideoRecapButton extends StatelessWidget {
               barrierLabel: '',
               barrierColor: Colors.black87,
               transitionDuration: const Duration(milliseconds: 400),
-              pageBuilder: (context, anim1, anim2) => Center(
-                child: Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: 900,
-                    maxHeight: 800,
-                  ),
-                  margin: const EdgeInsets.all(32),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: VideoRecapPlayer(
-                      videoFile: videoFile,
-                      frame: frame,
-                      photoTimestamps: photoTimestamps,
-                      isMirrored: isMirrored,
+              pageBuilder: (context, anim1, anim2) {
+                return Center(
+                  child: Container(
+                    constraints: isMobile
+                        ? null
+                        : const BoxConstraints(maxWidth: 900, maxHeight: 800),
+                    width: isMobile ? MediaQuery.sizeOf(context).width : null,
+                    height: isMobile ? MediaQuery.sizeOf(context).height : null,
+                    margin: isMobile
+                        ? EdgeInsets.zero
+                        : const EdgeInsets.all(32),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: VideoRecapPlayer(
+                        videoFile: videoFile,
+                        frame: frame,
+                        photoTimestamps: photoTimestamps,
+                        isMirrored: isMirrored,
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
               transitionBuilder: (context, anim1, anim2, child) {
                 return FadeTransition(
                   opacity: anim1,

@@ -34,7 +34,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   bool _isPlaying = true;
 
   // Controller for full video
-  late VideoPlayerController _fullController;
+  VideoPlayerController? _fullController;
   bool _fullInitialized = false;
 
   // Controllers for each slot
@@ -44,24 +44,44 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   @override
   void initState() {
     super.initState();
-    _initializeFullPlayer();
-    _initializeSlotPlayers();
+    if (_viewMode == RecapViewMode.full) {
+      _initializeFullPlayer();
+    } else {
+      _initializeSlotPlayers();
+    }
+  }
+
+  void _disposeFullPlayer() {
+    _fullController?.dispose();
+    _fullController = null;
+    _fullInitialized = false;
+  }
+
+  void _disposeSlotPlayers() {
+    for (var controller in _slotControllers) {
+      controller.dispose();
+    }
+    _slotControllers.clear();
+    _slotsInitialized.clear();
   }
 
   Future<void> _initializeFullPlayer() async {
     final videoPath = widget.videoFile.path;
-    _fullController = kIsWeb
+    final controller = kIsWeb
         ? VideoPlayerController.networkUrl(Uri.parse(videoPath))
         : VideoPlayerController.file(File(videoPath));
+        
+    _fullController = controller;
+    _fullInitialized = false;
 
     try {
-      await _fullController.initialize();
-      await _fullController.setLooping(true);
-      await _fullController.setVolume(0); // Always mute
-      if (mounted) {
+      await controller.initialize();
+      await controller.setLooping(true);
+      await controller.setVolume(0); // Always mute
+      if (mounted && _fullController == controller) {
         setState(() => _fullInitialized = true);
-        if (_isPlaying && _viewMode == RecapViewMode.full) {
-          _fullController.play();
+        if (_isPlaying) {
+          controller.play();
         }
       }
     } catch (e) {
@@ -73,6 +93,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     final videoPath = widget.videoFile.path;
     final timestamps = widget.photoTimestamps;
     final slots = widget.frame.slots;
+
+    _disposeSlotPlayers();
 
     for (int i = 0; i < slots.length; i++) {
       final controller = kIsWeb
@@ -102,10 +124,13 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
           }
         });
 
-        if (mounted) {
-          setState(() => _slotsInitialized[i] = true);
-          if (_isPlaying && _viewMode == RecapViewMode.frame) {
-            controller.play();
+        if (mounted && _slotControllers.contains(controller)) {
+          final idx = _slotControllers.indexOf(controller);
+          if (idx != -1) {
+            setState(() => _slotsInitialized[idx] = true);
+            if (_isPlaying) {
+              controller.play();
+            }
           }
         }
       } catch (e) {
@@ -119,9 +144,9 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       _isPlaying = !_isPlaying;
       if (_viewMode == RecapViewMode.full) {
         if (_isPlaying) {
-          _fullController.play();
+          _fullController?.play();
         } else {
-          _fullController.pause();
+          _fullController?.pause();
         }
       } else {
         for (var controller in _slotControllers) {
@@ -139,8 +164,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     setState(() {
       _isPlaying = true;
       if (_viewMode == RecapViewMode.full) {
-        _fullController.seekTo(Duration.zero);
-        _fullController.play();
+        _fullController?.seekTo(Duration.zero);
+        _fullController?.play();
       } else {
         final timestamps = widget.photoTimestamps;
         for (int i = 0; i < _slotControllers.length; i++) {
@@ -160,10 +185,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
 
   @override
   void dispose() {
-    _fullController.dispose();
-    for (VideoPlayerController controller in _slotControllers) {
-      controller.dispose();
-    }
+    _disposeFullPlayer();
+    _disposeSlotPlayers();
     super.dispose();
   }
 
@@ -238,71 +261,76 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   Widget _buildHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.primary.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.video_collection_rounded,
-                  color: colorScheme.primary,
-                  size: 18,
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.center,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
-                const Gap(8),
-                Text(
-                  t.video_recap.title,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    fontSize: 12,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.3),
                   ),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.video_collection_rounded,
+                      color: colorScheme.primary,
+                      size: 18,
+                    ),
+                    const Gap(8),
+                    Text(
+                      t.video_recap.title,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(16),
+              // Mode Selector
+              _ModeSelector(
+                currentMode: _viewMode,
+                onChanged: (mode) {
+                  if (mode == _viewMode) return;
+                  setState(() => _viewMode = mode);
+                  if (mode == RecapViewMode.full) {
+                    _disposeSlotPlayers();
+                    _initializeFullPlayer();
+                  } else {
+                    _disposeFullPlayer();
+                    _initializeSlotPlayers();
+                  }
+                },
+              ),
+              const Gap(16),
+              IconButton.filledTonal(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.1),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          // Mode Selector
-          _ModeSelector(
-            currentMode: _viewMode,
-            onChanged: (mode) {
-              setState(() => _viewMode = mode);
-              if (mode == RecapViewMode.full) {
-                // Pause slot players when showing full video
-                for (var controller in _slotControllers) {
-                  controller.pause();
-                }
-                if (_fullInitialized && _isPlaying) _fullController.play();
-              } else {
-                // Pause full player when showing frame slots
-                _fullController.pause();
-                for (var controller in _slotControllers) {
-                  if (_isPlaying) controller.play();
-                }
-              }
-            },
-          ),
-          const Gap(16),
-          IconButton.filledTonal(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withValues(alpha: 0.1),
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -322,10 +350,10 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_viewMode == RecapViewMode.full && _fullInitialized)
+          if (_viewMode == RecapViewMode.full && _fullInitialized && _fullController != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: _VideoProgressBar(controller: _fullController),
+              child: _VideoProgressBar(controller: _fullController!),
             ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -354,7 +382,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   }
 
   Widget _buildFullView() {
-    if (!_fullInitialized) {
+    if (!_fullInitialized || _fullController == null) {
       return const CircularProgressIndicator();
     }
     return Container(
@@ -372,10 +400,10 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       ),
       clipBehavior: Clip.antiAlias,
       child: AspectRatio(
-        aspectRatio: _fullController.value.aspectRatio,
+        aspectRatio: _fullController!.value.aspectRatio,
         child: Transform.scale(
           scaleX: widget.isMirrored == kIsWeb ? 1 : -1,
-          child: VideoPlayer(_fullController),
+          child: VideoPlayer(_fullController!),
         ),
       ),
     );

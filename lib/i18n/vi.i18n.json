@@ -37,7 +37,11 @@
     "frame_mode": "GẮN KHUNG",
     "full_mode": "TOÀN BỘ",
     "frames": "Khung hình",
-    "filters": "Bộ lọc"
+    "filters": "Bộ lọc",
+    "savePhoto": "LƯU ẢNH",
+    "saveSuccess": "Đã lưu ảnh vào thư viện!",
+    "saveError": "Lỗi khi lưu ảnh: $error",
+    "viewNow": "XEM NGAY"
   },
   "dialogs": {
     "photoSelection": {

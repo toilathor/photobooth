@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
@@ -10,8 +12,6 @@ import 'package:th_photobooth/features/photobooth/widgets/camera_preview_widget.
 import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.dart';
 import 'package:th_photobooth/features/photobooth/widgets/previews_footer.dart';
 import 'package:th_photobooth/features/photobooth/widgets/settings_panel.dart';
-import 'package:provider/provider.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class PhotoboothScreen extends StatefulWidget {
   const PhotoboothScreen({super.key});
@@ -27,42 +27,59 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface.withValues(alpha: 0.9),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border(
-              top: BorderSide(
-                color: colorScheme.secondary.withValues(alpha: 0.3),
-                width: 1.5,
+        final bool isLandscape =
+            MediaQuery.orientationOf(context) == Orientation.landscape;
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight:
+                MediaQuery.sizeOf(context).height * (isLandscape ? 0.95 : 0.7),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface.withValues(alpha: 0.9),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
+              border: Border(
+                top: BorderSide(
+                  color: colorScheme.secondary.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
               ),
             ),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 48,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: colorScheme.onSurface.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: SafeArea(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 48,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.2,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
-                      ),
+                        const Gap(24),
+                        const SettingsPanel(isBottomSheet: true),
+                      ],
                     ),
-                    const Gap(24),
-                    const SettingsPanel(isBottomSheet: true),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -77,9 +94,13 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final provider = context.watch<PhotoboothProvider>();
     final bool isMobile =
-        ResponsiveBreakpoints.of(context).smallerThan(DESKTOP);
+        ResponsiveBreakpoints.of(context).smallerThan(DESKTOP) ||
+        MediaQuery.sizeOf(context).height < 500;
+    final bool isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       floatingActionButton: (!isMobile && !provider.isFullscreen)
           ? FloatingActionButton.small(
@@ -90,29 +111,46 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> {
               child: const Icon(Icons.fullscreen_rounded),
             )
           : null,
+      bottomNavigationBar: isMobile
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: const PreviewsFooter(),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: Column(
           children: [
-            PhotoboothHeader(
-              trailing: isMobile
-                  ? IconButton(
-                      icon: Icon(
-                        Icons.settings_rounded,
-                        color: colorScheme.secondary,
-                        size: 28,
-                      ),
-                      onPressed: () => _showSettingsBottomSheet(context),
-                    )
-                  : null,
-            ),
+            // Hide header in landscape mobile to save vertical space
+            if (!(isMobile && isLandscape))
+              PhotoboothHeader(
+                trailing: isMobile
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.settings_rounded,
+                          color: colorScheme.secondary,
+                          size: 28,
+                        ),
+                        onPressed: () => _showSettingsBottomSheet(context),
+                      )
+                    : null,
+              ),
             Expanded(
               child: isMobile
                   ? (provider.cameraController == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : _MobilePanel(
-                          provider.cameraController!,
-                          cameraPreviewKey: _cameraPreviewKey,
-                        ))
+                        ? const Center(child: CircularProgressIndicator())
+                        : isLandscape
+                        ? _MobileLandscapePanel(
+                            provider.cameraController!,
+                            cameraPreviewKey: _cameraPreviewKey,
+                            onSettingsTap: () =>
+                                _showSettingsBottomSheet(context),
+                          )
+                        : _MobilePanel(
+                            provider.cameraController!,
+                            cameraPreviewKey: _cameraPreviewKey,
+                          ))
                   : Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Row(
@@ -180,9 +218,70 @@ class _MobilePanel extends StatelessWidget {
           const ActionButtonsWidget(),
           const Gap(16),
           const PhotoPreviewsPanel(isMobile: true),
-          const PreviewsFooter(),
         ],
       ),
+    );
+  }
+}
+
+/// Landscape-specific mobile layout:
+/// Row with Camera on the left (bounded by available height) and
+/// scrollable controls + thumbnails on the right.
+class _MobileLandscapePanel extends StatelessWidget {
+  const _MobileLandscapePanel(
+    this.controller, {
+    required this.cameraPreviewKey,
+    required this.onSettingsTap,
+  });
+
+  final CameraController controller;
+  final Key cameraPreviewKey;
+  final VoidCallback onSettingsTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        // Left: Camera preview (bounded by height, not scrollable)
+        Expanded(
+          flex: 3,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+            child: CameraPreviewWidget(controller, key: cameraPreviewKey),
+          ),
+        ),
+        // Right: Actions + Thumbnails (scrollable vertically)
+        Expanded(
+          flex: 2,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(8, 4, 16, 4),
+            child: Column(
+              children: [
+                // Settings icon in top-right
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.settings_rounded,
+                      color: colorScheme.secondary,
+                      size: 24,
+                    ),
+                    onPressed: onSettingsTap,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+                const Gap(4),
+                const ActionButtonsWidget(),
+                const Gap(8),
+                const PhotoPreviewsPanel(isMobile: true),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

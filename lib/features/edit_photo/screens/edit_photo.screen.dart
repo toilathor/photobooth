@@ -1,10 +1,18 @@
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 import 'package:gap/gap.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:th_photobooth/components/google_sign_in_button.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
+import 'package:th_photobooth/components/primary_button.dart';
+import 'package:th_photobooth/components/secondary_button.dart';
 import 'package:th_photobooth/core/configs/storage_config.dart';
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/editor_panel.dart';
@@ -12,9 +20,6 @@ import 'package:th_photobooth/features/edit_photo/widgets/preview_panel.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/qr_share_dialog.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
-import 'package:provider/provider.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:screenshot/screenshot.dart';
 
 class EditPhotoScreen extends StatefulWidget {
   const EditPhotoScreen({super.key});
@@ -62,6 +67,68 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       capturePaper: () => _capturePaperIndependent(provider),
       captureStrip: () => _captureStripIndependent(provider),
     );
+  }
+
+  Future<void> _handleSaveRequest(BuildContext context) async {
+    final provider = context.read<EditPhotoProvider>();
+    _showSimpleLoading(context);
+
+    try {
+      final files = await provider.generateAllFiles(
+        capturePaper: () => _capturePaperIndependent(provider),
+        captureStrip: () => _captureStripIndependent(provider),
+      );
+
+      if (files != null && files.isNotEmpty) {
+        final tempDir = await getTemporaryDirectory();
+
+        for (final entry in files.entries) {
+          final fileName = entry.key;
+          final bytes = entry.value;
+
+          if (fileName.endsWith('.mp4') || fileName.endsWith('.webm')) {
+            final file = File('${tempDir.path}/$fileName');
+            await file.writeAsBytes(bytes);
+            await Gal.putVideo(file.path);
+          } else {
+            // Assume it's an image
+            await Gal.putImageBytes(bytes);
+          }
+        }
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(t.editor.saveSuccess),
+              action: SnackBarAction(
+                label: t.editor.viewNow,
+                onPressed: () async {
+                  await Gal.open();
+                },
+              ),
+            ),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(t.editor.saveError(error: 'No files generated')),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.editor.saveError(error: e.toString()))),
+        );
+      }
+    } finally {
+      if (context.mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
   }
 
   void _showSimpleLoading(BuildContext context) {
@@ -367,68 +434,240 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bool isMobile = ResponsiveBreakpoints.of(context).smallerThan(DESKTOP);
+    final bool isMobile =
+        ResponsiveBreakpoints.of(context).smallerThan(DESKTOP) ||
+        MediaQuery.sizeOf(context).height < 500;
+
+    final bool isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return Consumer<EditPhotoProvider>(
       builder: (context, editPhotoProvider, child) {
         return Scaffold(
           backgroundColor: colorScheme.surface,
+          bottomNavigationBar: isMobile
+              ? SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: isLandscape ? 0 : 0,
+                    ),
+                    child: SizedBox(
+                      height: isLandscape ? 48 : null,
+                      child: Row(
+                        children: [
+                          if (kIsWeb) ...[
+                            if (StorageConfig.activeStorage !=
+                                StorageType.none) ...[
+                              Expanded(
+                                flex: 1,
+                                child: SecondaryButton(
+                                  onTap: () => _handleQRRequest(context),
+                                  icon: Icons.qr_code_2_rounded,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                            ],
+                          ] else ...[
+                            Expanded(
+                              flex: 1,
+                              child: SecondaryButton(
+                                onTap: () => _handleSaveRequest(context),
+                                icon: Icons.save_alt_rounded,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                          ],
+                          // Print Button
+                          Expanded(
+                            flex: 3,
+                            child: PrimaryButton(
+                              onTap: () {
+                                // TODO: Implement print logic
+                              },
+                              label: t.editor.printPhoto,
+                              icon: Icons.local_printshop_rounded,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : null,
           body: SafeArea(
             child: Padding(
               padding: isMobile
-                  ? const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0)
+                  ? EdgeInsets.symmetric(
+                      horizontal: isLandscape ? 8.0 : 12.0,
+                      vertical: isLandscape ? 4.0 : 8.0,
+                    )
                   : const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  const PhotoboothHeader(),
+                  // Hide header in landscape mobile
+                  if (!(isMobile && isLandscape)) const PhotoboothHeader(),
                   Expanded(
                     child: isMobile
-                        ? SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                PreviewPanel(
-                                  stripController: _stripController,
-                                  paperController: _paperController,
-                                  photos: editPhotoProvider.capturedPhotos,
-                                  selectedFrame: editPhotoProvider.selectedFrame,
-                                  availableFrames: editPhotoProvider.filteredFrames,
-                                  printTwoCopies: editPhotoProvider.printTwoCopies,
-                                  showPaperPreview: editPhotoProvider.showPaperPreview,
-                                  onTogglePrintTwoCopies:
-                                      editPhotoProvider.togglePrintTwoCopies,
-                                  onTogglePaperPreview:
-                                      editPhotoProvider.togglePaperPreview,
-                                  videoRecapFile: editPhotoProvider.videoRecapFile,
-                                  photoTimestamps: editPhotoProvider.photoTimestamps,
-                                  selectedFilter: editPhotoProvider.selectedFilter,
-                                  filterIntensity: editPhotoProvider.filterIntensity,
-                                  isMirrored: editPhotoProvider.isMirrored,
-                                  isMobile: true,
-                                ),
-                                const Gap(16),
-                                EditorPanel(
-                                  availableFrames: editPhotoProvider.filteredFrames,
-                                  selectedFrame: editPhotoProvider.selectedFrame.path,
-                                  onFrameSelected: editPhotoProvider.setSelectedFrame,
-                                  photos: editPhotoProvider.capturedPhotos,
-                                  videoRecapFile: editPhotoProvider.videoRecapFile,
-                                  photoTimestamps: editPhotoProvider.photoTimestamps,
-                                  isProcessing: editPhotoProvider.isProcessing,
-                                  filters: editPhotoProvider.filters,
-                                  selectedFilter: editPhotoProvider.selectedFilter,
-                                  filterIntensity: editPhotoProvider.filterIntensity,
-                                  onFilterSelected: editPhotoProvider.setFilter,
-                                  onFilterIntensityChanged:
-                                      editPhotoProvider.setFilterIntensity,
-                                  onQRRequested:
-                                      StorageConfig.activeStorage == StorageType.none
-                                      ? null
-                                      : () => _handleQRRequest(context),
-                                  isMobile: true,
-                                ),
-                              ],
-                            ),
-                          )
+                        ? (isLandscape
+                              // Landscape mobile: Row layout
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Left: Preview (scrollable)
+                                    Expanded(
+                                      flex: 2,
+                                      child: SingleChildScrollView(
+                                        child: PreviewPanel(
+                                          stripController: _stripController,
+                                          paperController: _paperController,
+                                          photos:
+                                              editPhotoProvider.capturedPhotos,
+                                          selectedFrame:
+                                              editPhotoProvider.selectedFrame,
+                                          availableFrames:
+                                              editPhotoProvider.filteredFrames,
+                                          printTwoCopies:
+                                              editPhotoProvider.printTwoCopies,
+                                          showPaperPreview: editPhotoProvider
+                                              .showPaperPreview,
+                                          onTogglePrintTwoCopies:
+                                              editPhotoProvider
+                                                  .togglePrintTwoCopies,
+                                          onTogglePaperPreview:
+                                              editPhotoProvider
+                                                  .togglePaperPreview,
+                                          videoRecapFile:
+                                              editPhotoProvider.videoRecapFile,
+                                          photoTimestamps:
+                                              editPhotoProvider.photoTimestamps,
+                                          selectedFilter:
+                                              editPhotoProvider.selectedFilter,
+                                          filterIntensity:
+                                              editPhotoProvider.filterIntensity,
+                                          isMirrored:
+                                              editPhotoProvider.isMirrored,
+                                          isMobile: true,
+                                        ),
+                                      ),
+                                    ),
+                                    const Gap(8),
+                                    // Right: Editor (scrollable)
+                                    Expanded(
+                                      flex: 3,
+                                      child: SingleChildScrollView(
+                                        child: EditorPanel(
+                                          availableFrames:
+                                              editPhotoProvider.filteredFrames,
+                                          selectedFrame: editPhotoProvider
+                                              .selectedFrame
+                                              .path,
+                                          onFrameSelected: editPhotoProvider
+                                              .setSelectedFrame,
+                                          photos:
+                                              editPhotoProvider.capturedPhotos,
+                                          videoRecapFile:
+                                              editPhotoProvider.videoRecapFile,
+                                          photoTimestamps:
+                                              editPhotoProvider.photoTimestamps,
+                                          isProcessing:
+                                              editPhotoProvider.isProcessing,
+                                          filters: editPhotoProvider.filters,
+                                          selectedFilter:
+                                              editPhotoProvider.selectedFilter,
+                                          filterIntensity:
+                                              editPhotoProvider.filterIntensity,
+                                          onFilterSelected:
+                                              editPhotoProvider.setFilter,
+                                          onFilterIntensityChanged:
+                                              editPhotoProvider
+                                                  .setFilterIntensity,
+                                          onQRRequested:
+                                              StorageConfig.activeStorage ==
+                                                  StorageType.none
+                                              ? null
+                                              : () => _handleQRRequest(context),
+                                          onSaveRequested: () =>
+                                              _handleSaveRequest(context),
+                                          isMobile: true,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              // Portrait mobile: vertical scroll
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      PreviewPanel(
+                                        stripController: _stripController,
+                                        paperController: _paperController,
+                                        photos:
+                                            editPhotoProvider.capturedPhotos,
+                                        selectedFrame:
+                                            editPhotoProvider.selectedFrame,
+                                        availableFrames:
+                                            editPhotoProvider.filteredFrames,
+                                        printTwoCopies:
+                                            editPhotoProvider.printTwoCopies,
+                                        showPaperPreview:
+                                            editPhotoProvider.showPaperPreview,
+                                        onTogglePrintTwoCopies:
+                                            editPhotoProvider
+                                                .togglePrintTwoCopies,
+                                        onTogglePaperPreview: editPhotoProvider
+                                            .togglePaperPreview,
+                                        videoRecapFile:
+                                            editPhotoProvider.videoRecapFile,
+                                        photoTimestamps:
+                                            editPhotoProvider.photoTimestamps,
+                                        selectedFilter:
+                                            editPhotoProvider.selectedFilter,
+                                        filterIntensity:
+                                            editPhotoProvider.filterIntensity,
+                                        isMirrored:
+                                            editPhotoProvider.isMirrored,
+                                        isMobile: true,
+                                      ),
+                                      const Gap(16),
+                                      EditorPanel(
+                                        availableFrames:
+                                            editPhotoProvider.filteredFrames,
+                                        selectedFrame: editPhotoProvider
+                                            .selectedFrame
+                                            .path,
+                                        onFrameSelected:
+                                            editPhotoProvider.setSelectedFrame,
+                                        photos:
+                                            editPhotoProvider.capturedPhotos,
+                                        videoRecapFile:
+                                            editPhotoProvider.videoRecapFile,
+                                        photoTimestamps:
+                                            editPhotoProvider.photoTimestamps,
+                                        isProcessing:
+                                            editPhotoProvider.isProcessing,
+                                        filters: editPhotoProvider.filters,
+                                        selectedFilter:
+                                            editPhotoProvider.selectedFilter,
+                                        filterIntensity:
+                                            editPhotoProvider.filterIntensity,
+                                        onFilterSelected:
+                                            editPhotoProvider.setFilter,
+                                        onFilterIntensityChanged:
+                                            editPhotoProvider
+                                                .setFilterIntensity,
+                                        onQRRequested:
+                                            StorageConfig.activeStorage ==
+                                                StorageType.none
+                                            ? null
+                                            : () => _handleQRRequest(context),
+                                        onSaveRequested: () =>
+                                            _handleSaveRequest(context),
+                                        isMobile: true,
+                                      ),
+                                    ],
+                                  ),
+                                ))
                         : Row(
                             children: [
                               Expanded(
@@ -437,18 +676,26 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                                   stripController: _stripController,
                                   paperController: _paperController,
                                   photos: editPhotoProvider.capturedPhotos,
-                                  selectedFrame: editPhotoProvider.selectedFrame,
-                                  availableFrames: editPhotoProvider.filteredFrames,
-                                  printTwoCopies: editPhotoProvider.printTwoCopies,
-                                  showPaperPreview: editPhotoProvider.showPaperPreview,
+                                  selectedFrame:
+                                      editPhotoProvider.selectedFrame,
+                                  availableFrames:
+                                      editPhotoProvider.filteredFrames,
+                                  printTwoCopies:
+                                      editPhotoProvider.printTwoCopies,
+                                  showPaperPreview:
+                                      editPhotoProvider.showPaperPreview,
                                   onTogglePrintTwoCopies:
                                       editPhotoProvider.togglePrintTwoCopies,
                                   onTogglePaperPreview:
                                       editPhotoProvider.togglePaperPreview,
-                                  videoRecapFile: editPhotoProvider.videoRecapFile,
-                                  photoTimestamps: editPhotoProvider.photoTimestamps,
-                                  selectedFilter: editPhotoProvider.selectedFilter,
-                                  filterIntensity: editPhotoProvider.filterIntensity,
+                                  videoRecapFile:
+                                      editPhotoProvider.videoRecapFile,
+                                  photoTimestamps:
+                                      editPhotoProvider.photoTimestamps,
+                                  selectedFilter:
+                                      editPhotoProvider.selectedFilter,
+                                  filterIntensity:
+                                      editPhotoProvider.filterIntensity,
                                   isMirrored: editPhotoProvider.isMirrored,
                                 ),
                               ),
@@ -456,23 +703,33 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                               Expanded(
                                 flex: 3,
                                 child: EditorPanel(
-                                  availableFrames: editPhotoProvider.filteredFrames,
-                                  selectedFrame: editPhotoProvider.selectedFrame.path,
-                                  onFrameSelected: editPhotoProvider.setSelectedFrame,
+                                  availableFrames:
+                                      editPhotoProvider.filteredFrames,
+                                  selectedFrame:
+                                      editPhotoProvider.selectedFrame.path,
+                                  onFrameSelected:
+                                      editPhotoProvider.setSelectedFrame,
                                   photos: editPhotoProvider.capturedPhotos,
-                                  videoRecapFile: editPhotoProvider.videoRecapFile,
-                                  photoTimestamps: editPhotoProvider.photoTimestamps,
+                                  videoRecapFile:
+                                      editPhotoProvider.videoRecapFile,
+                                  photoTimestamps:
+                                      editPhotoProvider.photoTimestamps,
                                   isProcessing: editPhotoProvider.isProcessing,
                                   filters: editPhotoProvider.filters,
-                                  selectedFilter: editPhotoProvider.selectedFilter,
-                                  filterIntensity: editPhotoProvider.filterIntensity,
+                                  selectedFilter:
+                                      editPhotoProvider.selectedFilter,
+                                  filterIntensity:
+                                      editPhotoProvider.filterIntensity,
                                   onFilterSelected: editPhotoProvider.setFilter,
                                   onFilterIntensityChanged:
                                       editPhotoProvider.setFilterIntensity,
                                   onQRRequested:
-                                      StorageConfig.activeStorage == StorageType.none
+                                      StorageConfig.activeStorage ==
+                                          StorageType.none
                                       ? null
                                       : () => _handleQRRequest(context),
+                                  onSaveRequested: () =>
+                                      _handleSaveRequest(context),
                                 ),
                               ),
                             ],

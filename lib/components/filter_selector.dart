@@ -26,8 +26,8 @@ class FilterSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMobile =
-        ResponsiveBreakpoints.of(context).smallerThan(DESKTOP);
+    final bool isMobile = ResponsiveBreakpoints.of(context).smallerThan(DESKTOP) ||
+        MediaQuery.sizeOf(context).height < 500;
     final double screenWidth = MediaQuery.of(context).size.width;
 
     final int crossAxisCount = isMobile

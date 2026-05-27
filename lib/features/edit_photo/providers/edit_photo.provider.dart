@@ -172,6 +172,45 @@ class EditPhotoProvider with ChangeNotifier {
     required Future<Uint8List?> Function() capturePaper,
     required Future<Uint8List?> Function() captureStrip,
   }) async {
+    try {
+      final filesToUpload = await generateAllFiles(
+        capturePaper: capturePaper,
+        captureStrip: captureStrip,
+      );
+
+      if (filesToUpload == null || filesToUpload.isEmpty) return null;
+
+      // 4. Thực hiện upload
+      final String? url = await StorageFactory.instance.uploadCollection(
+        files: filesToUpload,
+        folderName: sessionId!,
+        onProgress: (int current, int total) {
+          setUploadState(
+            isUploading: true,
+            progress: current / total,
+            message: t.google_drive.uploading_files(
+              current: current,
+              total: total,
+            ),
+          );
+        },
+      );
+
+      return url;
+    } catch (e) {
+      debugPrint('Upload error: $e');
+      rethrow;
+    } finally {
+      setUploadState(isUploading: false);
+    }
+  }
+
+  /// Thực hiện quy trình upload bộ sưu tập
+  /// Cần truyền vào function capture để lấy dữ liệu từ UI (vì UI quản lý RepaintBoundary)
+  Future<Map<String, Uint8List>?> generateAllFiles({
+    required Future<Uint8List?> Function() capturePaper,
+    required Future<Uint8List?> Function() captureStrip,
+  }) async {
     if (sessionId == null && capturedPhotos.isNotEmpty) {
       sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
     }
@@ -278,25 +317,9 @@ class EditPhotoProvider with ChangeNotifier {
         }
       }
 
-      // 4. Thực hiện upload
-      final String? url = await StorageFactory.instance.uploadCollection(
-        files: filesToUpload,
-        folderName: sessionId!,
-        onProgress: (int current, int total) {
-          setUploadState(
-            isUploading: true,
-            progress: current / total,
-            message: t.google_drive.uploading_files(
-              current: current,
-              total: total,
-            ),
-          );
-        },
-      );
-
-      return url;
+      return filesToUpload;
     } catch (e) {
-      debugPrint('Upload error: $e');
+      debugPrint('Generation error: $e');
       rethrow;
     } finally {
       setUploadState(isUploading: false);

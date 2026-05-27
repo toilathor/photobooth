@@ -61,7 +61,9 @@ class GoogleDriveService implements StorageService {
 
       // Khởi tạo Google Sign-In với clientId từ Config
       // Chúng ta gọi initialize cho cả Web và Mobile để đảm bảo SDK luôn sẵn sàng
-      await _googleSignIn.initialize(clientId: GoogleDriveConfig.clientId);
+      await _googleSignIn.initialize(
+        clientId: kIsWeb ? GoogleDriveConfig.clientId : null,
+      );
 
       if (!kIsWeb) {
         _currentUser = await _googleSignIn.attemptLightweightAuthentication();

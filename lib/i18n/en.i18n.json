@@ -37,7 +37,11 @@
     "frame_mode": "WITH FRAME",
     "full_mode": "FULL VIEW",
     "frames": "Frames",
-    "filters": "Filters"
+    "filters": "Filters",
+    "savePhoto": "SAVE PHOTO",
+    "saveSuccess": "Saved to gallery successfully!",
+    "saveError": "Failed to save: $error",
+    "viewNow": "VIEW NOW"
   },
   "dialogs": {
     "photoSelection": {

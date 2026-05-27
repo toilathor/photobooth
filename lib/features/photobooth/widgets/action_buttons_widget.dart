@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
-import 'package:provider/provider.dart';
 
 class ActionButtonsWidget extends StatelessWidget {
   const ActionButtonsWidget({super.key});
@@ -29,7 +29,8 @@ class ActionButtonsWidget extends StatelessWidget {
                 onTap: provider.takeManualPhoto,
                 isEnabled:
                     !provider.isAutoCapturing &&
-                    provider.capturedPhotos.length < provider.selectedPhotoCount,
+                    provider.capturedPhotos.length <
+                        provider.selectedPhotoCount,
               ),
               Gap(isMobile ? 16 : 32),
               _ActionIcon(
@@ -135,9 +136,18 @@ class _ActionIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 850;
-    final double outerSize = isPrimary ? (isMobile ? 72 : 84) : (isMobile ? 54 : 64);
-    final double innerSize = isPrimary ? (isMobile ? 60 : 70) : (isMobile ? 42 : 50);
-    final double iconSize = isPrimary ? (isMobile ? 28 : 36) : (isMobile ? 20 : 24);
+    final double outerSize = isPrimary
+        ? (isMobile ? 72 : 84)
+        : (isMobile ? 54 : 64);
+    final double innerSize = isPrimary
+        ? (isMobile ? 60 : 70)
+        : (isMobile ? 42 : 50);
+    final double iconSize = isPrimary
+        ? (isMobile ? 28 : 36)
+        : (isMobile ? 20 : 24);
+    final bool useGradient = isPrimary;
+    final Color lighterSecondary =
+        Color.lerp(colorScheme.secondary, Colors.white, 0.4) ?? Colors.white;
 
     return Opacity(
       opacity: isEnabled ? 1.0 : 0.4,
@@ -148,17 +158,23 @@ class _ActionIcon extends StatelessWidget {
             child: InkWell(
               onTap: isEnabled ? onTap : null,
               customBorder: const CircleBorder(),
-              splashColor: colorScheme.secondary.withValues(alpha: 0.3),
-              highlightColor: colorScheme.secondary.withValues(alpha: 0.1),
+              splashColor:
+                  (useGradient ? colorScheme.secondary : colorScheme.onSurface)
+                      .withValues(alpha: 0.3),
+              highlightColor:
+                  (useGradient ? colorScheme.secondary : colorScheme.onSurface)
+                      .withValues(alpha: 0.1),
               child: Container(
                 width: outerSize,
                 height: outerSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: colorScheme.secondary.withValues(
-                      alpha: isPrimary ? 0.6 : 0.3,
-                    ),
+                    color:
+                        (useGradient
+                                ? colorScheme.secondary
+                                : colorScheme.onSurface)
+                            .withValues(alpha: isPrimary ? 0.6 : 0.2),
                     width: 1,
                   ),
                   boxShadow: isPrimary && isEnabled
@@ -177,18 +193,18 @@ class _ActionIcon extends StatelessWidget {
                     height: innerSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: isPrimary
+                      gradient: useGradient
                           ? LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
                                 colorScheme.secondary,
-                                const Color(0xFFFFE57F), // Lighter Gold
+                                lighterSecondary,
                                 colorScheme.secondary,
                               ],
                             )
                           : null,
-                      color: isPrimary
+                      color: useGradient
                           ? null
                           : colorScheme.onSurface.withValues(alpha: 0.1),
                       border: isPrimary
@@ -197,8 +213,8 @@ class _ActionIcon extends StatelessWidget {
                               width: 1.5,
                             )
                           : Border.all(
-                              color: colorScheme.secondary.withValues(
-                                alpha: 0.2,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.1,
                               ),
                             ),
                     ),
@@ -206,8 +222,8 @@ class _ActionIcon extends StatelessWidget {
                       icon,
                       size: iconSize,
                       color: isPrimary
-                          ? colorScheme.primary
-                          : colorScheme.secondary,
+                          ? colorScheme.onSecondary
+                          : colorScheme.onSurface,
                     ),
                   ),
                 ),

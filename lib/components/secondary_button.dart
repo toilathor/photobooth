@@ -13,12 +13,9 @@ class SecondaryButton extends StatelessWidget {
     return Container(
       height: 72,
       decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.1),
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.onSurface.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: colorScheme.outline, width: 1.5),
       ),
       child: Material(
         color: Colors.transparent,

@@ -1,17 +1,16 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
-
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/screens/photobooth.screen.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/cache_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
-import 'package:provider/provider.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,12 +44,15 @@ class PhotoboothApp extends StatelessWidget {
     return MaterialApp(
       title: AppConfig.appName,
       theme: AppConfig.theme,
-      themeMode: ThemeMode.light,
+      darkTheme: AppConfig.darkTheme,
+      themeMode: ThemeMode.system,
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
-        final bool isDesktop = MediaQuery.of(context).size.width >= 850;
+        final bool isDesktop =
+            MediaQuery.sizeOf(context).width >= 850 &&
+            MediaQuery.sizeOf(context).height >= 500;
         return ResponsiveBreakpoints.builder(
           child: Stack(
             children: [

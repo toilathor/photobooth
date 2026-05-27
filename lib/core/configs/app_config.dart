@@ -28,7 +28,11 @@ class AppConfig {
       flavor == AppFlavor.personal ? 'TH PhotoBooth' : 'PhotoBooth';
   static ThemeData get theme => flavor == AppFlavor.personal
       ? ThemeConfig.weddingTheme
-      : ThemeConfig.lightTheme;
+      : ThemeConfig.commercialLightTheme;
+
+  static ThemeData get darkTheme => flavor == AppFlavor.personal
+      ? ThemeConfig.weddingTheme
+      : ThemeConfig.commercialDarkTheme;
 
   // Photo settings
   static const List<int> photoCounts = [1, 3, 4];

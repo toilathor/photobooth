@@ -16,6 +16,7 @@ class CameraPreviewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<PhotoboothProvider>();
     final colorScheme = Theme.of(context).colorScheme;
+    final bool isMobile = MediaQuery.sizeOf(context).shortestSide < 600;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(32),
@@ -77,16 +78,22 @@ class CameraPreviewWidget extends StatelessWidget {
                                           milliseconds: 1000,
                                         ),
                                         textStyle: GoogleFonts.inter(
-                                          fontSize: 140,
+                                          fontSize: isMobile ? 64 : 140,
                                           fontWeight: FontWeight.w900,
                                           color: colorScheme.secondary,
                                           shadows: [
                                             Shadow(
                                               blurRadius: 20,
                                               color: Colors.black.withValues(
-                                                alpha: 0.5,
+                                                alpha: 0.7,
                                               ),
                                               offset: const Offset(0, 4),
+                                            ),
+                                            Shadow(
+                                              blurRadius: 40,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.5,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -102,16 +109,22 @@ class CameraPreviewWidget extends StatelessWidget {
                                       ScaleAnimatedText(
                                         '${provider.currentCountdownValue}',
                                         textStyle: GoogleFonts.outfit(
-                                          fontSize: 140,
+                                          fontSize: isMobile ? 80 : 140,
                                           fontWeight: FontWeight.w900,
-                                          color: colorScheme.onSurface,
+                                          color: Colors.white,
                                           shadows: [
                                             Shadow(
                                               blurRadius: 30,
                                               color: Colors.black.withValues(
-                                                alpha: 0.4,
+                                                alpha: 0.7,
                                               ),
-                                              offset: const Offset(0, 10),
+                                              offset: const Offset(0, 6),
+                                            ),
+                                            Shadow(
+                                              blurRadius: 60,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.5,
+                                              ),
                                             ),
                                           ],
                                         ),
