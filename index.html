@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!DOCTYPE html><html><head>
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
@@ -23,17 +21,225 @@
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="my_photobooth">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="PhotoBooth">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <script>
+    // Determine flavor (either from compile-time web-define or dynamic runtime fallback)
+    let flavor = 'personal';
+    if (flavor.startsWith('{{') || flavor === '') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hostname = window.location.hostname;
+      flavor = 'commercial';
+      if (urlParams.get('flavor') === 'personal' || hostname.includes('thphotobooth') || hostname.includes('personal')) {
+        flavor = 'personal';
+      }
+    }
+    window.appFlavor = flavor;
 
-  <title>my_photobooth</title>
-  <link rel="manifest" href="manifest.json">
+    // 1. Dynamic Manifest Link
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = `manifest-${flavor}.json`;
+    document.head.appendChild(manifestLink);
+
+    // 2. Dynamic Favicon Link
+    const faviconLink = document.createElement('link');
+    faviconLink.rel = 'icon';
+    faviconLink.type = 'image/png';
+    faviconLink.href = `icons-${flavor}/favicon.png`;
+    document.head.appendChild(faviconLink);
+
+    // 3. Dynamic Apple Touch Icon Link
+    const appleIconLink = document.createElement('link');
+    appleIconLink.rel = 'apple-touch-icon';
+    appleIconLink.href = `icons-${flavor}/Icon-192.png`;
+    document.head.appendChild(appleIconLink);
+
+    // 4. Dynamic Title & Background Color
+    const appName = flavor === 'personal' ? 'TH PhotoBooth' : 'PhotoBooth';
+    const appNameFull = flavor === 'personal' ? 'TH PhotoBooth - Lưu giữ mọi khoảnh khắc' : 'PhotoBooth - Lưu giữ mọi khoảnh khắc';
+    document.title = appNameFull;
+
+    const bgColor = flavor === 'personal' ? '#440708' : '#101116';
+    document.documentElement.style.setProperty('--splash-bg-color', bgColor);
+
+    // Set apple title meta on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if (appleTitleMeta) {
+        appleTitleMeta.setAttribute('content', appName);
+      }
+    });
+  </script>
+  
+  
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  
+  <style id="splash-screen-style">
+    html {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      background-color: #101116;
+          background-size: 100% 100%;
+    }
+
+    .center {
+      margin: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .contain {
+      display:block;
+      width:100%; height:100%;
+      object-fit: contain;
+    }
+
+    .stretch {
+      display:block;
+      width:100%; height:100%;
+    }
+
+    .cover {
+      display:block;
+      width:100%; height:100%;
+      object-fit: cover;
+    }
+
+    .bottom {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      -ms-transform: translate(-50%, 0);
+      transform: translate(-50%, 0);
+    }
+
+    .bottomLeft {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    .bottomRight {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #101116;
+          }
+    }
+  </style>
+  <script id="splash-screen-script">
+    function removeSplashFromWeb() {
+      document.getElementById("splash")?.remove();
+      document.getElementById("splash-branding")?.remove();
+      document.body.style.background = "transparent";
+    }
+  </script>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <picture id="splash-branding">
+    <source id="source-branding-light" srcset="splash/img/branding-1x.png 1x, splash/img/branding-2x.png 2x, splash/img/branding-3x.png 3x, splash/img/branding-4x.png 4x" media="(prefers-color-scheme: light)">
+    <source id="source-branding-dark" srcset="splash/img/branding-dark-1x.png 1x, splash/img/branding-dark-2x.png 2x, splash/img/branding-dark-3x.png 3x, splash/img/branding-dark-4x.png 4x" media="(prefers-color-scheme: dark)">
+    <img id="img-branding" class="bottom" aria-hidden="true" src="splash/img/branding-1x.png" alt="">
+  </picture>
+  <picture id="splash">
+      <source id="source-splash-light" srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x" media="(prefers-color-scheme: light)">
+      <source id="source-splash-dark" srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
+      <img id="img-splash" class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
+  </picture>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script>
+    // Update splash images immediately to prevent flickering
+    (function() {
+      const prefix = `splash/${window.appFlavor}`;
+      document.getElementById('source-branding-light')?.setAttribute('srcset', `${prefix}/branding-1x.png 1x, ${prefix}/branding-2x.png 2x, ${prefix}/branding-3x.png 3x, ${prefix}/branding-4x.png 4x`);
+      document.getElementById('source-branding-dark')?.setAttribute('srcset', `${prefix}/branding-dark-1x.png 1x, ${prefix}/branding-dark-2x.png 2x, ${prefix}/branding-dark-3x.png 3x, ${prefix}/branding-dark-4x.png 4x`);
+      document.getElementById('img-branding')?.setAttribute('src', `${prefix}/branding-1x.png`);
+
+      document.getElementById('source-splash-light')?.setAttribute('srcset', `${prefix}/light-1x.png 1x, ${prefix}/light-2x.png 2x, ${prefix}/light-3x.png 3x, ${prefix}/light-4x.png 4x`);
+      document.getElementById('source-splash-dark')?.setAttribute('srcset', `${prefix}/dark-1x.png 1x, ${prefix}/dark-2x.png 2x, ${prefix}/dark-3x.png 3x, ${prefix}/dark-4x.png 4x`);
+      document.getElementById('img-splash')?.setAttribute('src', `${prefix}/light-1x.png`);
+    })();
+  </script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script src="flutter_bootstrap.js" async=""></script>
   <script>
   function enterFullscreen() {
     var element = document.documentElement; // Hoặc document.getElementById('flutter_container') nếu bạn có
@@ -49,6 +255,7 @@
     }
   }
 </script>
-  <script src="assets/js/video_exporter.js" defer></script>
-</body>
-</html>
+  <script src="assets/js/video_exporter.js" defer=""></script>
+
+
+</body></html>
