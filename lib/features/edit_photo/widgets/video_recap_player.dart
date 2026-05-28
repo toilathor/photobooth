@@ -400,7 +400,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       ),
       clipBehavior: Clip.antiAlias,
       child: AspectRatio(
-        aspectRatio: _fullController!.value.aspectRatio,
+        aspectRatio: _fullController?.value.aspectRatio ?? 1,
         child: Transform.scale(
           scaleX: widget.isMirrored == kIsWeb ? 1 : -1,
           child: VideoPlayer(_fullController!),

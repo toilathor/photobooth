@@ -1,7 +1,23 @@
 # TH PhotoBooth - Lưu giữ mọi khoảnh khắc
 
-# Build Web 
-flutter build web --base-href "/photobooth/" --wasm
+# Build Web
+
+flutter clean && flutter build web --base-href "/photobooth/" --wasm --web-define=FLAVOR=personal
+
+## Test build
+
+```bash
+# Đi vào thư mục build
+cd build
+
+# Đổi tên thư mục 'web' thành 'photobooth' để khớp với tham số base-href
+mv web photobooth
+
+# Khởi động một web server nội bộ bằng Python (có sẵn trên Mac) ở port 8000
+python3 -m http.server 8000
+```
+
+open http://localhost:8000/photobooth/
 
 Copy build/web to somewhere else
 
@@ -17,9 +33,11 @@ git push -u origin gh-pages
 ```
 
 # Build Android
+
 flutter clean
 flutter build appbundle --release --flavor commercial
 
 # Build iOS
+
 flutter clean
 flutter build ipa --release --flavor commercial

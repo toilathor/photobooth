@@ -23,6 +23,8 @@ import 'package:th_photobooth/helper/web_download_noop.dart'
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
 
+import 'package:th_photobooth/components/loading_indicator.dart';
+
 class EditPhotoScreen extends StatefulWidget {
   const EditPhotoScreen({super.key});
 
@@ -187,17 +189,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 64,
-                    height: 64,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 6,
-                      strokeCap: StrokeCap.round,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.secondary,
-                      ),
-                    ),
-                  ),
+                  const LoadingIndicator(),
                 ],
               ),
             ),

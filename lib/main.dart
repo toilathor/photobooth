@@ -15,7 +15,28 @@ import 'package:th_photobooth/services/storage_factory.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  AppConfig.cameras = await availableCameras();
+  final allCameras = await availableCameras();
+  final backCameras = allCameras
+      .where((c) => c.lensDirection == CameraLensDirection.back)
+      .toList();
+  final frontCameras = allCameras
+      .where((c) => c.lensDirection == CameraLensDirection.front)
+      .toList();
+
+  final List<CameraDescription> selectedCameras = [];
+  if (frontCameras.isNotEmpty) {
+    selectedCameras.add(frontCameras.first); // OS generally puts 1x Front Camera first
+  } else if (allCameras.isNotEmpty) {
+    selectedCameras.add(allCameras.first); // Fallback
+  }
+
+  if (backCameras.isNotEmpty) {
+    if (!selectedCameras.contains(backCameras.first)) {
+      selectedCameras.add(backCameras.first);
+    }
+  }
+
+  AppConfig.cameras = selectedCameras;
 
   // Dọn dẹp cache khi khởi động
   await CacheService.clearCache();

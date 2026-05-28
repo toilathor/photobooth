@@ -44,7 +44,7 @@ class GoogleDriveService implements StorageService {
 
   @override
   Future<void> init() async {
-    if (_initCompleter != null) return _initCompleter!.future;
+    if (_initCompleter != null) return _initCompleter?.future;
 
     _initCompleter = Completer<void>();
 
@@ -70,13 +70,13 @@ class GoogleDriveService implements StorageService {
         _userStreamController.add(_currentUser);
       }
 
-      _initCompleter!.complete();
+      _initCompleter?.complete();
     } catch (e) {
-      if (!_initCompleter!.isCompleted) _initCompleter!.complete();
+      if (_initCompleter?.isCompleted != true) _initCompleter?.complete();
       if (kDebugMode) print('Error initializing GoogleSignIn: $e');
     }
 
-    return _initCompleter!.future;
+    return _initCompleter?.future;
   }
 
   @override
@@ -251,8 +251,8 @@ class GoogleDriveService implements StorageService {
 
       httpClient.close();
 
-      if (folderList.files != null && folderList.files!.isNotEmpty) {
-        return folderList.files!.first.webViewLink;
+      if (folderList.files != null && folderList.files?.isNotEmpty == true) {
+        return folderList.files?.first.webViewLink;
       }
       return null;
     } catch (e) {
@@ -267,8 +267,8 @@ class GoogleDriveService implements StorageService {
           "name = '${GoogleDriveConfig.folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
       final folderList = await driveApi.files.list(q: query);
 
-      if (folderList.files != null && folderList.files!.isNotEmpty) {
-        return folderList.files!.first.id;
+      if (folderList.files != null && folderList.files?.isNotEmpty == true) {
+        return folderList.files?.first.id;
       }
 
       final folder = drive.File()

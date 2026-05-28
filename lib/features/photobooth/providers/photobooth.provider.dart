@@ -90,7 +90,7 @@ class PhotoboothProvider extends ChangeNotifier {
     final camera = AppConfig.cameras[_currentCameraIndex];
 
     if (cameraController != null) {
-      await cameraController!.dispose();
+      await cameraController?.dispose();
     }
 
     cameraController = CameraController(
@@ -100,7 +100,7 @@ class PhotoboothProvider extends ChangeNotifier {
     );
 
     try {
-      await cameraController!.initialize();
+      await cameraController?.initialize();
     } catch (e) {
       debugPrint('Error switching camera: $e');
     } finally {
@@ -111,7 +111,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
   Future<void> stopCamera() async {
     if (cameraController != null) {
-      await cameraController!.dispose();
+      await cameraController?.dispose();
       cameraController = null;
       notifyListeners();
     }
@@ -132,7 +132,14 @@ class PhotoboothProvider extends ChangeNotifier {
       );
 
       try {
-        await cameraController!.initialize();
+        await cameraController?.initialize();
+        if (!kIsWeb) {
+          try {
+            await cameraController?.setZoomLevel(1.0);
+          } catch (e) {
+            debugPrint('Warning: Could not set zoom level: $e');
+          }
+        }
       } catch (e) {
         debugPrint('Error starting camera: $e');
       } finally {
@@ -181,7 +188,7 @@ class PhotoboothProvider extends ChangeNotifier {
   Future<void> startAutoCapture() async {
     if (isCapturing ||
         cameraController == null ||
-        !cameraController!.value.isInitialized) {
+        cameraController?.value.isInitialized != true) {
       return;
     }
 
@@ -200,7 +207,7 @@ class PhotoboothProvider extends ChangeNotifier {
     // Start Video Recap if enabled
     if (isVideoRecap &&
         cameraController != null &&
-        cameraController!.value.isInitialized) {
+        cameraController?.value.isInitialized == true) {
       try {
         await _videoService.startRecording(cameraController!);
       } catch (e) {
@@ -276,10 +283,11 @@ class PhotoboothProvider extends ChangeNotifier {
         // Record timestamp relative to video start
         _videoService.recordTimestamp();
 
-        XFile photo = await cameraController!.takePicture();
-
-        capturedPhotos.add(photo);
-        notifyListeners();
+        XFile? photo = await cameraController?.takePicture();
+        if (photo != null) {
+          capturedPhotos.add(photo);
+          notifyListeners();
+        }
       } catch (e) {
         debugPrint('Error taking photo: $e');
       }
@@ -298,7 +306,7 @@ class PhotoboothProvider extends ChangeNotifier {
     // Stop Video Recap if it was recording
     if (isVideoRecap &&
         cameraController != null &&
-        cameraController!.value.isRecordingVideo) {
+        cameraController?.value.isRecordingVideo == true) {
       try {
         await _videoService.stopRecording(cameraController!);
       } catch (e) {
@@ -313,7 +321,8 @@ class PhotoboothProvider extends ChangeNotifier {
 
   Future<void> _cleanupAfterCancellation() async {
     // Stop recording if active
-    if (cameraController != null && cameraController!.value.isRecordingVideo) {
+    if (cameraController != null &&
+        cameraController?.value.isRecordingVideo == true) {
       try {
         await _videoService.stopRecording(cameraController!);
       } catch (e) {
@@ -335,7 +344,7 @@ class PhotoboothProvider extends ChangeNotifier {
   Future<void> takeManualPhoto() async {
     if (isCapturing ||
         cameraController == null ||
-        !cameraController!.value.isInitialized ||
+        cameraController?.value.isInitialized == false ||
         capturedPhotos.length >= selectedPhotoCount) {
       return;
     }
@@ -346,8 +355,11 @@ class PhotoboothProvider extends ChangeNotifier {
 
     try {
       sessionId ??= 'session_${DateTime.now().millisecondsSinceEpoch}';
-      XFile photo = await cameraController!.takePicture();
-      capturedPhotos.add(photo);
+      XFile? photo = await cameraController?.takePicture();
+      if (photo != null) {
+        capturedPhotos.add(photo);
+        notifyListeners();
+      }
     } catch (e) {
       debugPrint('Error taking photo: $e');
     }

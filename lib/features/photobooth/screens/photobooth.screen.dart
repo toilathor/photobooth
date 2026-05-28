@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
+import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
 import 'package:th_photobooth/features/photobooth/widgets/camera_preview_widget.dart';
@@ -20,8 +21,32 @@ class PhotoboothScreen extends StatefulWidget {
   State<PhotoboothScreen> createState() => _PhotoboothScreenState();
 }
 
-class _PhotoboothScreenState extends State<PhotoboothScreen> {
+class _PhotoboothScreenState extends State<PhotoboothScreen> with WidgetsBindingObserver {
   final GlobalKey _cameraPreviewKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+
+    final provider = context.read<PhotoboothProvider>();
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      provider.stopCamera();
+    } else if (state == AppLifecycleState.resumed) {
+      provider.startCamera();
+    }
+  }
 
   void _showSettingsBottomSheet(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -139,7 +164,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> {
             Expanded(
               child: isMobile
                   ? (provider.cameraController == null
-                        ? const Center(child: CircularProgressIndicator())
+                        ? const Center(child: LoadingIndicator())
                         : isLandscape
                         ? _MobileLandscapePanel(
                             provider.cameraController!,
@@ -161,9 +186,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> {
                           Expanded(
                             flex: 12,
                             child: provider.cameraController == null
-                                ? const Center(
-                                    child: CircularProgressIndicator(),
-                                  )
+                                ? const Center(child: LoadingIndicator())
                                 : _CenterPanel(
                                     provider.cameraController!,
                                     cameraPreviewKey: _cameraPreviewKey,

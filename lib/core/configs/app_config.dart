@@ -1,5 +1,4 @@
 import 'package:camera/camera.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
@@ -20,8 +19,15 @@ class AppConfig {
           ? AppFlavor.personal
           : AppFlavor.commercial;
     }
-    return EnumToString.fromString(AppFlavor.values, appFlavor ?? 'personal') ??
-        AppFlavor.personal;
+    final flavorString = appFlavor;
+    if (flavorString != null) {
+      for (final flavor in AppFlavor.values) {
+        if (flavor.name == flavorString) {
+          return flavor;
+        }
+      }
+    }
+    return AppFlavor.personal;
   }
 
   static String get appName =>

@@ -50,15 +50,18 @@ class PhotoItemCard extends StatelessWidget {
                           scaleX: isMirrored ? -1 : 1,
                           child: kIsWeb
                               ? Image.network(
-                                  photo!.path,
+                                  photo?.path ?? '',
                                   fit: BoxFit.cover,
                                   loadingBuilder: (context, child, progress) {
                                     if (progress == null) return child;
                                     return const SkeletonLoader();
                                   },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const SkeletonLoader();
+                                  },
                                 )
                               : Image.file(
-                                  File(photo!.path),
+                                  File(photo?.path ?? ''),
                                   fit: BoxFit.cover,
                                   frameBuilder:
                                       (context, child, frame, wasSync) {

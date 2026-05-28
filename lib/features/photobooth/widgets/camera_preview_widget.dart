@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -24,15 +25,11 @@ class CameraPreviewWidget extends StatelessWidget {
         aspectRatio: 4 / 3,
         child:
             provider.cameraController == null ||
-                !provider.cameraController!.value.isInitialized ||
+                provider.cameraController?.value.isInitialized != true ||
                 provider.isSwitchingCamera
             ? Container(
                 color: colorScheme.surfaceContainer,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: colorScheme.secondary,
-                  ),
-                ),
+                child: const Center(child: LoadingIndicator()),
               )
             : Stack(
                 fit: StackFit.expand,
@@ -77,16 +74,20 @@ class CameraPreviewWidget extends StatelessWidget {
                         if (provider.isCapturing &&
                             provider.currentCountdownValue > 0)
                           Center(
-                            child: provider.isPreparing
-                                ? AnimatedTextKit(
-                                    animatedTexts: [
-                                      ScaleAnimatedText(
-                                        t.actions.prepare,
-                                        duration: const Duration(
-                                          milliseconds: 1000,
-                                        ),
-                                        textStyle: GoogleFonts.inter(
-                                          fontSize: isMobile ? 64 : 140,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: provider.isPreparing
+                                    ? AnimatedTextKit(
+                                        animatedTexts: [
+                                          ScaleAnimatedText(
+                                            t.actions.prepare,
+                                            duration: const Duration(
+                                              milliseconds: 1000,
+                                            ),
+                                            textStyle: GoogleFonts.inter(
+                                              fontSize: isMobile ? 56 : 96,
                                           fontWeight: FontWeight.w900,
                                           color: colorScheme.secondary,
                                           shadows: [
@@ -143,7 +144,9 @@ class CameraPreviewWidget extends StatelessWidget {
                                     ],
                                     isRepeatingAnimation: false,
                                   ),
-                          ),
+                                ),
+                              ),
+                            ),
                         if (provider.isAutoCapturing)
                           Positioned(
                             bottom: 24,

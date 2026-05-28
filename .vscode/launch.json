@@ -8,10 +8,7 @@
             "args": [
                 "--web-port",
                 "5050",
-                "--flavor",
-                "personal",
-                "--web-launch-url",
-                "http://localhost:5050/?flavor=personal"
+                "--web-define=FLAVOR=personal"
             ]
         },
         {
@@ -21,10 +18,7 @@
             "args": [
                 "--web-port",
                 "5050",
-                "--flavor",
-                "commercial",
-                "--web-launch-url",
-                "http://localhost:5050/?flavor=commercial"
+                "--web-define=FLAVOR=commercial"
             ]
         },
         {

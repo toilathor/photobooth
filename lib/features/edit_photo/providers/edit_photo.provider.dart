@@ -275,7 +275,7 @@ class EditPhotoProvider with ChangeNotifier {
         // 3.1. Xử lý video gốc (flip nếu cần)
         try {
           final flippedResult = await VideoRecapService.flipVideo(
-            videoUrl: videoRecapFile!.path,
+            videoUrl: videoRecapFile?.path ?? '',
             isMirrored: isMirrored == kIsWeb ? false : true,
             preferredMimeType: _getVideoMimeType(videoRecapFile!),
           );
@@ -283,23 +283,25 @@ class EditPhotoProvider with ChangeNotifier {
           if (flippedResult != null) {
             finalOriginalBytes = flippedResult.bytes;
           } else {
-            finalOriginalBytes = await videoRecapFile!.readAsBytes();
+            finalOriginalBytes =
+                await videoRecapFile?.readAsBytes() ?? Uint8List.fromList([]);
           }
         } catch (e) {
           debugPrint('Error flipping original video: $e');
-          finalOriginalBytes = await videoRecapFile!.readAsBytes();
+          finalOriginalBytes =
+              await videoRecapFile?.readAsBytes() ?? Uint8List.fromList([]);
         }
 
         filesToUpload['video_recap_goc$originalExt'] = finalOriginalBytes;
 
         try {
           final result = await VideoRecapService.exportFramedVideo(
-            videoUrl: videoRecapFile!.path,
+            videoUrl: videoRecapFile?.path ?? '',
             frame: selectedFrame,
             timestamps: photoTimestamps,
             recapDurationSeconds:
                 AppConfig.recapClipDuration.inMilliseconds / 1000.0,
-            preferredMimeType: _getVideoMimeType(videoRecapFile!),
+            preferredMimeType: _getVideoMimeType(videoRecapFile),
             isMirrored: isMirrored == kIsWeb ? false : true,
           );
 
@@ -339,7 +341,8 @@ class EditPhotoProvider with ChangeNotifier {
     return '.mp4';
   }
 
-  String? _getVideoMimeType(XFile file) {
+  String? _getVideoMimeType(XFile? file) {
+    if (file == null) return null;
     if (file.mimeType != null) return file.mimeType;
     if (file.path.toLowerCase().endsWith('.webm')) return 'video/webm';
     if (file.path.toLowerCase().endsWith('.mp4')) return 'video/mp4';
