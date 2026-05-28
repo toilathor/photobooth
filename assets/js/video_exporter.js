@@ -234,3 +234,44 @@ window.flipVideo = async function (videoUrl, isMirrored, preferredMimeType) {
         }
     });
 };
+
+window.saveFilesToDevice = async function (filesMap) {
+    let useDirectoryPicker = typeof window.showDirectoryPicker === 'function';
+    
+    if (useDirectoryPicker) {
+        try {
+            const dirHandle = await window.showDirectoryPicker({
+                mode: 'readwrite'
+            });
+            
+            for (const [fileName, fileData] of Object.entries(filesMap)) {
+                const blob = fileData instanceof Blob ? fileData : new Blob([fileData]);
+                const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+            }
+            return "success";
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                return "aborted";
+            }
+            console.warn("Directory picker failed, falling back to direct download:", e);
+        }
+    }
+    
+    // Fallback: download files individually
+    for (const [fileName, fileData] of Object.entries(filesMap)) {
+        const blob = fileData instanceof Blob ? fileData : new Blob([fileData]);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        URL.revokeObjectURL(url);
+    }
+    return "downloaded";
+};
