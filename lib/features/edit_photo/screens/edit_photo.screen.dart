@@ -18,6 +18,8 @@ import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.
 import 'package:th_photobooth/features/edit_photo/widgets/editor_panel.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/preview_panel.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/qr_share_dialog.dart';
+import 'package:th_photobooth/helper/web_download_noop.dart'
+    if (dart.library.js_interop) 'package:th_photobooth/helper/web_download_web.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
 
@@ -72,6 +74,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
   Future<void> _handleSaveRequest(BuildContext context) async {
     final provider = context.read<EditPhotoProvider>();
     _showSimpleLoading(context);
+    bool dialogPopped = false;
 
     try {
       final files = await provider.generateAllFiles(
@@ -80,6 +83,34 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       );
 
       if (files != null && files.isNotEmpty) {
+        if (kIsWeb) {
+          final result = await saveFilesToDeviceWeb(files);
+          if (context.mounted && Navigator.canPop(context)) {
+            Navigator.pop(context);
+            dialogPopped = true;
+          }
+          if (context.mounted) {
+            if (result == 'success' || result == 'downloaded') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(t.editor.saveToDeviceSuccess)),
+              );
+            } else if (result == 'aborted') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(t.editor.saveToDeviceCancel)),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    t.editor.saveError(error: 'Failed to save files'),
+                  ),
+                ),
+              );
+            }
+          }
+          return;
+        }
+
         final tempDir = await getTemporaryDirectory();
 
         for (final entry in files.entries) {
@@ -125,7 +156,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         );
       }
     } finally {
-      if (context.mounted && Navigator.canPop(context)) {
+      if (!dialogPopped && context.mounted && Navigator.canPop(context)) {
         Navigator.pop(context);
       }
     }
@@ -468,6 +499,14 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                               ),
                               const SizedBox(width: 16),
                             ],
+                            Expanded(
+                              flex: 1,
+                              child: SecondaryButton(
+                                onTap: () => _handleSaveRequest(context),
+                                icon: Icons.save_alt_rounded,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
                           ] else ...[
                             Expanded(
                               flex: 1,

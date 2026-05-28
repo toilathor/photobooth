@@ -281,6 +281,16 @@ class _EditorPanelState extends State<EditorPanel> {
                       ),
                       const SizedBox(width: 16),
                     ],
+                    if (widget.onSaveRequested != null) ...[
+                      Expanded(
+                        flex: 1,
+                        child: SecondaryButton(
+                          onTap: widget.onSaveRequested!,
+                          icon: Icons.save_alt_rounded,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
                   ] else ...[
                     if (widget.onSaveRequested != null) ...[
                       Expanded(

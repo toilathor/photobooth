@@ -108,8 +108,10 @@ class PreviewPanel extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           ExpressiveButtonGroup(
                             selectedIndex: showPaperPreview ? 1 : 0,
@@ -145,62 +147,75 @@ class PreviewPanel extends StatelessWidget {
                       ),
                     ],
                   )
-                : Row(
+                : Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 16,
+                    runSpacing: 12,
                     children: [
-                      Icon(
-                        Icons.visibility_outlined,
-                        size: 18,
-                        color: colorScheme.secondary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        t.preview.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                          letterSpacing: 2,
-                          color: colorScheme.secondary,
-                        ),
-                      ),
-                      if (videoRecapFile != null) ...[
-                        const SizedBox(width: 12),
-                        _CompactVideoRecapButton(
-                          videoFile: videoRecapFile!,
-                          frame: selectedFrame,
-                          photoTimestamps: photoTimestamps,
-                          isMirrored: isMirrored,
-                          isMobile: isMobile,
-                        ),
-                      ],
-                      const Spacer(),
-                      // Material 3 Expressive-style Button Group
-                      ExpressiveButtonGroup(
-                        selectedIndex: showPaperPreview ? 1 : 0,
-                        onChanged: (index) => onTogglePaperPreview(index == 1),
-                        items: [
-                          ExpressiveItemData(
-                            label: t.preview.edit_mode,
-                            icon: Icons.edit_outlined,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.visibility_outlined,
+                            size: 18,
+                            color: colorScheme.secondary.withValues(alpha: 0.5),
                           ),
-                          ExpressiveItemData(
-                            label: t.preview.print_mode,
-                            icon: Icons.local_printshop_outlined,
+                          const SizedBox(width: 8),
+                          Text(
+                            t.preview.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              letterSpacing: 2,
+                              color: colorScheme.secondary,
+                            ),
                           ),
+                          if (videoRecapFile != null) ...[
+                            const SizedBox(width: 12),
+                            _CompactVideoRecapButton(
+                              videoFile: videoRecapFile!,
+                              frame: selectedFrame,
+                              photoTimestamps: photoTimestamps,
+                              isMirrored: isMirrored,
+                              isMobile: isMobile,
+                            ),
+                          ],
                         ],
                       ),
-                      const SizedBox(width: 8),
-                      ExpressiveButtonGroup(
-                        selectedIndex: printTwoCopies ? 1 : 0,
-                        onChanged: (index) =>
-                            onTogglePrintTwoCopies(index == 1),
-                        items: [
-                          ExpressiveItemData(
-                            label: t.preview.copy,
-                            icon: Icons.looks_one_outlined,
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ExpressiveButtonGroup(
+                            selectedIndex: showPaperPreview ? 1 : 0,
+                            onChanged: (index) =>
+                                onTogglePaperPreview(index == 1),
+                            items: [
+                              ExpressiveItemData(
+                                label: t.preview.edit_mode,
+                                icon: Icons.edit_outlined,
+                              ),
+                              ExpressiveItemData(
+                                label: t.preview.print_mode,
+                                icon: Icons.local_printshop_outlined,
+                              ),
+                            ],
                           ),
-                          ExpressiveItemData(
-                            label: t.preview.copy,
-                            icon: Icons.looks_two_outlined,
+                          ExpressiveButtonGroup(
+                            selectedIndex: printTwoCopies ? 1 : 0,
+                            onChanged: (index) =>
+                                onTogglePrintTwoCopies(index == 1),
+                            items: [
+                              ExpressiveItemData(
+                                label: t.preview.copy,
+                                icon: Icons.looks_one_outlined,
+                              ),
+                              ExpressiveItemData(
+                                label: t.preview.copy,
+                                icon: Icons.looks_two_outlined,
+                              ),
+                            ],
                           ),
                         ],
                       ),

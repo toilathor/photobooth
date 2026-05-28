@@ -4,10 +4,10 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
-import 'package:provider/provider.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
   const CameraPreviewWidget(CameraController cameraController, {super.key});
@@ -53,7 +53,11 @@ class CameraPreviewWidget extends StatelessWidget {
                             left: 24,
                             child: _ControlButton(
                               icon: Icons.flip_camera_ios_rounded,
-                              onTap: () => provider.toggleCamera(),
+                              onTap:
+                                  (provider.isDoneTakingPhotos ||
+                                      provider.isCapturing)
+                                  ? null
+                                  : () => provider.toggleCamera(),
                               colorScheme: colorScheme,
                             ),
                           ),
@@ -62,7 +66,11 @@ class CameraPreviewWidget extends StatelessWidget {
                           right: 24,
                           child: _ControlButton(
                             icon: Icons.flip_rounded,
-                            onTap: () => provider.toggleMirror(),
+                            onTap:
+                                (provider.isDoneTakingPhotos ||
+                                    provider.isCapturing)
+                                ? null
+                                : () => provider.toggleMirror(),
                             colorScheme: colorScheme,
                           ),
                         ),
@@ -224,28 +232,31 @@ class _CancelButton extends StatelessWidget {
 
 class _ControlButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final ColorScheme colorScheme;
 
   const _ControlButton({
     required this.icon,
-    required this.onTap,
+    this.onTap,
     required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onTap != null;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.secondary.withValues(alpha: 0.6),
+            color: colorScheme.secondary.withValues(
+              alpha: isEnabled ? 0.6 : 0.2,
+            ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.black.withValues(alpha: isEnabled ? 0.2 : 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -253,7 +264,11 @@ class _ControlButton extends StatelessWidget {
           ),
           child: IconButton(
             onPressed: onTap,
-            icon: Icon(icon, color: Colors.white, size: 28),
+            icon: Icon(
+              icon,
+              color: Colors.white.withValues(alpha: isEnabled ? 1.0 : 0.5),
+              size: 28,
+            ),
             style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
           ),
         ),

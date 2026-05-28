@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:th_photobooth/components/primary_button.dart';
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:th_photobooth/features/edit_photo/screens/edit_photo.screen.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
-import 'package:th_photobooth/components/primary_button.dart';
 
 class PreviewsFooter extends StatelessWidget {
   const PreviewsFooter({super.key});
@@ -46,7 +46,12 @@ class PreviewsFooter extends StatelessWidget {
                 (provider.capturedPhotos.length >=
                         provider.selectedPhotoCount &&
                     !provider.isCapturing)
-                ? () {
+                ? () async {
+                    try {
+                      await provider.stopCamera();
+                    } catch (_) {}
+                    if (!context.mounted) return;
+
                     context.read<EditPhotoProvider>().initWithPhotoboothData(
                       photos: provider.capturedPhotos,
                       photoCount: provider.selectedPhotoCount,
@@ -55,18 +60,24 @@ class PreviewsFooter extends StatelessWidget {
                       timestamps: provider.photoTimestamps,
                       session: provider.sessionId,
                     );
-                    Navigator.push(
+                    await Navigator.push(
                       context,
                       MaterialPageRoute<void>(
                         builder: (context) => const EditPhotoScreen(),
                       ),
                     );
+
+                    if (context.mounted) {
+                      try {
+                        provider.startCamera();
+                      } catch (_) {}
+                    }
                   }
                 : null,
             height: isLandscape ? 48 : 60,
             label: provider.capturedPhotos.length >= provider.selectedPhotoCount
-                    ? t.preview.continue_btn
-                    : t.preview.not_enough_photos,
+                ? t.preview.continue_btn
+                : t.preview.not_enough_photos,
             icon: Icons.arrow_forward_ios_rounded,
           ),
         ),

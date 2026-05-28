@@ -34,6 +34,8 @@ class PhotoboothProvider extends ChangeNotifier {
 
   AppLocale currentLocale = LocaleSettings.currentLocale;
 
+  bool get isDoneTakingPhotos => capturedPhotos.length >= selectedPhotoCount;
+
   final VideoService _videoService = VideoService();
   XFile? get videoRecapFile => _videoService.videoRecapFile;
   List<Duration> get photoTimestamps => _videoService.photoTimestamps;
@@ -42,28 +44,7 @@ class PhotoboothProvider extends ChangeNotifier {
   final List<int> countdowns = AppConfig.countdowns;
 
   PhotoboothProvider() {
-    if (AppConfig.cameras.isNotEmpty) {
-      cameraController = CameraController(
-        AppConfig.cameras[0],
-        ResolutionPreset.max,
-        enableAudio: false,
-      );
-    }
-    cameraController
-        ?.initialize()
-        .then((_) {
-          notifyListeners();
-        })
-        .catchError((Object e) {
-          if (e is CameraException) {
-            switch (e.code) {
-              case 'CameraAccessDenied':
-                break;
-              default:
-                break;
-            }
-          }
-        });
+    startCamera();
 
     // Listen for fullscreen changes (e.g. Esc key)
     fullscreen.onFullscreenChangeWeb((dynamic value) {
@@ -125,6 +106,39 @@ class PhotoboothProvider extends ChangeNotifier {
     } finally {
       isSwitchingCamera = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> stopCamera() async {
+    if (cameraController != null) {
+      await cameraController!.dispose();
+      cameraController = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> startCamera() async {
+    if (cameraController != null) return;
+
+    if (AppConfig.cameras.isNotEmpty) {
+      isSwitchingCamera = true;
+      notifyListeners();
+
+      final camera = AppConfig.cameras[_currentCameraIndex];
+      cameraController = CameraController(
+        camera,
+        ResolutionPreset.max,
+        enableAudio: false,
+      );
+
+      try {
+        await cameraController!.initialize();
+      } catch (e) {
+        debugPrint('Error starting camera: $e');
+      } finally {
+        isSwitchingCamera = false;
+        notifyListeners();
+      }
     }
   }
 

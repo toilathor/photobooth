@@ -41,7 +41,10 @@
     "savePhoto": "SAVE PHOTO",
     "saveSuccess": "Saved to gallery successfully!",
     "saveError": "Failed to save: $error",
-    "viewNow": "VIEW NOW"
+    "viewNow": "VIEW NOW",
+    "saveToDevice": "SAVE TO DEVICE",
+    "saveToDeviceSuccess": "Saved all photos and videos to device!",
+    "saveToDeviceCancel": "Save cancelled."
   },
   "dialogs": {
     "photoSelection": {

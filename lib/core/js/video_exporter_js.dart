@@ -15,3 +15,6 @@ external JSPromise flipVideo(
   JSBoolean isMirrored, [
   JSString? preferredMimeType,
 ]);
+
+@JS()
+external JSPromise saveFilesToDevice(JSObject filesMap);

@@ -41,7 +41,10 @@
     "savePhoto": "LƯU ẢNH",
     "saveSuccess": "Đã lưu ảnh vào thư viện!",
     "saveError": "Lỗi khi lưu ảnh: $error",
-    "viewNow": "XEM NGAY"
+    "viewNow": "XEM NGAY",
+    "saveToDevice": "LƯU VỀ THIẾT BỊ",
+    "saveToDeviceSuccess": "Đã lưu toàn bộ ảnh và video vào thiết bị!",
+    "saveToDeviceCancel": "Đã hủy lưu tệp."
   },
   "dialogs": {
     "photoSelection": {

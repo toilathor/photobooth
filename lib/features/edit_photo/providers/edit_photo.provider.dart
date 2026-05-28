@@ -271,7 +271,7 @@ class EditPhotoProvider with ChangeNotifier {
 
         final originalExt = _getVideoExtension(videoRecapFile!);
         Uint8List finalOriginalBytes;
-        
+
         // 3.1. Xử lý video gốc (flip nếu cần)
         try {
           final flippedResult = await VideoRecapService.flipVideo(
@@ -279,7 +279,7 @@ class EditPhotoProvider with ChangeNotifier {
             isMirrored: isMirrored == kIsWeb ? false : true,
             preferredMimeType: _getVideoMimeType(videoRecapFile!),
           );
-          
+
           if (flippedResult != null) {
             finalOriginalBytes = flippedResult.bytes;
           } else {
@@ -289,7 +289,7 @@ class EditPhotoProvider with ChangeNotifier {
           debugPrint('Error flipping original video: $e');
           finalOriginalBytes = await videoRecapFile!.readAsBytes();
         }
-        
+
         filesToUpload['video_recap_goc$originalExt'] = finalOriginalBytes;
 
         try {
@@ -302,18 +302,20 @@ class EditPhotoProvider with ChangeNotifier {
             preferredMimeType: _getVideoMimeType(videoRecapFile!),
             isMirrored: isMirrored == kIsWeb ? false : true,
           );
- 
+
           if (result != null) {
             final extension = result.mimeType.contains('webm')
                 ? '.webm'
                 : '.mp4';
             filesToUpload['video_recap_gan_khung$extension'] = result.bytes;
           } else {
-            filesToUpload['video_recap_gan_khung$originalExt'] = finalOriginalBytes;
+            filesToUpload['video_recap_gan_khung$originalExt'] =
+                finalOriginalBytes;
           }
         } catch (e) {
           debugPrint('Error generating framed video: $e');
-          filesToUpload['video_recap_gan_khung$originalExt'] = finalOriginalBytes;
+          filesToUpload['video_recap_gan_khung$originalExt'] =
+              finalOriginalBytes;
         }
       }
 
