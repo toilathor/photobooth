@@ -5,11 +5,14 @@
   },
   "settings": {
     "title": "SETTINGS",
-    "photoCount": "Photos",
+    "photoCount": "Mode",
+    "modeGroup": "Group Shot",
+    "modeStandard": "Standard",
     "countdown": "Countdown",
-    "seconds": "s",
+    "seconds": "sec",
     "language": "Language",
-    "mirror": "Mirror"
+    "mirror": "Mirror",
+    "veryHighResolution": "FullHD"
   },
   "actions": {
     "manual": "Manual",

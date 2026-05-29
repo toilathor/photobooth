@@ -41,7 +41,7 @@ class AppConfig {
       : ThemeConfig.commercialDarkTheme;
 
   // Photo settings
-  static const List<int> photoCounts = [1, 3, 4];
+  static const List<int> photoCounts = [1, 4];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
 

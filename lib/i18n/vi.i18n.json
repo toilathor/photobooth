@@ -5,11 +5,14 @@
   },
   "settings": {
     "title": "CÀI ĐẶT",
-    "photoCount": "Số ảnh",
+    "photoCount": "Chế độ",
+    "modeGroup": "Chụp Nhóm",
+    "modeStandard": "Tiêu Chuẩn",
     "countdown": "Đếm Ngược",
     "seconds": "giây",
     "language": "Ngôn ngữ",
-    "mirror": "Gương"
+    "mirror": "Gương",
+    "veryHighResolution": "FullHD"
   },
   "actions": {
     "manual": "Chụp tay",

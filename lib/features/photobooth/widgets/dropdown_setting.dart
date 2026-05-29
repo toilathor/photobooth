@@ -45,34 +45,39 @@ class DropdownSetting<T> extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             color: colorScheme.surface,
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: value,
-              dropdownColor: colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              items: items
-                  .map(
-                    (e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(
-                        '${itemLabelBuilder != null ? itemLabelBuilder!(e) : e}$suffix',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: onChanged,
-              isExpanded: true,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 50) return const SizedBox.shrink();
+              return DropdownButtonHideUnderline(
+                child: DropdownButton<T>(
+                  value: value,
+                  dropdownColor: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  items: items
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(
+                            '${itemLabelBuilder != null ? itemLabelBuilder!(e) : e}$suffix',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: onChanged,
+                  isExpanded: true,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ],

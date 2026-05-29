@@ -4,10 +4,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:th_photobooth/components/expressive_button_group.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
-import 'package:th_photobooth/components/expressive_button_group.dart';
 
 import 'video_recap_player.dart';
 
@@ -435,7 +435,6 @@ class PreviewPanel extends StatelessWidget {
     );
   }
 }
-
 
 class VirtualPaper extends StatelessWidget {
   final Widget child;

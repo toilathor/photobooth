@@ -40,6 +40,11 @@ class SettingsPanel extends StatelessWidget {
           label: t.settings.photoCount,
           value: provider.selectedPhotoCount,
           items: provider.photoCounts,
+          itemLabelBuilder: (val) {
+            if (val == 1) return t.settings.modeGroup;
+            if (val == 4) return t.settings.modeStandard;
+            return val.toString();
+          },
           onChanged: provider.isAutoCapturing
               ? null
               : (val) {
@@ -75,6 +80,27 @@ class SettingsPanel extends StatelessWidget {
               ? null
               : (val) => provider.setCountdown(val as int),
           suffix: ' ${t.settings.seconds}',
+        ),
+        const Gap(20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              t.settings.veryHighResolution,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onPrimary,
+              ),
+            ),
+            Switch(
+              value: provider.isVeryHighResolution,
+              onChanged: provider.isAutoCapturing
+                  ? null
+                  : (val) => provider.toggleResolution(val),
+              activeThumbColor: colorScheme.primary,
+            ),
+          ],
         ),
         if (isBottomSheet) ...[
           const Gap(20),

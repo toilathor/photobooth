@@ -63,11 +63,16 @@ class GoogleDriveService implements StorageService {
       // Chúng ta gọi initialize cho cả Web và Mobile để đảm bảo SDK luôn sẵn sàng
       await _googleSignIn.initialize(
         clientId: kIsWeb ? GoogleDriveConfig.clientId : null,
+        serverClientId: !kIsWeb ? GoogleDriveConfig.clientId : null,
       );
 
       if (!kIsWeb) {
-        _currentUser = await _googleSignIn.attemptLightweightAuthentication();
-        _userStreamController.add(_currentUser);
+        try {
+          _currentUser = await _googleSignIn.attemptLightweightAuthentication();
+          _userStreamController.add(_currentUser);
+        } catch (e) {
+          if (kDebugMode) print('Lightweight auth failed: $e');
+        }
       }
 
       _initCompleter?.complete();
@@ -85,7 +90,6 @@ class GoogleDriveService implements StorageService {
 
     try {
       if (_currentUser != null) return _currentUser;
-      if (kIsWeb) return null;
 
       var account = await _googleSignIn.attemptLightweightAuthentication();
       if (account != null) {

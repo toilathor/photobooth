@@ -52,7 +52,7 @@ class PreviewsFooter extends StatelessWidget {
                     } catch (_) {}
                     if (!context.mounted) return;
 
-                    context.read<EditPhotoProvider>().initWithPhotoboothData(
+                    await context.read<EditPhotoProvider>().initWithPhotoboothData(
                       photos: provider.capturedPhotos,
                       photoCount: provider.selectedPhotoCount,
                       isMirrored: provider.isMirrored,
@@ -60,6 +60,9 @@ class PreviewsFooter extends StatelessWidget {
                       timestamps: provider.photoTimestamps,
                       session: provider.sessionId,
                     );
+
+                    if (!context.mounted) return;
+
                     await Navigator.push(
                       context,
                       MaterialPageRoute<void>(

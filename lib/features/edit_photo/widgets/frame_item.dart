@@ -39,7 +39,21 @@ class FrameItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: Stack(
             children: [
-              Image.asset(framePath, fit: BoxFit.fitWidth),
+              Image.asset(
+                framePath,
+                fit: BoxFit.fitWidth,
+                // Decode ảnh ở kích thước nhỏ (thumbnail) thay vì full 880px
+                cacheWidth: 200,
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  if (wasSynchronouslyLoaded) return child;
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: frame != null
+                        ? child
+                        : Container(color: colorScheme.surfaceContainerHighest),
+                  );
+                },
+              ),
               if (isSelected)
                 Positioned(
                   top: 4,

@@ -12,7 +12,7 @@ void main() {
   group('PhotoboothProvider Tests', () {
     test('Initial state should be correct', () {
       final provider = PhotoboothProvider();
-      expect(provider.countdown, 3);
+      expect(provider.countdown, 4);
       expect(provider.capturedPhotos, isEmpty);
       expect(provider.isVideoRecap, isTrue); // Default is true now
     });

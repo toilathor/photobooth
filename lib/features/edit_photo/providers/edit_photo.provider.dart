@@ -3,24 +3,27 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/core/configs/frame_config.dart';
 import 'package:th_photobooth/core/configs/storage_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/services/frame_service.dart';
+import 'package:th_photobooth/services/photo_merger_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
 class EditPhotoProvider with ChangeNotifier {
   bool isProcessing = false;
   String selectedFilter = 'normal';
-  double filterIntensity = 1.0;
+  double filterIntensity = 0.5;
   final List<String> filters = AppConfig.filters;
 
-  final List<FrameData> allFrames = FrameConfig.allFrames;
+  List<FrameData> allFrames = FrameConfig.allFrames;
 
   List<FrameData> filteredFrames = [];
   late FrameData selectedFrame;
-  bool printTwoCopies = false;
+  bool printTwoCopies = true;
   bool showPaperPreview = false;
 
   // Photobooth Session Data
@@ -51,19 +54,21 @@ class EditPhotoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void initWithPhotoboothData({
+  Future<void> initWithPhotoboothData({
     required List<XFile> photos,
     required int photoCount,
     required bool isMirrored,
     XFile? videoFile,
     List<Duration>? timestamps,
     String? session,
-  }) {
+  }) async {
     capturedPhotos = photos;
     videoRecapFile = videoFile;
     photoTimestamps = timestamps ?? [];
     sessionId = session;
     this.isMirrored = isMirrored;
+
+    allFrames = await FrameService.loadFrames();
 
     initForPhotoCount(photoCount);
   }
@@ -248,11 +253,26 @@ class EditPhotoProvider with ChangeNotifier {
       if (originalPrintTwoCopies) {
         togglePrintTwoCopies(false);
       }
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      final Uint8List? framedCapture = await captureStrip();
-      if (framedCapture != null) {
+      try {
+        final Uint8List framedCapture = await PhotoMergerService.mergePhotos(
+          photos: capturedPhotos,
+          frameData: selectedFrame,
+          colorFilterMatrix: FilterConfig.getFilterMatrix(
+            selectedFilter,
+            filterIntensity,
+          ),
+          isMirrored: isMirrored == kIsWeb ? false : true,
+        );
         filesToUpload['anh_da_ghep_khung.png'] = framedCapture;
+      } catch (e) {
+        debugPrint('Error merging photos with PhotoMergerService: $e');
+        // Fallback to UI capture if something goes wrong
+        final Uint8List? fallbackCapture = await captureStrip();
+        if (fallbackCapture != null) {
+          filesToUpload['anh_da_ghep_khung.png'] = fallbackCapture;
+        }
       }
       await Future<void>.delayed(const Duration(milliseconds: 100));
 

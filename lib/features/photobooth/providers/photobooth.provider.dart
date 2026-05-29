@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/configs/asset_config.dart';
 import 'package:th_photobooth/helper/fullscreen_noop.dart'
-    if (dart.library.js) 'package:th_photobooth/helper/fullscreen_web.dart'
+    if (dart.library.js_interop) 'package:th_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/cache_service.dart';
@@ -18,6 +18,7 @@ class PhotoboothProvider extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
   int _currentCameraIndex = 0;
   bool isMirrored = false;
+  bool isVeryHighResolution = false;
 
   int selectedPhotoCount = 4;
   int countdown = 3;
@@ -90,12 +91,14 @@ class PhotoboothProvider extends ChangeNotifier {
     final camera = AppConfig.cameras[_currentCameraIndex];
 
     if (cameraController != null) {
-      await cameraController?.dispose();
+      final oldController = cameraController;
+      cameraController = null;
+      await oldController?.dispose();
     }
 
     cameraController = CameraController(
       camera,
-      ResolutionPreset.max,
+      isVeryHighResolution ? ResolutionPreset.veryHigh : ResolutionPreset.high,
       enableAudio: false,
     );
 
@@ -111,9 +114,10 @@ class PhotoboothProvider extends ChangeNotifier {
 
   Future<void> stopCamera() async {
     if (cameraController != null) {
-      await cameraController?.dispose();
+      final oldController = cameraController;
       cameraController = null;
       notifyListeners();
+      await oldController?.dispose();
     }
   }
 
@@ -127,7 +131,7 @@ class PhotoboothProvider extends ChangeNotifier {
       final camera = AppConfig.cameras[_currentCameraIndex];
       cameraController = CameraController(
         camera,
-        ResolutionPreset.max,
+        isVeryHighResolution ? ResolutionPreset.veryHigh : ResolutionPreset.high,
         enableAudio: false,
       );
 
@@ -157,6 +161,17 @@ class PhotoboothProvider extends ChangeNotifier {
   void toggleMirror() {
     isMirrored = !isMirrored;
     notifyListeners();
+  }
+
+  Future<void> toggleResolution(bool value) async {
+    if (isVeryHighResolution == value) return;
+    isVeryHighResolution = value;
+    notifyListeners();
+    
+    if (cameraController != null) {
+      await stopCamera();
+      await startCamera();
+    }
   }
 
   void setLanguage(AppLocale locale) {
@@ -398,7 +413,9 @@ class PhotoboothProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    cameraController?.dispose();
+    final oldController = cameraController;
+    cameraController = null;
+    oldController?.dispose();
     super.dispose();
   }
 }
