@@ -39,6 +39,7 @@ dependencies:
   enum_to_string: ^2.2.1
   gal: ^2.3.2
   ffmpeg_kit_flutter_new: ^4.1.0
+  package_info_plus: ^10.1.0
 
 dev_dependencies:
   flutter_test:

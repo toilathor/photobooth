@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
+import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
 import 'package:th_photobooth/features/photobooth/widgets/camera_preview_widget.dart';
@@ -21,7 +21,8 @@ class PhotoboothScreen extends StatefulWidget {
   State<PhotoboothScreen> createState() => _PhotoboothScreenState();
 }
 
-class _PhotoboothScreenState extends State<PhotoboothScreen> with WidgetsBindingObserver {
+class _PhotoboothScreenState extends State<PhotoboothScreen>
+    with WidgetsBindingObserver {
   final GlobalKey _cameraPreviewKey = GlobalKey();
 
   @override
@@ -41,7 +42,8 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> with WidgetsBinding
     if (ModalRoute.of(context)?.isCurrent != true) return;
 
     final provider = context.read<PhotoboothProvider>();
-    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
       provider.stopCamera();
     } else if (state == AppLifecycleState.resumed) {
       provider.startCamera();
@@ -130,9 +132,9 @@ class _PhotoboothScreenState extends State<PhotoboothScreen> with WidgetsBinding
       floatingActionButton: (!isMobile && !provider.isFullscreen)
           ? FloatingActionButton.small(
               onPressed: () => provider.enterFullscreen(),
-              backgroundColor: colorScheme.secondary,
-              foregroundColor: colorScheme.primary,
-              elevation: 8,
+              backgroundColor: colorScheme.surface,
+              foregroundColor: colorScheme.onSurface,
+              elevation: 4,
               child: const Icon(Icons.fullscreen_rounded),
             )
           : null,

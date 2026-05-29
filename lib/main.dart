@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:th_photobooth/components/copyright_watermark.dart';
 import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
@@ -25,7 +26,9 @@ Future<void> main() async {
 
   final List<CameraDescription> selectedCameras = [];
   if (frontCameras.isNotEmpty) {
-    selectedCameras.add(frontCameras.first); // OS generally puts 1x Front Camera first
+    selectedCameras.add(
+      frontCameras.first,
+    ); // OS generally puts 1x Front Camera first
   } else if (allCameras.isNotEmpty) {
     selectedCameras.add(allCameras.first); // Fallback
   }
@@ -87,6 +90,7 @@ class PhotoboothApp extends StatelessWidget {
                     child: LanguageSwitcher(),
                   ),
                 ),
+              const CopyrightWatermark(),
             ],
           ),
           breakpoints: [
