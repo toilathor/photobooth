@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
@@ -10,10 +11,12 @@ import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:th_photobooth/components/google_sign_in_button.dart';
+import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/components/primary_button.dart';
 import 'package:th_photobooth/components/secondary_button.dart';
 import 'package:th_photobooth/core/configs/storage_config.dart';
+import 'package:th_photobooth/core/di/service_locator.dart';
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/editor_panel.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/preview_panel.dart';
@@ -23,10 +26,21 @@ import 'package:th_photobooth/helper/web_download_noop.dart'
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
 
-import 'package:th_photobooth/components/loading_indicator.dart';
-
 class EditPhotoScreen extends StatefulWidget {
-  const EditPhotoScreen({super.key});
+  final List<XFile> photos;
+  final int photoCount;
+  final bool isMirrored;
+  final XFile? videoFile;
+  final List<Duration>? timestamps;
+
+  const EditPhotoScreen({
+    super.key,
+    required this.photos,
+    required this.photoCount,
+    required this.isMirrored,
+    this.videoFile,
+    this.timestamps,
+  });
 
   @override
   State<EditPhotoScreen> createState() => _EditPhotoScreenState();
@@ -188,9 +202,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  const LoadingIndicator(),
-                ],
+                children: [const LoadingIndicator()],
               ),
             ),
           ),
@@ -206,161 +218,170 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
-        return PopScope(
-          canPop: false,
-          child: Consumer<EditPhotoProvider>(
-            builder: (context, provider, _) {
-              final colorScheme = Theme.of(context).colorScheme;
-              final progress = provider.uploadProgress;
+      builder: (dialogContext) {
+        return ChangeNotifierProvider<EditPhotoProvider>.value(
+          value: provider,
+          child: PopScope(
+            canPop: false,
+            child: Consumer<EditPhotoProvider>(
+              builder: (context, provider, _) {
+                final colorScheme = Theme.of(context).colorScheme;
+                final progress = provider.uploadProgress;
 
-              return Dialog(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                child: Container(
-                  width: 360,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 48,
-                    horizontal: 32,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
+                return Dialog(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  child: Container(
+                    width: 360,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 48,
+                      horizontal: 32,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 50,
-                        spreadRadius: -10,
-                        offset: const Offset(0, 25),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.1),
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(
-                          begin: 0,
-                          end: provider.isPreparingUpload ? 0 : progress,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 50,
+                          spreadRadius: -10,
+                          offset: const Offset(0, 25),
                         ),
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, value, child) {
-                          return SizedBox(
-                            width: 160,
-                            height: 160,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Background circle
-                                SizedBox.expand(
-                                  child: CircularProgressIndicator(
-                                    value: 1.0,
-                                    strokeWidth: 12,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      colorScheme.primary.withValues(
-                                        alpha: 0.05,
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: provider.isPreparingUpload ? 0 : progress,
+                          ),
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return SizedBox(
+                              width: 160,
+                              height: 160,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Background circle
+                                  SizedBox.expand(
+                                    child: CircularProgressIndicator(
+                                      value: 1.0,
+                                      strokeWidth: 12,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        colorScheme.primary.withValues(
+                                          alpha: 0.05,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                // Progress circle
-                                SizedBox.expand(
-                                  child: CircularProgressIndicator(
-                                    value: provider.isPreparingUpload
-                                        ? null
-                                        : value,
-                                    strokeWidth: 12,
-                                    strokeCap: StrokeCap.round,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      colorScheme.secondary,
+                                  // Progress circle
+                                  SizedBox.expand(
+                                    child: CircularProgressIndicator(
+                                      value: provider.isPreparingUpload
+                                          ? null
+                                          : value,
+                                      strokeWidth: 12,
+                                      strokeCap: StrokeCap.round,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        colorScheme.secondary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if (!provider.isPreparingUpload)
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '${(value * 100).toInt()}',
-                                        style: TextStyle(
-                                          fontSize: 48,
-                                          fontWeight: FontWeight.w900,
-                                          color: colorScheme.secondary,
-                                          height: 1,
-                                          letterSpacing: -2,
+                                  if (!provider.isPreparingUpload)
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '${(value * 100).toInt()}',
+                                          style: TextStyle(
+                                            fontSize: 48,
+                                            fontWeight: FontWeight.w900,
+                                            color: colorScheme.secondary,
+                                            height: 1,
+                                            letterSpacing: -2,
+                                          ),
                                         ),
+                                        Text(
+                                          '%',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.secondary
+                                                .withValues(alpha: 0.5),
+                                            letterSpacing: 2,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  else
+                                    TweenAnimationBuilder<double>(
+                                      tween: Tween<double>(
+                                        begin: 0.8,
+                                        end: 1.2,
                                       ),
-                                      Text(
-                                        '%',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: colorScheme.secondary
-                                              .withValues(alpha: 0.5),
-                                          letterSpacing: 2,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                else
-                                  TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(begin: 0.8, end: 1.2),
-                                    duration: const Duration(seconds: 1),
-                                    curve: Curves.easeInOutSine,
-                                    builder: (context, scale, child) {
-                                      return Transform.scale(
-                                        scale: scale,
-                                        child: Icon(
-                                          Icons.cloud_upload_rounded,
-                                          color: colorScheme.secondary,
-                                          size: 56,
-                                        ),
-                                      );
-                                    },
-                                    onEnd:
-                                        () {}, // Loop handled by TweenAnimationBuilder if needed or just use a loop
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const Gap(40),
-                      Text(
-                        provider.isPreparingUpload
-                            ? t.google_drive.preparing
-                            : t.google_drive.uploading.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 4,
-                          color: colorScheme.secondary,
+                                      duration: const Duration(seconds: 1),
+                                      curve: Curves.easeInOutSine,
+                                      builder: (context, scale, child) {
+                                        return Transform.scale(
+                                          scale: scale,
+                                          child: Icon(
+                                            Icons.cloud_upload_rounded,
+                                            color: colorScheme.secondary,
+                                            size: 56,
+                                          ),
+                                        );
+                                      },
+                                      onEnd:
+                                          () {}, // Loop handled by TweenAnimationBuilder if needed or just use a loop
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                      const Gap(16),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: Text(
-                          provider.uploadStatusMessage,
-                          key: ValueKey(provider.uploadStatusMessage),
-                          textAlign: TextAlign.center,
+                        const Gap(40),
+                        Text(
+                          provider.isPreparingUpload
+                              ? t.google_drive.preparing
+                              : t.google_drive.uploading.toUpperCase(),
                           style: TextStyle(
-                            fontSize: 15,
-                            color: colorScheme.onSurface.withValues(alpha: 0.7),
-                            fontWeight: FontWeight.w500,
-                            height: 1.4,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 4,
+                            color: colorScheme.secondary,
                           ),
                         ),
-                      ),
-                    ],
+                        const Gap(16),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: Text(
+                            provider.uploadStatusMessage,
+                            key: ValueKey(provider.uploadStatusMessage),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
+                              fontWeight: FontWeight.w500,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         );
       },
@@ -456,181 +477,291 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final bool isMobile =
-        ResponsiveBreakpoints.of(context).smallerThan(DESKTOP) ||
-        MediaQuery.sizeOf(context).height < 500;
+    return ChangeNotifierProvider<EditPhotoProvider>(
+      create: (_) => locator<EditPhotoProvider>()
+        ..initWithPhotoboothData(
+          photos: widget.photos,
+          photoCount: widget.photoCount,
+          isMirrored: widget.isMirrored,
+          videoFile: widget.videoFile,
+          timestamps: widget.timestamps,
+        ),
+      child: Builder(
+        builder: (context) {
+          final colorScheme = Theme.of(context).colorScheme;
+          final bool isMobile =
+              ResponsiveBreakpoints.of(context).smallerThan(DESKTOP) ||
+              MediaQuery.sizeOf(context).height < 500;
 
-    final bool isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+          final bool isLandscape =
+              MediaQuery.orientationOf(context) == Orientation.landscape;
 
-    return Consumer<EditPhotoProvider>(
-      builder: (context, editPhotoProvider, child) {
-        return Scaffold(
-          backgroundColor: colorScheme.surface,
-          bottomNavigationBar: isMobile
-              ? SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: isLandscape ? 0 : 0,
-                    ),
-                    child: SizedBox(
-                      height: isLandscape ? 48 : null,
-                      child: Row(
-                        children: [
-                          if (kIsWeb) ...[
-                            if (StorageConfig.activeStorage !=
-                                StorageType.none) ...[
-                              Expanded(
-                                flex: 1,
-                                child: SecondaryButton(
-                                  onTap: () => _handleQRRequest(context),
-                                  icon: Icons.qr_code_2_rounded,
+          return Consumer<EditPhotoProvider>(
+            builder: (context, editPhotoProvider, child) {
+              return Scaffold(
+                backgroundColor: colorScheme.surface,
+                bottomNavigationBar: isMobile
+                    ? SafeArea(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: isLandscape ? 0 : 0,
+                          ),
+                          child: SizedBox(
+                            height: isLandscape ? 48 : null,
+                            child: Row(
+                              children: [
+                                if (kIsWeb) ...[
+                                  if (StorageConfig.activeStorage !=
+                                      StorageType.none) ...[
+                                    Expanded(
+                                      flex: 1,
+                                      child: SecondaryButton(
+                                        onTap: () => _handleQRRequest(context),
+                                        icon: Icons.qr_code_2_rounded,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                  ],
+                                  Expanded(
+                                    flex: 1,
+                                    child: SecondaryButton(
+                                      onTap: () => _handleSaveRequest(context),
+                                      icon: Icons.save_alt_rounded,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                ] else ...[
+                                  Expanded(
+                                    flex: 1,
+                                    child: SecondaryButton(
+                                      onTap: () => _handleSaveRequest(context),
+                                      icon: Icons.save_alt_rounded,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                ],
+                                // Print Button
+                                Expanded(
+                                  flex: 3,
+                                  child: PrimaryButton(
+                                    onTap: () {
+                                      // TODO: Implement print logic
+                                    },
+                                    label: t.editor.printPhoto,
+                                    icon: Icons.local_printshop_rounded,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                            ],
-                            Expanded(
-                              flex: 1,
-                              child: SecondaryButton(
-                                onTap: () => _handleSaveRequest(context),
-                                icon: Icons.save_alt_rounded,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                          ] else ...[
-                            Expanded(
-                              flex: 1,
-                              child: SecondaryButton(
-                                onTap: () => _handleSaveRequest(context),
-                                icon: Icons.save_alt_rounded,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                          ],
-                          // Print Button
-                          Expanded(
-                            flex: 3,
-                            child: PrimaryButton(
-                              onTap: () {
-                                // TODO: Implement print logic
-                              },
-                              label: t.editor.printPhoto,
-                              icon: Icons.local_printshop_rounded,
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : null,
-          body: SafeArea(
-            child: Padding(
-              padding: isMobile
-                  ? EdgeInsets.symmetric(
-                      horizontal: isLandscape ? 8.0 : 12.0,
-                      vertical: isLandscape ? 4.0 : 8.0,
-                    )
-                  : const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Hide header in landscape mobile
-                  if (!(isMobile && isLandscape)) const PhotoboothHeader(),
-                  Expanded(
-                    child: isMobile
-                        ? (isLandscape
-                              // Landscape mobile: Row layout
-                              ? Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      )
+                    : null,
+                body: SafeArea(
+                  child: Padding(
+                    padding: isMobile
+                        ? EdgeInsets.symmetric(
+                            horizontal: isLandscape ? 8.0 : 12.0,
+                            vertical: isLandscape ? 4.0 : 8.0,
+                          )
+                        : const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Hide header in landscape mobile
+                        if (!(isMobile && isLandscape))
+                          const PhotoboothHeader(),
+                        Expanded(
+                          child: isMobile
+                              ? (isLandscape
+                                    // Landscape mobile: Row layout
+                                    ? Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Left: Preview (scrollable)
+                                          Expanded(
+                                            flex: 2,
+                                            child: SingleChildScrollView(
+                                              child: PreviewPanel(
+                                                stripController:
+                                                    _stripController,
+                                                paperController:
+                                                    _paperController,
+                                                photos: editPhotoProvider
+                                                    .capturedPhotos,
+                                                selectedFrame: editPhotoProvider
+                                                    .selectedFrame,
+                                                availableFrames:
+                                                    editPhotoProvider
+                                                        .filteredFrames,
+                                                printTwoCopies:
+                                                    editPhotoProvider
+                                                        .printTwoCopies,
+                                                showPaperPreview:
+                                                    editPhotoProvider
+                                                        .showPaperPreview,
+                                                onTogglePrintTwoCopies:
+                                                    editPhotoProvider
+                                                        .togglePrintTwoCopies,
+                                                onTogglePaperPreview:
+                                                    editPhotoProvider
+                                                        .togglePaperPreview,
+                                                videoRecapFile:
+                                                    editPhotoProvider
+                                                        .videoRecapFile,
+                                                photoTimestamps:
+                                                    editPhotoProvider
+                                                        .photoTimestamps,
+                                                selectedFilter:
+                                                    editPhotoProvider
+                                                        .selectedFilter,
+                                                filterIntensity:
+                                                    editPhotoProvider
+                                                        .filterIntensity,
+                                                isMirrored: editPhotoProvider
+                                                    .isMirrored,
+                                                isMobile: true,
+                                              ),
+                                            ),
+                                          ),
+                                          const Gap(8),
+                                          // Right: Editor (scrollable)
+                                          Expanded(
+                                            flex: 3,
+                                            child: SingleChildScrollView(
+                                              child: EditorPanel(
+                                                availableFrames:
+                                                    editPhotoProvider
+                                                        .filteredFrames,
+                                                selectedFrame: editPhotoProvider
+                                                    .selectedFrame
+                                                    .path,
+                                                onFrameSelected:
+                                                    editPhotoProvider
+                                                        .setSelectedFrame,
+                                                photos: editPhotoProvider
+                                                    .capturedPhotos,
+                                                videoRecapFile:
+                                                    editPhotoProvider
+                                                        .videoRecapFile,
+                                                photoTimestamps:
+                                                    editPhotoProvider
+                                                        .photoTimestamps,
+                                                isProcessing: editPhotoProvider
+                                                    .isProcessing,
+                                                filters:
+                                                    editPhotoProvider.filters,
+                                                selectedFilter:
+                                                    editPhotoProvider
+                                                        .selectedFilter,
+                                                filterIntensity:
+                                                    editPhotoProvider
+                                                        .filterIntensity,
+                                                onFilterSelected:
+                                                    editPhotoProvider.setFilter,
+                                                onFilterIntensityChanged:
+                                                    editPhotoProvider
+                                                        .setFilterIntensity,
+                                                onQRRequested:
+                                                    StorageConfig
+                                                            .activeStorage ==
+                                                        StorageType.none
+                                                    ? null
+                                                    : () => _handleQRRequest(
+                                                        context,
+                                                      ),
+                                                onSaveRequested: () =>
+                                                    _handleSaveRequest(context),
+                                                isMobile: true,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    // Portrait mobile: vertical scroll
+                                    : SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            PreviewPanel(
+                                              stripController: _stripController,
+                                              paperController: _paperController,
+                                              photos: editPhotoProvider
+                                                  .capturedPhotos,
+                                              selectedFrame: editPhotoProvider
+                                                  .selectedFrame,
+                                              availableFrames: editPhotoProvider
+                                                  .filteredFrames,
+                                              printTwoCopies: editPhotoProvider
+                                                  .printTwoCopies,
+                                              showPaperPreview:
+                                                  editPhotoProvider
+                                                      .showPaperPreview,
+                                              onTogglePrintTwoCopies:
+                                                  editPhotoProvider
+                                                      .togglePrintTwoCopies,
+                                              onTogglePaperPreview:
+                                                  editPhotoProvider
+                                                      .togglePaperPreview,
+                                              videoRecapFile: editPhotoProvider
+                                                  .videoRecapFile,
+                                              photoTimestamps: editPhotoProvider
+                                                  .photoTimestamps,
+                                              selectedFilter: editPhotoProvider
+                                                  .selectedFilter,
+                                              filterIntensity: editPhotoProvider
+                                                  .filterIntensity,
+                                              isMirrored:
+                                                  editPhotoProvider.isMirrored,
+                                              isMobile: true,
+                                            ),
+                                            const Gap(16),
+                                            EditorPanel(
+                                              availableFrames: editPhotoProvider
+                                                  .filteredFrames,
+                                              selectedFrame: editPhotoProvider
+                                                  .selectedFrame
+                                                  .path,
+                                              onFrameSelected: editPhotoProvider
+                                                  .setSelectedFrame,
+                                              photos: editPhotoProvider
+                                                  .capturedPhotos,
+                                              videoRecapFile: editPhotoProvider
+                                                  .videoRecapFile,
+                                              photoTimestamps: editPhotoProvider
+                                                  .photoTimestamps,
+                                              isProcessing: editPhotoProvider
+                                                  .isProcessing,
+                                              filters:
+                                                  editPhotoProvider.filters,
+                                              selectedFilter: editPhotoProvider
+                                                  .selectedFilter,
+                                              filterIntensity: editPhotoProvider
+                                                  .filterIntensity,
+                                              onFilterSelected:
+                                                  editPhotoProvider.setFilter,
+                                              onFilterIntensityChanged:
+                                                  editPhotoProvider
+                                                      .setFilterIntensity,
+                                              onQRRequested:
+                                                  StorageConfig.activeStorage ==
+                                                      StorageType.none
+                                                  ? null
+                                                  : () => _handleQRRequest(
+                                                      context,
+                                                    ),
+                                              onSaveRequested: () =>
+                                                  _handleSaveRequest(context),
+                                              isMobile: true,
+                                            ),
+                                          ],
+                                        ),
+                                      ))
+                              : Row(
                                   children: [
-                                    // Left: Preview (scrollable)
                                     Expanded(
                                       flex: 2,
-                                      child: SingleChildScrollView(
-                                        child: PreviewPanel(
-                                          stripController: _stripController,
-                                          paperController: _paperController,
-                                          photos:
-                                              editPhotoProvider.capturedPhotos,
-                                          selectedFrame:
-                                              editPhotoProvider.selectedFrame,
-                                          availableFrames:
-                                              editPhotoProvider.filteredFrames,
-                                          printTwoCopies:
-                                              editPhotoProvider.printTwoCopies,
-                                          showPaperPreview: editPhotoProvider
-                                              .showPaperPreview,
-                                          onTogglePrintTwoCopies:
-                                              editPhotoProvider
-                                                  .togglePrintTwoCopies,
-                                          onTogglePaperPreview:
-                                              editPhotoProvider
-                                                  .togglePaperPreview,
-                                          videoRecapFile:
-                                              editPhotoProvider.videoRecapFile,
-                                          photoTimestamps:
-                                              editPhotoProvider.photoTimestamps,
-                                          selectedFilter:
-                                              editPhotoProvider.selectedFilter,
-                                          filterIntensity:
-                                              editPhotoProvider.filterIntensity,
-                                          isMirrored:
-                                              editPhotoProvider.isMirrored,
-                                          isMobile: true,
-                                        ),
-                                      ),
-                                    ),
-                                    const Gap(8),
-                                    // Right: Editor (scrollable)
-                                    Expanded(
-                                      flex: 3,
-                                      child: SingleChildScrollView(
-                                        child: EditorPanel(
-                                          availableFrames:
-                                              editPhotoProvider.filteredFrames,
-                                          selectedFrame: editPhotoProvider
-                                              .selectedFrame
-                                              .path,
-                                          onFrameSelected: editPhotoProvider
-                                              .setSelectedFrame,
-                                          photos:
-                                              editPhotoProvider.capturedPhotos,
-                                          videoRecapFile:
-                                              editPhotoProvider.videoRecapFile,
-                                          photoTimestamps:
-                                              editPhotoProvider.photoTimestamps,
-                                          isProcessing:
-                                              editPhotoProvider.isProcessing,
-                                          filters: editPhotoProvider.filters,
-                                          selectedFilter:
-                                              editPhotoProvider.selectedFilter,
-                                          filterIntensity:
-                                              editPhotoProvider.filterIntensity,
-                                          onFilterSelected:
-                                              editPhotoProvider.setFilter,
-                                          onFilterIntensityChanged:
-                                              editPhotoProvider
-                                                  .setFilterIntensity,
-                                          onQRRequested:
-                                              StorageConfig.activeStorage ==
-                                                  StorageType.none
-                                              ? null
-                                              : () => _handleQRRequest(context),
-                                          onSaveRequested: () =>
-                                              _handleSaveRequest(context),
-                                          isMobile: true,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              // Portrait mobile: vertical scroll
-                              : SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      PreviewPanel(
+                                      child: PreviewPanel(
                                         stripController: _stripController,
                                         paperController: _paperController,
                                         photos:
@@ -658,10 +789,12 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                                             editPhotoProvider.filterIntensity,
                                         isMirrored:
                                             editPhotoProvider.isMirrored,
-                                        isMobile: true,
                                       ),
-                                      const Gap(16),
-                                      EditorPanel(
+                                    ),
+                                    const Gap(24),
+                                    Expanded(
+                                      flex: 3,
+                                      child: EditorPanel(
                                         availableFrames:
                                             editPhotoProvider.filteredFrames,
                                         selectedFrame: editPhotoProvider
@@ -694,84 +827,20 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                                             : () => _handleQRRequest(context),
                                         onSaveRequested: () =>
                                             _handleSaveRequest(context),
-                                        isMobile: true,
                                       ),
-                                    ],
-                                  ),
-                                ))
-                        : Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: PreviewPanel(
-                                  stripController: _stripController,
-                                  paperController: _paperController,
-                                  photos: editPhotoProvider.capturedPhotos,
-                                  selectedFrame:
-                                      editPhotoProvider.selectedFrame,
-                                  availableFrames:
-                                      editPhotoProvider.filteredFrames,
-                                  printTwoCopies:
-                                      editPhotoProvider.printTwoCopies,
-                                  showPaperPreview:
-                                      editPhotoProvider.showPaperPreview,
-                                  onTogglePrintTwoCopies:
-                                      editPhotoProvider.togglePrintTwoCopies,
-                                  onTogglePaperPreview:
-                                      editPhotoProvider.togglePaperPreview,
-                                  videoRecapFile:
-                                      editPhotoProvider.videoRecapFile,
-                                  photoTimestamps:
-                                      editPhotoProvider.photoTimestamps,
-                                  selectedFilter:
-                                      editPhotoProvider.selectedFilter,
-                                  filterIntensity:
-                                      editPhotoProvider.filterIntensity,
-                                  isMirrored: editPhotoProvider.isMirrored,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const Gap(24),
-                              Expanded(
-                                flex: 3,
-                                child: EditorPanel(
-                                  availableFrames:
-                                      editPhotoProvider.filteredFrames,
-                                  selectedFrame:
-                                      editPhotoProvider.selectedFrame.path,
-                                  onFrameSelected:
-                                      editPhotoProvider.setSelectedFrame,
-                                  photos: editPhotoProvider.capturedPhotos,
-                                  videoRecapFile:
-                                      editPhotoProvider.videoRecapFile,
-                                  photoTimestamps:
-                                      editPhotoProvider.photoTimestamps,
-                                  isProcessing: editPhotoProvider.isProcessing,
-                                  filters: editPhotoProvider.filters,
-                                  selectedFilter:
-                                      editPhotoProvider.selectedFilter,
-                                  filterIntensity:
-                                      editPhotoProvider.filterIntensity,
-                                  onFilterSelected: editPhotoProvider.setFilter,
-                                  onFilterIntensityChanged:
-                                      editPhotoProvider.setFilterIntensity,
-                                  onQRRequested:
-                                      StorageConfig.activeStorage ==
-                                          StorageType.none
-                                      ? null
-                                      : () => _handleQRRequest(context),
-                                  onSaveRequested: () =>
-                                      _handleSaveRequest(context),
-                                ),
-                              ),
-                            ],
-                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

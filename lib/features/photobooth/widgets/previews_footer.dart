@@ -3,7 +3,6 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:th_photobooth/components/primary_button.dart';
-import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:th_photobooth/features/edit_photo/screens/edit_photo.screen.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -52,26 +51,22 @@ class PreviewsFooter extends StatelessWidget {
                     } catch (_) {}
                     if (!context.mounted) return;
 
-                    await context.read<EditPhotoProvider>().initWithPhotoboothData(
-                      photos: provider.capturedPhotos,
-                      photoCount: provider.selectedPhotoCount,
-                      isMirrored: provider.isMirrored,
-                      videoFile: provider.videoRecapFile,
-                      timestamps: provider.photoTimestamps,
-                      session: provider.sessionId,
-                    );
-
-                    if (!context.mounted) return;
-
                     await Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (context) => const EditPhotoScreen(),
+                        builder: (context) => EditPhotoScreen(
+                          photos: provider.capturedPhotos,
+                          photoCount: provider.selectedPhotoCount,
+                          isMirrored: provider.isMirrored,
+                          videoFile: provider.videoRecapFile,
+                          timestamps: provider.photoTimestamps,
+                        ),
                       ),
                     );
 
                     if (context.mounted) {
                       try {
+                        await provider.clearSession();
                         provider.startCamera();
                       } catch (_) {}
                     }

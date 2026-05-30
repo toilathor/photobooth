@@ -92,6 +92,10 @@
   "auth": {
     "title": "ACCOUNT AUTHENTICATION",
     "description": "To ensure your photos are stored privately and securely on your Google Drive.",
-    "back": "BACK"
+    "back": "BACK",
+    "grant_title": "GRANT ACCESS PERMISSION",
+    "grant_description": "Please grant Google Drive access so the app can create folders and store your photos/videos.",
+    "grant_btn": "GRANT ACCESS & CONTINUE",
+    "grant_failed": "Failed to grant access. Please try again."
   }
 }

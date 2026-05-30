@@ -107,6 +107,7 @@ class QRShareDialog extends StatelessWidget {
                         child: QrImageView(
                           data: url,
                           version: QrVersions.auto,
+                          errorCorrectionLevel: QrErrorCorrectLevel.H,
                           size: 260.0, // Giữ kích thước lớn nhưng cân đối hơn
                           gapless: true,
                           eyeStyle: const QrEyeStyle(
@@ -121,14 +122,14 @@ class QRShareDialog extends StatelessWidget {
                       ),
                       // Logo Overlay
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
                         child: Container(
-                          width: 54,
-                          height: 54,
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: const DecorationImage(
@@ -137,7 +138,7 @@ class QRShareDialog extends StatelessWidget {
                               ),
                               fit: BoxFit.cover,
                             ),
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(color: Colors.white, width: 1.5),
                           ),
                         ),
                       ),

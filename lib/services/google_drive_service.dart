@@ -295,4 +295,37 @@ class GoogleDriveService implements StorageService {
     if (lower.endsWith('.webm')) return 'video/webm';
     return 'application/octet-stream';
   }
+
+  @override
+  Future<bool> hasRequiredScopes() async {
+    if (!kIsWeb) return true;
+    final account = _currentUser;
+    if (account == null) return false;
+    try {
+      final auth = await account.authorizationClient.authorizationForScopes(
+        GoogleDriveConfig.scopes,
+      );
+      return auth != null;
+    } catch (e) {
+      if (kDebugMode) print('Error checking scopes: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> requestRequiredScopes() async {
+    if (!kIsWeb) return true;
+    final account = _currentUser;
+    if (account == null) return false;
+    try {
+      await account.authorizationClient.authorizeScopes(
+        GoogleDriveConfig.scopes,
+      );
+      _userStreamController.add(_currentUser);
+      return true;
+    } catch (e) {
+      if (kDebugMode) print('Error requesting scopes: $e');
+      return false;
+    }
+  }
 }

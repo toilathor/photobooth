@@ -92,6 +92,10 @@
   "auth": {
     "title": "XÁC THỰC TÀI KHOẢN",
     "description": "Để đảm bảo ảnh được lưu trữ riêng tư và an toàn trên Google Drive của bạn.",
-    "back": "QUAY LẠI"
+    "back": "QUAY LẠI",
+    "grant_title": "CẤP QUYỀN TRUY CẬP",
+    "grant_description": "Vui lòng cấp quyền truy cập Google Drive để ứng dụng có thể tạo thư mục và lưu trữ ảnh/video của bạn.",
+    "grant_btn": "CẤP QUYỀN & TIẾP TỤC",
+    "grant_failed": "Cấp quyền truy cập thất bại. Vui lòng thử lại."
   }
 }

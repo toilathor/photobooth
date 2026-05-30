@@ -18,6 +18,7 @@ class EditPhotoProvider with ChangeNotifier {
   String selectedFilter = 'normal';
   double filterIntensity = 0.5;
   final List<String> filters = AppConfig.filters;
+  bool _isHandlingQR = false;
 
   List<FrameData> allFrames = FrameConfig.allFrames;
 
@@ -60,12 +61,11 @@ class EditPhotoProvider with ChangeNotifier {
     required bool isMirrored,
     XFile? videoFile,
     List<Duration>? timestamps,
-    String? session,
   }) async {
     capturedPhotos = photos;
     videoRecapFile = videoFile;
     photoTimestamps = timestamps ?? [];
-    sessionId = session;
+    sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
     this.isMirrored = isMirrored;
 
     allFrames = await FrameService.loadFrames();
@@ -132,6 +132,9 @@ class EditPhotoProvider with ChangeNotifier {
 
     if (sessionId == null && capturedPhotos.isEmpty) return;
 
+    if (_isHandlingQR) return;
+    _isHandlingQR = true;
+
     try {
       // 1. Kiểm tra xem bộ ảnh này đã được upload chưa
       onShowLoading();
@@ -145,10 +148,14 @@ class EditPhotoProvider with ChangeNotifier {
         return;
       }
 
-      // 2. Kiểm tra đăng nhập (đối với Web)
-      if (kIsWeb && StorageFactory.instance.currentUser == null) {
-        onShowLogin();
-        return;
+      // 2. Kiểm tra đăng nhập và phân quyền (đối với Web)
+      if (kIsWeb) {
+        final hasLoggedIn = StorageFactory.instance.currentUser != null;
+        final hasScopes = await StorageFactory.instance.hasRequiredScopes();
+        if (!hasLoggedIn || !hasScopes) {
+          onShowLogin();
+          return;
+        }
       }
 
       // 3. Thực hiện upload
@@ -168,6 +175,8 @@ class EditPhotoProvider with ChangeNotifier {
     } catch (e) {
       onHideLoading();
       onShowError(e.toString());
+    } finally {
+      _isHandlingQR = false;
     }
   }
 
