@@ -12,6 +12,18 @@ class FrameItem extends StatelessWidget {
     required this.onTap,
   });
 
+  String get _thumbnailPath {
+    if (framePath.contains('assets/frames/collected/')) {
+      return framePath.replaceFirst(
+        'assets/frames/collected/',
+        'assets/frames/thumbnails/',
+      );
+    } else if (framePath == 'assets/frames/frame1.png') {
+      return 'assets/frames/thumbnails/frame1.png';
+    }
+    return framePath;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -40,10 +52,8 @@ class FrameItem extends StatelessWidget {
           child: Stack(
             children: [
               Image.asset(
-                framePath,
+                _thumbnailPath,
                 fit: BoxFit.fitWidth,
-                // Decode ảnh ở kích thước nhỏ (thumbnail) thay vì full 880px
-                cacheWidth: 200,
                 frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                   if (wasSynchronouslyLoaded) return child;
                   return AnimatedSwitcher(

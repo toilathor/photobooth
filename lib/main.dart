@@ -6,12 +6,12 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/copyright_watermark.dart';
 import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
-import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/screens/photobooth.screen.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/cache_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
+import 'package:th_photobooth/core/di/service_locator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,12 +47,14 @@ Future<void> main() async {
   // Khởi tạo Storage Service theo cấu hình (Personal: Google Drive, Commercial: None)
   await StorageFactory.instance.init();
 
+  // Khởi tạo Service Locator (GetIt)
+  setupServiceLocator();
+
   runApp(
     TranslationProvider(
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
-          ChangeNotifierProvider(create: (_) => EditPhotoProvider()),
+          ChangeNotifierProvider(create: (_) => locator<PhotoboothProvider>()),
         ],
         child: const PhotoboothApp(),
       ),

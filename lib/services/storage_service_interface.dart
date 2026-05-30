@@ -28,4 +28,10 @@ abstract class StorageService {
 
   /// Luồng sự kiện thay đổi người dùng
   Stream<dynamic> get onCurrentUserChanged;
+
+  /// Kiểm tra xem người dùng đã cấp quyền các scope cần thiết chưa (chỉ dùng cho Web)
+  Future<bool> hasRequiredScopes();
+
+  /// Yêu cầu cấp quyền các scope cần thiết (chỉ dùng cho Web)
+  Future<bool> requestRequiredScopes();
 }

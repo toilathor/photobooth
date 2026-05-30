@@ -86,19 +86,49 @@ class _WebLoginDialogContent extends StatefulWidget {
 
 class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
   StreamSubscription<dynamic>? _subscription;
+  bool _isCheckingScopes = true;
+  bool _hasScopes = false;
+  bool _isRequestingScopes = false;
+  String? _errorMessage;
+  bool _isSuccessCallbackTriggered = false;
 
   @override
   void initState() {
     super.initState();
+    _checkInitialState();
     _subscription = StorageFactory.instance.onCurrentUserChanged.listen((user) {
-      if (user != null) {
-        // Đăng nhập thành công
-        if (mounted) {
+      _checkState();
+    });
+  }
+
+  Future<void> _checkInitialState() async {
+    await _checkState();
+  }
+
+  Future<void> _checkState() async {
+    if (!mounted) return;
+    final user = StorageFactory.instance.currentUser;
+    if (user != null) {
+      final hasScopes = await StorageFactory.instance.hasRequiredScopes();
+      if (mounted) {
+        setState(() {
+          _hasScopes = hasScopes;
+          _isCheckingScopes = false;
+        });
+        if (hasScopes && !_isSuccessCallbackTriggered) {
+          _isSuccessCallbackTriggered = true;
           Navigator.pop(context);
           widget.onLoginSuccess();
         }
       }
-    });
+    } else {
+      if (mounted) {
+        setState(() {
+          _hasScopes = false;
+          _isCheckingScopes = false;
+        });
+      }
+    }
   }
 
   @override
@@ -107,9 +137,53 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
     super.dispose();
   }
 
+  Future<void> _handleGrantPermission() async {
+    if (_isRequestingScopes) return;
+    setState(() {
+      _isRequestingScopes = true;
+      _errorMessage = null;
+    });
+
+    final success = await StorageFactory.instance.requestRequiredScopes();
+
+    if (!mounted) return;
+    setState(() {
+      _isRequestingScopes = false;
+    });
+
+    if (success) {
+      await _checkState();
+    } else {
+      setState(() {
+        _errorMessage = t.auth.grant_failed;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final user = StorageFactory.instance.currentUser;
+
+    if (_isCheckingScopes) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 380,
+          height: 200,
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    // Show Grant UI if user is signed in but hasn't authorized the Drive scope
+    final bool showGrantUI = user != null && !_hasScopes;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -137,18 +211,19 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF4285F4).withValues(alpha: 0.1),
+                color: (showGrantUI ? const Color(0xFF34A853) : const Color(0xFF4285F4))
+                    .withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.lock_person_rounded,
-                color: Color(0xFF4285F4),
+              child: Icon(
+                showGrantUI ? Icons.vpn_key_rounded : Icons.lock_person_rounded,
+                color: showGrantUI ? const Color(0xFF34A853) : const Color(0xFF4285F4),
                 size: 36,
               ),
             ),
             const Gap(32),
             Text(
-              t.auth.title,
+              showGrantUI ? t.auth.grant_title : t.auth.title,
               style: GoogleFonts.plusJakartaSans(
                 color: colorScheme.secondary,
                 fontSize: 16,
@@ -161,7 +236,7 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                t.auth.description,
+                showGrantUI ? t.auth.grant_description : t.auth.description,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -172,7 +247,56 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
               ),
             ),
             const Gap(40),
-            const GoogleSignInWebButton(),
+            if (showGrantUI) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF34A853),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      elevation: 2,
+                    ),
+                    onPressed: _isRequestingScopes ? null : _handleGrantPermission,
+                    icon: _isRequestingScopes
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.cloud_done_rounded),
+                    label: Text(
+                      t.auth.grant_btn,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (_errorMessage != null) ...[
+                const Gap(12),
+                Text(
+                  _errorMessage!,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: colorScheme.error,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ] else ...[
+              const GoogleSignInWebButton(),
+            ],
             const Gap(32),
             TextButton(
               onPressed: () => Navigator.pop(context),

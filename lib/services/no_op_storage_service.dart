@@ -36,4 +36,10 @@ class NoOpStorageService implements StorageService {
 
   @override
   Stream<dynamic> get onCurrentUserChanged => const Stream.empty();
+
+  @override
+  Future<bool> hasRequiredScopes() async => true;
+
+  @override
+  Future<bool> requestRequiredScopes() async => true;
 }
