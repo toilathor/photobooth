@@ -44,7 +44,7 @@ class EditPhotoProvider with ChangeNotifier {
     filteredFrames = allFrames;
     selectedFrame = allFrames.isNotEmpty
         ? allFrames.first
-        : const FrameData(path: '', photoSlots: 0);
+        : const FrameData(photoSlots: 0);
   }
 
   void initForPhotoCount(int count) {

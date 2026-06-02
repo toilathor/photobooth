@@ -47,7 +47,8 @@
     "viewNow": "XEM NGAY",
     "saveToDevice": "LƯU VỀ THIẾT BỊ",
     "saveToDeviceSuccess": "Đã lưu toàn bộ ảnh và video vào thiết bị!",
-    "saveToDeviceCancel": "Đã hủy lưu tệp."
+    "saveToDeviceCancel": "Đã hủy lưu tệp.",
+    "chooseFrame": "Chọn khung hình"
   },
   "dialogs": {
     "photoSelection": {

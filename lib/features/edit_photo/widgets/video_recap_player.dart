@@ -70,7 +70,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     final controller = kIsWeb
         ? VideoPlayerController.networkUrl(Uri.parse(videoPath))
         : VideoPlayerController.file(File(videoPath));
-        
+
     _fullController = controller;
     _fullInitialized = false;
 
@@ -350,7 +350,9 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_viewMode == RecapViewMode.full && _fullInitialized && _fullController != null)
+          if (_viewMode == RecapViewMode.full &&
+              _fullInitialized &&
+              _fullController != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _VideoProgressBar(controller: _fullController!),
@@ -464,11 +466,12 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                     ),
                   ),
                 // Frame Overlay
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Image.asset(frame.path, fit: BoxFit.fill),
+                if (frame.path.isNotEmpty)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Image.asset(frame.path, fit: BoxFit.fill),
+                    ),
                   ),
-                ),
               ],
             );
           },

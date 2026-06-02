@@ -127,7 +127,9 @@ class PhotoboothProvider extends ChangeNotifier {
       final camera = AppConfig.cameras[_currentCameraIndex];
       cameraController = CameraController(
         camera,
-        isVeryHighResolution ? ResolutionPreset.veryHigh : ResolutionPreset.high,
+        isVeryHighResolution
+            ? ResolutionPreset.veryHigh
+            : ResolutionPreset.high,
         enableAudio: false,
       );
 
@@ -163,7 +165,7 @@ class PhotoboothProvider extends ChangeNotifier {
     if (isVeryHighResolution == value) return;
     isVeryHighResolution = value;
     notifyListeners();
-    
+
     if (cameraController != null) {
       await stopCamera();
       await startCamera();

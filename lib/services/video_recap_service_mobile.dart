@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
@@ -24,8 +23,10 @@ class VideoRecapService {
   }) async {
     try {
       final tempDir = await getTemporaryDirectory();
-      final String outputPath = '${tempDir.path}/recap_${DateTime.now().millisecondsSinceEpoch}.mp4';
-      final String frameImagePath = '${tempDir.path}/frame_${DateTime.now().millisecondsSinceEpoch}.png';
+      final String outputPath =
+          '${tempDir.path}/recap_${DateTime.now().millisecondsSinceEpoch}.mp4';
+      final String frameImagePath =
+          '${tempDir.path}/frame_${DateTime.now().millisecondsSinceEpoch}.png';
 
       // 1. Tải ảnh frame từ assets và lưu vào file tạm để FFmpeg có thể đọc
       final ByteData frameByteData = await rootBundle.load(frame.path);
@@ -39,7 +40,9 @@ class VideoRecapService {
       }
 
       // 2. Lấy độ phân giải và thông tin video gốc bằng FFprobe
-      final mediaInformation = await FFprobeKit.getMediaInformation(cleanVideoUrl);
+      final mediaInformation = await FFprobeKit.getMediaInformation(
+        cleanVideoUrl,
+      );
       final info = mediaInformation.getMediaInformation();
       if (info == null) {
         if (kDebugMode) {
@@ -79,7 +82,9 @@ class VideoRecapService {
         for (final log in mediaLogs) {
           final message = log.getMessage();
           if (message.contains('rotation of')) {
-            final match = RegExp(r'rotation of (-?\d+(?:\.\d+)?)').firstMatch(message);
+            final match = RegExp(
+              r'rotation of (-?\d+(?:\.\d+)?)',
+            ).firstMatch(message);
             if (match != null) {
               final val = double.tryParse(match.group(1) ?? '');
               if (val != null) {
@@ -88,8 +93,11 @@ class VideoRecapService {
               }
             }
           }
-          if (rotation == 0 && (message.contains('rotate') || message.contains('rotation'))) {
-            final match = RegExp(r'(?:rotate|rotation)[^0-9-]*(-?\d+)').firstMatch(message);
+          if (rotation == 0 &&
+              (message.contains('rotate') || message.contains('rotation'))) {
+            final match = RegExp(
+              r'(?:rotate|rotation)[^0-9-]*(-?\d+)',
+            ).firstMatch(message);
             if (match != null) {
               rotation = (int.tryParse(match.group(1) ?? '') ?? 0).abs();
               break;
@@ -109,7 +117,7 @@ class VideoRecapService {
       if (rotation == 0) {
         try {
           final rotationSession = await FFprobeKit.execute(
-            '-v error -select_streams v:0 -show_entries stream=tags:side_data -of json "$cleanVideoUrl"'
+            '-v error -select_streams v:0 -show_entries stream=tags:side_data -of json "$cleanVideoUrl"',
           );
           final rawJsonOutput = await rotationSession.getOutput();
           if (rawJsonOutput != null && rawJsonOutput.trim().isNotEmpty) {
@@ -123,17 +131,23 @@ class VideoRecapService {
                   if (tags is Map) {
                     final rotateVal = tags['rotate'];
                     if (rotateVal != null) {
-                      rotation = (double.tryParse(rotateVal.toString()) ?? 0.0).round().abs();
+                      rotation = (double.tryParse(rotateVal.toString()) ?? 0.0)
+                          .round()
+                          .abs();
                     }
                   }
                   if (rotation == 0) {
                     final sideDataList = stream['side_data_list'];
                     if (sideDataList is List) {
                       for (final sideData in sideDataList) {
-                        if (sideData is Map && sideData['side_data_type'] == 'Display Matrix') {
+                        if (sideData is Map &&
+                            sideData['side_data_type'] == 'Display Matrix') {
                           final rotationVal = sideData['rotation'];
                           if (rotationVal != null) {
-                            rotation = (double.tryParse(rotationVal.toString()) ?? 0.0).round().abs();
+                            rotation =
+                                (double.tryParse(rotationVal.toString()) ?? 0.0)
+                                    .round()
+                                    .abs();
                           }
                         }
                       }
@@ -161,7 +175,9 @@ class VideoRecapService {
           for (final log in dummyLogs) {
             final message = log.getMessage();
             if (message.contains('rotation of')) {
-              final match = RegExp(r'rotation of (-?\d+(?:\.\d+)?)').firstMatch(message);
+              final match = RegExp(
+                r'rotation of (-?\d+(?:\.\d+)?)',
+              ).firstMatch(message);
               if (match != null) {
                 final val = double.tryParse(match.group(1) ?? '');
                 if (val != null) {
@@ -187,13 +203,15 @@ class VideoRecapService {
           if (stream.getType() == 'video') {
             videoWidth = stream.getWidth() ?? 0;
             videoHeight = stream.getHeight() ?? 0;
-            
+
             // Nếu tệp có chiều rộng ngang (width > height) nhưng ứng dụng chạy dọc,
             // camera mặc định ghi dọc luôn có metadata xoay 90 hoặc 270.
             if (videoWidth > videoHeight) {
               rotation = 90;
               if (kDebugMode) {
-                debugPrint('Fallback: no rotation metadata found, but file is landscape. Assuming portrait rotation 90.');
+                debugPrint(
+                  'Fallback: no rotation metadata found, but file is landscape. Assuming portrait rotation 90.',
+                );
               }
             }
             break;
@@ -205,7 +223,7 @@ class VideoRecapService {
         if (stream.getType() == 'video') {
           videoWidth = stream.getWidth() ?? 0;
           videoHeight = stream.getHeight() ?? 0;
-          
+
           // Phương pháp 5: Dự phòng cuối cùng nếu quét các nơi không tìm thấy
           if (rotation == 0) {
             final properties = stream.getAllProperties();
@@ -219,10 +237,13 @@ class VideoRecapService {
             final sideDataList = properties?['side_data_list'];
             if (sideDataList is List) {
               for (final sideData in sideDataList) {
-                if (sideData is Map && sideData['side_data_type'] == 'Display Matrix') {
+                if (sideData is Map &&
+                    sideData['side_data_type'] == 'Display Matrix') {
                   final rotationVal = sideData['rotation'];
                   if (rotationVal != null) {
-                    final parsedRotation = (double.tryParse(rotationVal.toString()) ?? 0.0).round();
+                    final parsedRotation =
+                        (double.tryParse(rotationVal.toString()) ?? 0.0)
+                            .round();
                     rotation = parsedRotation.abs();
                   }
                 }
@@ -269,8 +290,9 @@ class VideoRecapService {
       );
 
       // 4. Gọi FFmpeg sử dụng libx264 encoder (được hỗ trợ hoàn toàn bởi gói full-gpl của dự án) để đảm bảo khả năng chạy được trên mọi thiết bị
-      final command = '-y -i "$cleanVideoUrl" -i "$frameImagePath" -filter_complex "$filterGraph" -map "[outv]" -c:v libx264 -preset ultrafast -pix_fmt yuv420p "$outputPath"';
-      
+      final command =
+          '-y -i "$cleanVideoUrl" -i "$frameImagePath" -filter_complex "$filterGraph" -map "[outv]" -c:v libx264 -preset ultrafast -pix_fmt yuv420p "$outputPath"';
+
       final session = await FFmpegKit.execute(command);
       final returnCode = await session.getReturnCode();
 
@@ -282,14 +304,11 @@ class VideoRecapService {
       if (ReturnCode.isSuccess(returnCode)) {
         final File outputFile = File(outputPath);
         final bytes = await outputFile.readAsBytes();
-        
+
         // Dọn dẹp video xuất
         await outputFile.delete();
-        
-        return FramedVideoResult(
-          bytes: bytes,
-          mimeType: 'video/mp4',
-        );
+
+        return FramedVideoResult(bytes: bytes, mimeType: 'video/mp4');
       } else {
         if (kDebugMode) {
           final logs = await session.getLogs();
@@ -329,7 +348,8 @@ class VideoRecapService {
 
     try {
       final tempDir = await getTemporaryDirectory();
-      final String outputPath = '${tempDir.path}/flipped_${DateTime.now().millisecondsSinceEpoch}.mp4';
+      final String outputPath =
+          '${tempDir.path}/flipped_${DateTime.now().millisecondsSinceEpoch}.mp4';
 
       String cleanVideoUrl = videoUrl;
       if (cleanVideoUrl.startsWith('file://')) {
@@ -337,7 +357,8 @@ class VideoRecapService {
       }
 
       // Tắt audio (-an) và sử dụng libx264 encoder để đảm bảo khả năng tương thích cao nhất và tránh lỗi không có audio stream
-      final command = '-y -i "$cleanVideoUrl" -vf hflip -c:v libx264 -preset ultrafast -pix_fmt yuv420p -an "$outputPath"';
+      final command =
+          '-y -i "$cleanVideoUrl" -vf hflip -c:v libx264 -preset ultrafast -pix_fmt yuv420p -an "$outputPath"';
       final session = await FFmpegKit.execute(command);
       final returnCode = await session.getReturnCode();
 
@@ -345,11 +366,8 @@ class VideoRecapService {
         final File outputFile = File(outputPath);
         final bytes = await outputFile.readAsBytes();
         await outputFile.delete();
-        
-        return FramedVideoResult(
-          bytes: bytes,
-          mimeType: 'video/mp4',
-        );
+
+        return FramedVideoResult(bytes: bytes, mimeType: 'video/mp4');
       } else {
         if (kDebugMode) {
           final logs = await session.getLogs();
@@ -379,11 +397,11 @@ class VideoRecapService {
   }) {
     final StringBuffer filter = StringBuffer();
     final double videoAspect = videoWidth / videoHeight;
-    
+
     // Đảm bảo kích thước canvas luôn là số chẵn để tương thích yuv420p
     final int canvasWidth = (frame.size.width.toInt() ~/ 2) * 2;
     final int canvasHeight = (frame.size.height.toInt() ~/ 2) * 2;
-    
+
     final int slotCount = frame.slots.length;
     if (slotCount == 0) return '';
 
@@ -395,14 +413,19 @@ class VideoRecapService {
     filter.write('[0:v]split=$slotCount$splitOut;');
 
     // Tạo 1 base video nền đen với thời lượng bằng `recapDurationSeconds`
-    filter.write('color=c=black:s=${canvasWidth}x$canvasHeight:d=$recapDurationSeconds:rate=30[base];');
+    filter.write(
+      'color=c=black:s=${canvasWidth}x$canvasHeight:d=$recapDurationSeconds:rate=30[base];',
+    );
 
     for (int i = 0; i < slotCount; i++) {
       final slot = frame.slots[i];
-      
+
       double photoTime;
       if (timestamps.length > i) {
-        photoTime = (timestamps[i].inMilliseconds / 1000.0).clamp(0.0, videoDuration);
+        photoTime = (timestamps[i].inMilliseconds / 1000.0).clamp(
+          0.0,
+          videoDuration,
+        );
       } else {
         if (slotCount > 1) {
           photoTime = ((i + 1) / slotCount) * videoDuration;
@@ -411,7 +434,10 @@ class VideoRecapService {
         }
       }
 
-      double startTime = (photoTime - recapDurationSeconds).clamp(0.0, videoDuration);
+      double startTime = (photoTime - recapDurationSeconds).clamp(
+        0.0,
+        videoDuration,
+      );
       if (photoTime - startTime < 0.5) {
         if (photoTime >= 0.5) {
           startTime = photoTime - 0.5;
@@ -423,8 +449,10 @@ class VideoRecapService {
       final slotAspect = slot.width / slot.height;
 
       // 1. Cắt video theo thời lượng slot
-      filter.write('[in$i]trim=start=$startTime:end=$photoTime,setpts=PTS-STARTPTS[v$i];');
-      
+      filter.write(
+        '[in$i]trim=start=$startTime:end=$photoTime,setpts=PTS-STARTPTS[v$i];',
+      );
+
       // 2. Tính toán Crop (Cắt ảnh theo tỉ lệ slot giống object-fit: cover)
       double cropWidth, cropHeight, cropX, cropY;
       if (videoAspect > slotAspect) {
@@ -446,14 +474,18 @@ class VideoRecapService {
       final int cropYEven = (cropY.toInt() ~/ 2) * 2;
 
       // 3. Crop
-      filter.write('[v$i]crop=$cropWidthEven:$cropHeightEven:$cropXEven:$cropYEven[vcrop$i];');
-      
+      filter.write(
+        '[v$i]crop=$cropWidthEven:$cropHeightEven:$cropXEven:$cropYEven[vcrop$i];',
+      );
+
       // Đảm bảo kích thước scale luôn là số chẵn
       final int scaleWidthEven = (slot.width.toInt() ~/ 2) * 2;
       final int scaleHeightEven = (slot.height.toInt() ~/ 2) * 2;
 
       // 4. Scale
-      filter.write('[vcrop$i]scale=$scaleWidthEven:$scaleHeightEven[vscale$i];');
+      filter.write(
+        '[vcrop$i]scale=$scaleWidthEven:$scaleHeightEven[vscale$i];',
+      );
 
       // 5. Flip (nếu có)P
       String finalSeg = 'vscale$i';
@@ -463,14 +495,16 @@ class VideoRecapService {
       }
 
       // 6. Overlay lên background
-      final String bgIn = i == 0 ? 'base' : 'bg${i-1}';
+      final String bgIn = i == 0 ? 'base' : 'bg${i - 1}';
       final String bgOut = 'bg$i';
-      filter.write('[$bgIn][$finalSeg]overlay=${slot.left.toInt()}:${slot.top.toInt()}:eof_action=repeat[$bgOut];');
+      filter.write(
+        '[$bgIn][$finalSeg]overlay=${slot.left.toInt()}:${slot.top.toInt()}:eof_action=repeat[$bgOut];',
+      );
     }
 
     final int lastIdx = slotCount - 1;
     final String finalBg = 'bg$lastIdx';
-    
+
     // 7. Overlay frame image lên trên cùng
     filter.write('[$finalBg][1:v]overlay=0:0:eof_action=repeat[outv]');
 

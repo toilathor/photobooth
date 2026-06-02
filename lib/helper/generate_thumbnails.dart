@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, avoid_dynamic_calls, prefer_single_quotes
 
 import 'dart:io';
 import 'package:image/image.dart' as img;
@@ -6,27 +6,21 @@ import 'package:image/image.dart' as img;
 void main() async {
   print('Starting thumbnail generation...');
   final collectedDir = Directory('assets/frames/collected');
+  final customStandardDir = Directory('assets/frames/custom/standard');
+  final customGroupDir = Directory('assets/frames/custom/group');
   final thumbnailsDir = Directory('assets/frames/thumbnails');
 
   if (!thumbnailsDir.existsSync()) {
     thumbnailsDir.createSync(recursive: true);
   }
 
-  // 1. Process main frame1.png
-  final frame1File = File('assets/frames/frame1.png');
-  if (frame1File.existsSync()) {
-    final destFile = File('${thumbnailsDir.path}/frame1.png');
-    if (!destFile.existsSync()) {
-      print('Processing frame1.png...');
-      _generateThumbnail(frame1File, destFile);
-    } else {
-      print('frame1.png thumbnail already exists, skipping.');
+  // Helper function to process a list of files in a directory
+  void processDirectory(Directory dir, String label) {
+    if (!dir.existsSync()) {
+      print('$label directory does not exist, skipping.');
+      return;
     }
-  }
-
-  // 2. Process collected frames
-  if (collectedDir.existsSync()) {
-    final files = collectedDir.listSync().whereType<File>().toList();
+    final files = dir.listSync().whereType<File>().toList();
     int count = 0;
     for (final file in files) {
       final filename = file.uri.pathSegments.last;
@@ -34,17 +28,30 @@ void main() async {
 
       final destFile = File('${thumbnailsDir.path}/$filename');
       if (!destFile.existsSync()) {
-        print('Processing $filename (${count + 1}/${files.length})...');
+        print('Processing $filename in $label (${count + 1}/${files.length})...');
         try {
           _generateThumbnail(file, destFile);
           count++;
         } catch (e) {
-          print('Error processing $filename: $e');
+          print('Error processing $filename in $label: $e');
         }
       }
     }
-    print('Generated $count new thumbnails.');
+    if (count > 0) {
+      print('Generated $count new thumbnails for $label.');
+    } else {
+      print('No new thumbnails generated for $label.');
+    }
   }
+
+  // 2. Process collected frames
+  processDirectory(collectedDir, 'collected');
+
+  // 3. Process custom standard frames
+  processDirectory(customStandardDir, 'custom/standard');
+
+  // 4. Process custom group frames
+  processDirectory(customGroupDir, 'custom/group');
 
   print('Thumbnail generation completed.');
 }

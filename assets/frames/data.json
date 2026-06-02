@@ -41,6 +41,12 @@
             "name": "Frame Chụp Cùng Idol",
             "created_at": "2025-08-07T15:30:07.000000Z",
             "updated_at": "2025-10-30T10:09:49.000000Z"
+        },
+        {
+            "id": 99,
+            "name": "Frame Custom",
+            "created_at": "2026-06-02T10:52:09.347294",
+            "updated_at": "2026-06-02T10:52:09.348206"
         }
     ],
     "images": [
@@ -1796,6 +1802,44 @@
                 "name": "Frame Đại Học",
                 "created_at": "2025-06-18T12:55:15.000000Z",
                 "updated_at": "2025-08-28T00:37:59.000000Z"
+            }
+        },
+        {
+            "id": 558,
+            "filename": "standard_custom_1.png",
+            "name": "standard_custom_1",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-06-02T10:52:09.351158",
+            "updated_at": "2026-06-02T10:52:09.351172",
+            "category_id": "99",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 99,
+                "name": "Frame Custom",
+                "created_at": "2026-06-02T10:52:09.351178",
+                "updated_at": "2026-06-02T10:52:09.351182"
+            }
+        },
+        {
+            "id": 559,
+            "filename": "group_custom_1.png",
+            "name": "group_custom_1",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-06-02T10:52:09.351387",
+            "updated_at": "2026-06-02T10:52:09.351394",
+            "category_id": "99",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 99,
+                "name": "Frame Custom",
+                "created_at": "2026-06-02T10:52:09.351399",
+                "updated_at": "2026-06-02T10:52:09.351403"
             }
         }
     ]

@@ -47,7 +47,8 @@
     "viewNow": "VIEW NOW",
     "saveToDevice": "SAVE TO DEVICE",
     "saveToDeviceSuccess": "Saved all photos and videos to device!",
-    "saveToDeviceCancel": "Save cancelled."
+    "saveToDeviceCancel": "Save cancelled.",
+    "chooseFrame": "Choose Frame"
   },
   "dialogs": {
     "photoSelection": {

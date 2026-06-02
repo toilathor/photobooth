@@ -31,6 +31,8 @@ window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson, pr
                 v.crossOrigin = "anonymous";
                 v.muted = true;
                 v.playsInline = true;
+                v.setAttribute('playsinline', '');
+                v.setAttribute('webkit-playsinline', '');
                 v.src = videoUrl;
 
                 await new Promise((res) => { v.onloadedmetadata = res; });
@@ -180,6 +182,9 @@ window.flipVideo = async function (videoUrl, isMirrored, preferredMimeType) {
             const v = document.createElement('video');
             v.crossOrigin = "anonymous";
             v.muted = true;
+            v.playsInline = true;
+            v.setAttribute('playsinline', '');
+            v.setAttribute('webkit-playsinline', '');
             v.src = videoUrl;
             await new Promise((res) => { v.onloadedmetadata = res; });
 

@@ -634,11 +634,12 @@ class PhotoStrip extends StatelessWidget {
                         ),
                       ),
                     ),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Image.asset(frame.path, fit: BoxFit.fill),
+                if (frame.path.isNotEmpty)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Image.asset(frame.path, fit: BoxFit.fill),
+                    ),
                   ),
-                ),
               ],
             );
           },

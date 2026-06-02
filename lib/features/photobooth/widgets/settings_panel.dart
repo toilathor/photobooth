@@ -2,13 +2,13 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:provider/provider.dart';
+import 'package:th_photobooth/components/language_switcher.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 
 import 'dropdown_setting.dart';
 import 'photo_selection_dialog.dart';
-import 'package:th_photobooth/i18n/strings.g.dart';
-import 'package:th_photobooth/components/language_switcher.dart';
 
 class SettingsPanel extends StatelessWidget {
   final bool isBottomSheet;
@@ -82,25 +82,64 @@ class SettingsPanel extends StatelessWidget {
           suffix: ' ${t.settings.seconds}',
         ),
         const Gap(20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              t.settings.veryHighResolution,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onPrimary,
-              ),
-            ),
-            Switch(
-              value: provider.isVeryHighResolution,
-              onChanged: provider.isAutoCapturing
-                  ? null
-                  : (val) => provider.toggleResolution(val),
-              activeThumbColor: colorScheme.primary,
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 65) {
+              return const SizedBox.shrink();
+            }
+
+            if (constraints.maxWidth < 160) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.settings.veryHighResolution,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const Gap(8),
+                  Switch(
+                    value: provider.isVeryHighResolution,
+                    onChanged: provider.isAutoCapturing
+                        ? null
+                        : (val) => provider.toggleResolution(val),
+                    activeThumbColor: colorScheme.secondary,
+                  ),
+                ],
+              );
+            }
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: constraints.maxWidth - 68,
+                  child: Text(
+                    t.settings.veryHighResolution,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Gap(8),
+                Switch(
+                  value: provider.isVeryHighResolution,
+                  onChanged: provider.isAutoCapturing
+                      ? null
+                      : (val) => provider.toggleResolution(val),
+                  activeThumbColor: colorScheme.secondary,
+                ),
+              ],
+            );
+          },
         ),
         if (isBottomSheet) ...[
           const Gap(20),
@@ -112,13 +151,11 @@ class SettingsPanel extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: colorScheme.primary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const Gap(10),
-              const Center(
-                child: LanguageSwitcher(isMobile: true),
-              ),
+              const Center(child: LanguageSwitcher(isMobile: true)),
             ],
           ),
         ],
@@ -138,9 +175,7 @@ class SettingsPanel extends StatelessWidget {
         border: Border.all(color: colorScheme.secondary.withValues(alpha: 0.3)),
       ),
       padding: const EdgeInsets.all(20),
-      child: SingleChildScrollView(
-        child: content,
-      ),
+      child: SingleChildScrollView(child: content),
     );
   }
 }

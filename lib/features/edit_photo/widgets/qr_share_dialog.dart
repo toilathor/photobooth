@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:th_photobooth/gen/assets.gen.dart';
 
 class QRShareDialog extends StatelessWidget {
   final String url;
@@ -132,9 +133,9 @@ class QRShareDialog extends StatelessWidget {
                           height: 44,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            image: const DecorationImage(
+                            image: DecorationImage(
                               image: AssetImage(
-                                'assets/images/ic_launcher.png',
+                                Assets.images.icLauncher.path,
                               ),
                               fit: BoxFit.cover,
                             ),

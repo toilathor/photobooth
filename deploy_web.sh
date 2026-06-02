@@ -44,7 +44,7 @@ fi
 # =====================================================================
 # Bạn CÓ THỂ điền các thư mục con ở đây (ví dụ: "assets/frames/collected")
 # Script sẽ giữ lại các file này của nhánh gh-pages trước khi xoá.
-KEEP_FILES=("env" ".gitignore" "assets/frames/collected")
+KEEP_FILES=("env" ".gitignore" "assets")
 
 echo "Đang sao lưu các file cần thiết (${KEEP_FILES[*]})..."
 
