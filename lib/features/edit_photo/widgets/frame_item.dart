@@ -25,18 +25,18 @@ class FrameItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: CupertinoContextMenu(
-        actions: [
-          CupertinoContextMenuAction(
-            child: Text(t.editor.chooseFrame),
-            onPressed: () {
-              onTap();
-              Navigator.pop(context);
-            },
-          ),
-        ],
+    return CupertinoContextMenu(
+      actions: [
+        CupertinoContextMenuAction(
+          child: Text(t.editor.chooseFrame),
+          onPressed: () {
+            onTap();
+            Navigator.pop(context);
+          },
+        ),
+      ],
+      child: GestureDetector(
+        onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),

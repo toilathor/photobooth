@@ -4,7 +4,6 @@ class AssetConfig {
   // Base paths
   static const String soundPath = 'sounds/';
   static const String framePath = 'assets/frames/';
-  static final String sampleFilter = Assets.images.sampleFilter.path;
 
   // Specific sounds (extract relative filename from type-safe Assets path)
   static final String soundCamera = Assets.sounds.camera.replaceFirst('assets/sounds/', '');

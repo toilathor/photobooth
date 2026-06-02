@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
@@ -9,13 +8,14 @@ import 'package:th_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js_interop) 'package:th_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
 import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/services/audio_service.dart';
 import 'package:th_photobooth/services/cache_service.dart';
 import 'package:th_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
   CameraController? cameraController;
   bool isFullscreen = false;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioService _audioService = AudioService();
   int _currentCameraIndex = 0;
   bool isMirrored = false;
   bool isVeryHighResolution = false;
@@ -179,12 +179,7 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> _playSound(String fileName) async {
-    try {
-      await _audioPlayer.stop();
-      await _audioPlayer.play(AssetSource(AssetConfig.getSoundPath(fileName)));
-    } catch (e) {
-      debugPrint('Error playing sound: $e');
-    }
+    await _audioService.playSound(fileName);
   }
 
   final Map<int, String> _numberSounds = AppConfig.numberSounds;
@@ -199,6 +194,7 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> startAutoCapture() async {
+    _audioService.warmup();
     if (isCapturing ||
         cameraController == null ||
         cameraController?.value.isInitialized != true) {
@@ -228,23 +224,31 @@ class PhotoboothProvider extends ChangeNotifier {
     }
 
     // Preparation Countdown
-    Completer<void> prepCompleter = Completer<void>();
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_shouldCancelCapture) {
-        timer.cancel();
-        prepCompleter.complete();
-        return;
-      }
-      if (currentCountdownValue > 1) {
-        currentCountdownValue--;
+    int prepCountdown = 2;
+    currentCountdownValue = prepCountdown;
+    notifyListeners();
+
+    DateTime prepStartTime = DateTime.now();
+    int prepLastTriggeredSecond = prepCountdown + 1;
+
+    while (currentCountdownValue > 0) {
+      if (_shouldCancelCapture) break;
+
+      DateTime now = DateTime.now();
+      double elapsed = now.difference(prepStartTime).inMilliseconds / 1000.0;
+      int expectedRemaining = prepCountdown - elapsed.floor();
+
+      if (expectedRemaining < 0) expectedRemaining = 0;
+
+      if (expectedRemaining < prepLastTriggeredSecond) {
+        currentCountdownValue = expectedRemaining;
         notifyListeners();
-      } else {
-        currentCountdownValue = 0;
-        timer.cancel();
-        prepCompleter.complete();
+        prepLastTriggeredSecond = expectedRemaining;
       }
-    });
-    await prepCompleter.future;
+
+      if (currentCountdownValue == 0) break;
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+    }
 
     if (_shouldCancelCapture) {
       await _cleanupAfterCancellation();
@@ -264,27 +268,37 @@ class PhotoboothProvider extends ChangeNotifier {
         _playSound(_numberSounds[currentCountdownValue]!);
       }
 
-      // Countdown
-      Completer<void> countdownCompleter = Completer<void>();
-      Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_shouldCancelCapture) {
-          timer.cancel();
-          countdownCompleter.complete();
-          return;
-        }
-        if (currentCountdownValue > 1) {
-          currentCountdownValue--;
-          notifyListeners();
-          if (_numberSounds.containsKey(currentCountdownValue)) {
-            _playSound(_numberSounds[currentCountdownValue]!);
+      // Countdown using target-based DateTime delta loop
+      DateTime cdStartTime = DateTime.now();
+      int cdLastTriggeredSecond = countdown;
+
+      while (currentCountdownValue > 0) {
+        if (_shouldCancelCapture) break;
+
+        DateTime now = DateTime.now();
+        double elapsed = now.difference(cdStartTime).inMilliseconds / 1000.0;
+        int expectedRemaining = countdown - elapsed.floor();
+
+        if (expectedRemaining < 0) expectedRemaining = 0;
+
+        if (expectedRemaining < cdLastTriggeredSecond) {
+          if (expectedRemaining == cdLastTriggeredSecond - 1) {
+            currentCountdownValue = expectedRemaining;
+            notifyListeners();
+            if (currentCountdownValue > 0 && _numberSounds.containsKey(currentCountdownValue)) {
+              _playSound(_numberSounds[currentCountdownValue]!);
+            }
+          } else {
+            // Main thread was blocked, update state without stacking audio calls
+            currentCountdownValue = expectedRemaining;
+            notifyListeners();
           }
-        } else {
-          currentCountdownValue = 0;
-          timer.cancel();
-          countdownCompleter.complete();
+          cdLastTriggeredSecond = expectedRemaining;
         }
-      });
-      await countdownCompleter.future;
+
+        if (currentCountdownValue == 0) break;
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+      }
 
       if (_shouldCancelCapture) break;
 
@@ -354,6 +368,7 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> takeManualPhoto() async {
+    _audioService.warmup();
     if (isCapturing ||
         cameraController == null ||
         cameraController?.value.isInitialized == false ||
@@ -412,6 +427,7 @@ class PhotoboothProvider extends ChangeNotifier {
     final oldController = cameraController;
     cameraController = null;
     oldController?.dispose();
+    _audioService.dispose();
     super.dispose();
   }
 }

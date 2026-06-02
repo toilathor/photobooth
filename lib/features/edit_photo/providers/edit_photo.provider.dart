@@ -80,7 +80,7 @@ class EditPhotoProvider with ChangeNotifier {
 
   void setFilter(String filter) {
     selectedFilter = filter;
-    filterIntensity = 1.0; // Reset intensity when filter changes
+    filterIntensity = 0.5; // Reset intensity to 50% when filter changes
     notifyListeners();
   }
 
@@ -298,7 +298,7 @@ class EditPhotoProvider with ChangeNotifier {
           message: t.google_drive.creating_recap,
         );
 
-        final originalExt = _getVideoExtension(videoRecapFile!);
+        var originalExt = _getVideoExtension(videoRecapFile!);
         Uint8List finalOriginalBytes;
 
         // 3.1. Xử lý video gốc (flip nếu cần)
@@ -311,6 +311,7 @@ class EditPhotoProvider with ChangeNotifier {
 
           if (flippedResult != null) {
             finalOriginalBytes = flippedResult.bytes;
+            originalExt = _getExtensionFromMimeType(flippedResult.mimeType);
           } else {
             finalOriginalBytes =
                 await videoRecapFile?.readAsBytes() ?? Uint8List.fromList([]);
@@ -335,9 +336,7 @@ class EditPhotoProvider with ChangeNotifier {
           );
 
           if (result != null) {
-            final extension = result.mimeType.contains('webm')
-                ? '.webm'
-                : '.mp4';
+            final extension = _getExtensionFromMimeType(result.mimeType);
             filesToUpload['video_recap_gan_khung$extension'] = result.bytes;
           } else {
             filesToUpload['video_recap_gan_khung$originalExt'] =
@@ -360,12 +359,32 @@ class EditPhotoProvider with ChangeNotifier {
   }
 
   String _getVideoExtension(XFile file) {
-    if (file.path.toLowerCase().endsWith('.webm')) return '.webm';
-    if (file.path.toLowerCase().endsWith('.mp4')) return '.mp4';
+    final path = file.path.toLowerCase();
+    if (path.endsWith('.webm')) return '.webm';
+    if (path.endsWith('.mp4')) return '.mp4';
+    if (path.endsWith('.mov')) return '.mov';
+    if (path.endsWith('.avi')) return '.avi';
+    if (path.endsWith('.3gp')) return '.3gp';
+
     final mimeType = file.mimeType;
     if (mimeType != null) {
-      if (mimeType.contains('webm')) return '.webm';
-      if (mimeType.contains('mp4')) return '.mp4';
+      return _getExtensionFromMimeType(mimeType);
+    }
+    return '.mp4';
+  }
+
+  String _getExtensionFromMimeType(String mimeType) {
+    final cleanMime = mimeType.toLowerCase();
+    if (cleanMime.contains('webm')) return '.webm';
+    if (cleanMime.contains('mp4')) return '.mp4';
+    if (cleanMime.contains('quicktime') || cleanMime.contains('mov')) return '.mov';
+    if (cleanMime.contains('3gpp')) return '.3gp';
+    if (cleanMime.contains('ogg')) return '.ogv';
+    if (cleanMime.contains('avi')) return '.avi';
+    final parts = cleanMime.split('/');
+    if (parts.length == 2) {
+      final subtype = parts[1].split(';')[0].trim();
+      return '.$subtype';
     }
     return '.mp4';
   }
@@ -373,8 +392,10 @@ class EditPhotoProvider with ChangeNotifier {
   String? _getVideoMimeType(XFile? file) {
     if (file == null) return null;
     if (file.mimeType != null) return file.mimeType;
-    if (file.path.toLowerCase().endsWith('.webm')) return 'video/webm';
-    if (file.path.toLowerCase().endsWith('.mp4')) return 'video/mp4';
+    final path = file.path.toLowerCase();
+    if (path.endsWith('.webm')) return 'video/webm';
+    if (path.endsWith('.mp4')) return 'video/mp4';
+    if (path.endsWith('.mov')) return 'video/quicktime';
     return null;
   }
 }

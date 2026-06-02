@@ -1,17 +1,13 @@
-import 'dart:io' show File;
-
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:th_photobooth/components/expressive_button_group.dart';
-import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
+import 'photo_strip.dart';
 import 'video_recap_player.dart';
-
-const double _perforationGap = 20.0;
+import 'virtual_paper.dart';
 
 class PreviewPanel extends StatelessWidget {
   final List<XFile> photos;
@@ -59,6 +55,7 @@ class PreviewPanel extends StatelessWidget {
     // If aspect ratio > 0.5, it's better to print Landscape (2 photos stacked horizontally or vertically)
     // For our specific frames: Strips are ~0.33 (Portrait), frame1 is ~0.77 (Landscape)
     final bool isLandscape = frameAspectRatio > 0.5;
+    final bool paperIsLandscape = isLandscape && !printTwoCopies;
 
     return Container(
       decoration: BoxDecoration(
@@ -103,6 +100,7 @@ class PreviewPanel extends StatelessWidget {
                               photoTimestamps: photoTimestamps,
                               isMirrored: isMirrored,
                               isMobile: isMobile,
+                              photos: photos,
                             ),
                           ],
                         ],
@@ -179,6 +177,7 @@ class PreviewPanel extends StatelessWidget {
                               photoTimestamps: photoTimestamps,
                               isMirrored: isMirrored,
                               isMobile: isMobile,
+                              photos: photos,
                             ),
                           ],
                         ],
@@ -227,206 +226,13 @@ class PreviewPanel extends StatelessWidget {
                   height: 380,
                   alignment: Alignment.center,
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: showPaperPreview
-                      ? Screenshot(
-                          controller: paperController ?? ScreenshotController(),
-                          child: VirtualPaper(
-                            isLandscape: isLandscape,
-                            child: printTwoCopies
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Flexible(
-                                        fit: FlexFit.loose,
-                                        child: PhotoStrip(
-                                          photos: photos,
-                                          frame: selectedFrame,
-                                          selectedFilter: selectedFilter,
-                                          filterIntensity: filterIntensity,
-                                          isMirrored: isMirrored,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Flexible(
-                                        fit: FlexFit.loose,
-                                        child: PhotoStrip(
-                                          photos: photos,
-                                          frame: selectedFrame,
-                                          selectedFilter: selectedFilter,
-                                          filterIntensity: filterIntensity,
-                                          isMirrored: isMirrored,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : PhotoStrip(
-                                    photos: photos,
-                                    frame: selectedFrame,
-                                    selectedFilter: selectedFilter,
-                                    filterIntensity: filterIntensity,
-                                    isMirrored: isMirrored,
-                                  ),
-                          ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.2),
-                                blurRadius: 20,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Screenshot(
-                            controller:
-                                stripController ?? ScreenshotController(),
-                            child: printTwoCopies
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Flexible(
-                                        fit: FlexFit.loose,
-                                        child: PhotoStrip(
-                                          photos: photos,
-                                          frame: selectedFrame,
-                                          selectedFilter: selectedFilter,
-                                          filterIntensity: filterIntensity,
-                                          isMirrored: isMirrored,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Flexible(
-                                        fit: FlexFit.loose,
-                                        child: PhotoStrip(
-                                          photos: photos,
-                                          frame: selectedFrame,
-                                          selectedFilter: selectedFilter,
-                                          filterIntensity: filterIntensity,
-                                          isMirrored: isMirrored,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : PhotoStrip(
-                                    photos: photos,
-                                    frame: selectedFrame,
-                                    selectedFilter: selectedFilter,
-                                    filterIntensity: filterIntensity,
-                                    isMirrored: isMirrored,
-                                  ),
-                          ),
-                        ),
+                  child: _buildPreview(isLandscape: paperIsLandscape),
                 )
               : Expanded(
                   child: Center(
                     child: Container(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                      child: showPaperPreview
-                          ? Screenshot(
-                              controller:
-                                  paperController ?? ScreenshotController(),
-                              child: VirtualPaper(
-                                isLandscape: isLandscape,
-                                child: printTwoCopies
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            fit: FlexFit.loose,
-                                            child: PhotoStrip(
-                                              photos: photos,
-                                              frame: selectedFrame,
-                                              selectedFilter: selectedFilter,
-                                              filterIntensity: filterIntensity,
-                                              isMirrored: isMirrored,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            fit: FlexFit.loose,
-                                            child: PhotoStrip(
-                                              photos: photos,
-                                              frame: selectedFrame,
-                                              selectedFilter: selectedFilter,
-                                              filterIntensity: filterIntensity,
-                                              isMirrored: isMirrored,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : PhotoStrip(
-                                        photos: photos,
-                                        frame: selectedFrame,
-                                        selectedFilter: selectedFilter,
-                                        filterIntensity: filterIntensity,
-                                        isMirrored: isMirrored,
-                                      ),
-                              ),
-                            )
-                          : Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Screenshot(
-                                controller:
-                                    stripController ?? ScreenshotController(),
-                                child: printTwoCopies
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            fit: FlexFit.loose,
-                                            child: PhotoStrip(
-                                              photos: photos,
-                                              frame: selectedFrame,
-                                              selectedFilter: selectedFilter,
-                                              filterIntensity: filterIntensity,
-                                              isMirrored: isMirrored,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            fit: FlexFit.loose,
-                                            child: PhotoStrip(
-                                              photos: photos,
-                                              frame: selectedFrame,
-                                              selectedFilter: selectedFilter,
-                                              filterIntensity: filterIntensity,
-                                              isMirrored: isMirrored,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : PhotoStrip(
-                                        photos: photos,
-                                        frame: selectedFrame,
-                                        selectedFilter: selectedFilter,
-                                        filterIntensity: filterIntensity,
-                                        isMirrored: isMirrored,
-                                      ),
-                              ),
-                            ),
+                      child: _buildPreview(isLandscape: paperIsLandscape),
                     ),
                   ),
                 ),
@@ -434,216 +240,74 @@ class PreviewPanel extends StatelessWidget {
       ),
     );
   }
-}
 
-class VirtualPaper extends StatelessWidget {
-  final Widget child;
-  final bool isLandscape;
+  Widget _buildPhotoStripsContent() {
+    final strip = PhotoStrip(
+      photos: photos,
+      frame: selectedFrame,
+      selectedFilter: selectedFilter,
+      filterIntensity: filterIntensity,
+      isMirrored: isMirrored,
+    );
 
-  const VirtualPaper({
-    super.key,
-    required this.child,
-    required this.isLandscape,
-  });
+    if (printTwoCopies) {
+      final double frameAspectRatio =
+          selectedFrame.size.width / selectedFrame.size.height;
+      final bool isLandscape = frameAspectRatio > 0.5;
 
-  @override
-  Widget build(BuildContext context) {
-    // KP-108IN is 100mm x 148mm (4x6 inch)
-    final double paperAspectRatio = isLandscape ? 148 / 100 : 100 / 148;
-
-    return AspectRatio(
-      aspectRatio: paperAspectRatio,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(4),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Stack(
+      if (isLandscape) {
+        // Stack two landscape photos vertically to fit portrait paper
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Perforation Lines
-            if (!isLandscape) ...[
-              const Positioned(
-                top: _perforationGap,
-                left: 0,
-                right: 0,
-                child: _DashedLine(isVertical: false),
-              ),
-              const Positioned(
-                bottom: _perforationGap,
-                left: 0,
-                right: 0,
-                child: _DashedLine(isVertical: false),
-              ),
-            ] else ...[
-              const Positioned(
-                left: _perforationGap,
-                top: 0,
-                bottom: 0,
-                child: _DashedLine(isVertical: true),
-              ),
-              const Positioned(
-                right: _perforationGap,
-                top: 0,
-                bottom: 0,
-                child: _DashedLine(isVertical: true),
-              ),
-            ],
-            // The actual content (photo strips)
-            Padding(
-              padding: isLandscape
-                  ? const EdgeInsets.symmetric(
-                      horizontal: _perforationGap + 4,
-                      vertical: 4,
-                    )
-                  : const EdgeInsets.symmetric(
-                      vertical: _perforationGap + 4,
-                      horizontal: 4,
-                    ),
-              child: Center(child: child),
-            ),
-            // Paper size indicator (Placed in the perforation margin area)
-            if (isLandscape)
-              Positioned(
-                left: 8,
-                top: 8,
-                right: 8,
-                child: RotatedBox(
-                  quarterTurns: 3,
-                  child: Text(
-                    'CANON KP-108IN (4x6") - ${t.preview.landscape}',
-                    style: TextStyle(
-                      fontSize: 6,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black.withValues(alpha: 0.1),
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ),
-              )
-            else
-              Positioned(
-                bottom: 8,
-                left: 8,
-                right: 8,
-                child: Text(
-                  'CANON KP-108IN (4x6") - ${t.preview.portrait}',
-                  style: TextStyle(
-                    fontSize: 6,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black.withValues(alpha: 0.1),
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
+            Flexible(fit: FlexFit.loose, child: strip),
+            const SizedBox(height: 4),
+            Flexible(fit: FlexFit.loose, child: strip),
           ],
-        ),
-      ),
-    );
+        );
+      } else {
+        // Place two portrait strips side-by-side to fit portrait paper
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(fit: FlexFit.loose, child: strip),
+            const SizedBox(width: 4),
+            Flexible(fit: FlexFit.loose, child: strip),
+          ],
+        );
+      }
+    }
+    return strip;
   }
-}
 
-class _DashedLine extends StatelessWidget {
-  final bool isVertical;
-  const _DashedLine({required this.isVertical});
-
-  @override
-  Widget build(BuildContext context) {
-    return Flex(
-      direction: isVertical ? Axis.vertical : Axis.horizontal,
-      children: List.generate(
-        30,
-        (index) => Expanded(
-          child: Container(
-            width: isVertical ? 0.5 : null,
-            height: isVertical ? null : 0.5,
-            margin: isVertical
-                ? const EdgeInsets.symmetric(vertical: 2)
-                : const EdgeInsets.symmetric(horizontal: 2),
-            color: Colors.black.withValues(alpha: 0.1),
-          ),
+  Widget _buildPreview({required bool isLandscape}) {
+    if (showPaperPreview) {
+      return Screenshot(
+        controller: paperController ?? ScreenshotController(),
+        child: VirtualPaper(
+          isLandscape: isLandscape,
+          child: _buildPhotoStripsContent(),
         ),
-      ),
-    );
-  }
-}
+      );
+    }
 
-class PhotoStrip extends StatelessWidget {
-  final List<XFile> photos;
-  final FrameData frame;
-  final String selectedFilter;
-  final double filterIntensity;
-  final bool isMirrored;
-
-  const PhotoStrip({
-    super.key,
-    required this.photos,
-    required this.frame,
-    required this.selectedFilter,
-    required this.filterIntensity,
-    required this.isMirrored,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.1),
-          width: 0.1,
-          style: BorderStyle.solid,
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: AspectRatio(
-        aspectRatio: frame.size.width / frame.size.height,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final scaleX = constraints.maxWidth / frame.size.width;
-            final scaleY = constraints.maxHeight / frame.size.height;
-
-            return Stack(
-              children: [
-                for (int i = 0; i < frame.slots.length; i++)
-                  if (i < photos.length)
-                    Positioned(
-                      left: frame.slots[i].left * scaleX,
-                      top: frame.slots[i].top * scaleY,
-                      width: frame.slots[i].width * scaleX,
-                      height: frame.slots[i].height * scaleY,
-                      child: ColorFiltered(
-                        colorFilter: ColorFilter.matrix(
-                          FilterConfig.getFilterMatrix(
-                            selectedFilter,
-                            filterIntensity,
-                          ),
-                        ),
-                        child: Transform.scale(
-                          scaleX: isMirrored ? -1 : 1,
-                          child: kIsWeb
-                              ? Image.network(photos[i].path, fit: BoxFit.cover)
-                              : Image.file(
-                                  File(photos[i].path),
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                    ),
-                if (frame.path.isNotEmpty)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: Image.asset(frame.path, fit: BoxFit.fill),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
+      child: Screenshot(
+        controller: stripController ?? ScreenshotController(),
+        child: _buildPhotoStripsContent(),
       ),
     );
   }
@@ -655,6 +319,7 @@ class _CompactVideoRecapButton extends StatelessWidget {
   final List<Duration> photoTimestamps;
   final bool isMirrored;
   final bool isMobile;
+  final List<XFile> photos;
 
   const _CompactVideoRecapButton({
     required this.videoFile,
@@ -662,6 +327,7 @@ class _CompactVideoRecapButton extends StatelessWidget {
     required this.photoTimestamps,
     required this.isMirrored,
     required this.isMobile,
+    required this.photos,
   });
 
   @override
@@ -670,7 +336,7 @@ class _CompactVideoRecapButton extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.secondary.withValues(alpha: 0.8),
+        color: colorScheme.secondary,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
@@ -708,6 +374,7 @@ class _CompactVideoRecapButton extends StatelessWidget {
                         frame: frame,
                         photoTimestamps: photoTimestamps,
                         isMirrored: isMirrored,
+                        photos: photos,
                       ),
                     ),
                   ),

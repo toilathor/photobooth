@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:th_photobooth/components/expressive_button_group.dart';
-import 'package:th_photobooth/components/filter_selector.dart';
 import 'package:th_photobooth/components/primary_button.dart';
 import 'package:th_photobooth/components/secondary_button.dart';
+import 'package:th_photobooth/features/edit_photo/widgets/filter_selector.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
@@ -70,200 +70,31 @@ class _EditorPanelState extends State<EditorPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: widget.isMobile
-                ? const EdgeInsets.fromLTRB(16, 16, 16, 12)
-                : const EdgeInsets.fromLTRB(24, 24, 24, 16),
-            child: Text(
-              t.editor.title,
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-                letterSpacing: 2,
-                color: colorScheme.secondary,
-              ),
-            ),
-          ),
-
           // Tab Switcher
           Padding(
             padding: widget.isMobile
-                ? const EdgeInsets.symmetric(horizontal: 16)
-                : const EdgeInsets.symmetric(horizontal: 24),
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: colorScheme.onSurface.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ExpressiveButtonGroup(
-                selectedIndex: _selectedTabIndex,
-                onChanged: (index) => setState(() => _selectedTabIndex = index),
-                items: [
-                  ExpressiveItemData(
-                    label: t.editor.frames,
-                    icon: Icons.filter_frames_rounded,
-                  ),
-                  ExpressiveItemData(
-                    label: t.editor.filters,
-                    icon: Icons.auto_awesome_rounded,
-                  ),
-                ],
-              ),
+                ? const EdgeInsets.all(16)
+                : const EdgeInsets.all(24),
+            child: ExpressiveButtonGroup(
+              selectedIndex: _selectedTabIndex,
+              onChanged: (index) => setState(() => _selectedTabIndex = index),
+              items: [
+                ExpressiveItemData(
+                  label: t.editor.frames,
+                  icon: Icons.filter_frames_rounded,
+                ),
+                ExpressiveItemData(
+                  label: t.editor.filters,
+                  icon: Icons.auto_awesome_rounded,
+                ),
+              ],
             ),
           ),
 
-          const Gap(16),
-
           // Tab Content
           widget.isMobile
-              ? SizedBox(
-                  height: 180,
-                  child: IndexedStack(
-                    index: _selectedTabIndex,
-                    children: [
-                      // Frames Tab
-                      FrameSelector(
-                        availableFrames: widget.availableFrames,
-                        selectedFrame: widget.selectedFrame,
-                        onFrameSelected: widget.onFrameSelected,
-                      ),
-
-                      // Filters Tab
-                      Column(
-                        children: [
-                          Expanded(
-                            child: FilterSelector(
-                              filters: widget.filters,
-                              selectedFilter: widget.selectedFilter,
-                              onFilterSelected: widget.onFilterSelected,
-                              colorScheme: colorScheme,
-                              previewImagePath: widget.photos.isNotEmpty
-                                  ? widget.photos.first.path
-                                  : null,
-                            ),
-                          ),
-                          if (widget.selectedFilter != 'normal') ...[
-                            const Gap(16),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.tonality_rounded,
-                                    color: colorScheme.onSurface.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    size: 20,
-                                  ),
-                                  const Gap(12),
-                                  Expanded(
-                                    child: Slider(
-                                      value: widget.filterIntensity,
-                                      onChanged:
-                                          widget.onFilterIntensityChanged,
-                                      activeColor: colorScheme.secondary,
-                                      inactiveColor: colorScheme.onSurface
-                                          .withValues(alpha: 0.1),
-                                    ),
-                                  ),
-                                  const Gap(12),
-                                  SizedBox(
-                                    width: 40,
-                                    child: Text(
-                                      '${(widget.filterIntensity * 100).toInt()}%',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.secondary,
-                                      ),
-                                      textAlign: TextAlign.end,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              : Expanded(
-                  child: IndexedStack(
-                    index: _selectedTabIndex,
-                    children: [
-                      // Frames Tab
-                      FrameSelector(
-                        availableFrames: widget.availableFrames,
-                        selectedFrame: widget.selectedFrame,
-                        onFrameSelected: widget.onFrameSelected,
-                      ),
-
-                      // Filters Tab
-                      Column(
-                        children: [
-                          Expanded(
-                            child: FilterSelector(
-                              filters: widget.filters,
-                              selectedFilter: widget.selectedFilter,
-                              onFilterSelected: widget.onFilterSelected,
-                              colorScheme: colorScheme,
-                              previewImagePath: widget.photos.isNotEmpty
-                                  ? widget.photos.first.path
-                                  : null,
-                            ),
-                          ),
-                          if (widget.selectedFilter != 'normal') ...[
-                            const Gap(24),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.tonality_rounded,
-                                    color: colorScheme.onSurface.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    size: 20,
-                                  ),
-                                  const Gap(12),
-                                  Expanded(
-                                    child: Slider(
-                                      value: widget.filterIntensity,
-                                      onChanged:
-                                          widget.onFilterIntensityChanged,
-                                      activeColor: colorScheme.secondary,
-                                      inactiveColor: colorScheme.onSurface
-                                          .withValues(alpha: 0.1),
-                                    ),
-                                  ),
-                                  const Gap(12),
-                                  SizedBox(
-                                    width: 40,
-                                    child: Text(
-                                      '${(widget.filterIntensity * 100).toInt()}%',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.secondary,
-                                      ),
-                                      textAlign: TextAlign.end,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+              ? SizedBox(height: 180, child: _buildTabContent(colorScheme))
+              : Expanded(child: _buildTabContent(colorScheme)),
 
           if (!widget.isMobile)
             Padding(
@@ -319,6 +150,78 @@ class _EditorPanelState extends State<EditorPanel> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTabContent(ColorScheme colorScheme) {
+    return IndexedStack(
+      index: _selectedTabIndex,
+      children: [
+        // Frames Tab
+        FrameSelector(
+          availableFrames: widget.availableFrames,
+          selectedFrame: widget.selectedFrame,
+          onFrameSelected: widget.onFrameSelected,
+        ),
+
+        // Filters Tab
+        Column(
+          children: [
+            Expanded(
+              child: FilterSelector(
+                filters: widget.filters,
+                selectedFilter: widget.selectedFilter,
+                onFilterSelected: widget.onFilterSelected,
+                colorScheme: colorScheme,
+              ),
+            ),
+            Visibility(
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              replacement: const SizedBox.shrink(),
+              visible: widget.selectedFilter != 'normal',
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.tonality_rounded,
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      size: 20,
+                    ),
+                    const Gap(12),
+                    Expanded(
+                      child: Slider(
+                        value: widget.filterIntensity,
+                        onChanged: widget.onFilterIntensityChanged,
+                        activeColor: colorScheme.secondary,
+                        inactiveColor: colorScheme.onSurface.withValues(
+                          alpha: 0.1,
+                        ),
+                      ),
+                    ),
+                    const Gap(12),
+                    SizedBox(
+                      width: 40,
+                      child: Text(
+                        '${(widget.filterIntensity * 100).toInt()}%',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.secondary,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Gap(16),
+          ],
+        ),
+      ],
     );
   }
 }

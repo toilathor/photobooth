@@ -159,15 +159,19 @@ class GoogleDriveService implements StorageService {
 
       onProgress?.call(0, totalCount);
 
-      for (var entry in files.entries) {
-        String fileName = entry.key;
+      final fileNames = files.keys.toList();
+      for (var fileName in fileNames) {
+        final fileBytes = files[fileName];
+        if (fileBytes == null) continue;
+
+        String actualFileName = fileName;
         String parentId = sessionId;
 
         // Xử lý thư mục con (chỉ hỗ trợ 1 cấp)
-        if (fileName.contains('/')) {
-          final parts = fileName.split('/');
+        if (actualFileName.contains('/')) {
+          final parts = actualFileName.split('/');
           final subFolderName = parts[0];
-          fileName = parts.sublist(1).join('/');
+          actualFileName = parts.sublist(1).join('/');
 
           if (subFolderIds.containsKey(subFolderName)) {
             parentId = subFolderIds[subFolderName]!;
@@ -184,24 +188,27 @@ class GoogleDriveService implements StorageService {
           }
         }
 
-        final mimeType = _getMimeType(fileName);
+        final mimeType = _getMimeType(actualFileName);
         final driveFile = drive.File()
-          ..name = fileName
+          ..name = actualFileName
           ..mimeType = mimeType
           ..parents = [parentId];
 
         // Đảm bảo Stream được tạo từ một bản sao sạch của tệp
         final media = drive.Media(
-          Stream.fromIterable([entry.value]),
-          entry.value.length,
+          Stream.fromIterable([fileBytes]),
+          fileBytes.length,
           contentType: mimeType,
         );
 
         await driveApi.files.create(
           driveFile,
           uploadMedia: media,
-          uploadOptions: drive.UploadOptions.defaultOptions,
+          uploadOptions: drive.UploadOptions.resumable,
         );
+
+        // Giải phóng bộ nhớ bằng cách loại bỏ byte array khỏi map ngay lập tức
+        files.remove(fileName);
 
         currentCount++;
         onProgress?.call(currentCount, totalCount);

@@ -16,12 +16,14 @@ class VideoRecapPlayer extends StatefulWidget {
   final FrameData frame;
   final List<Duration> photoTimestamps;
   final bool isMirrored;
+  final List<XFile> photos;
 
   const VideoRecapPlayer({
     super.key,
     required this.videoFile,
     required this.frame,
     required this.photoTimestamps,
+    required this.photos,
     this.isMirrored = false,
   });
 
@@ -37,9 +39,11 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   VideoPlayerController? _fullController;
   bool _fullInitialized = false;
 
-  // Controllers for each slot
-  final List<VideoPlayerController> _slotControllers = [];
-  final List<bool> _slotsInitialized = [];
+  // Controller for slots (sequential playback)
+  VideoPlayerController? _slotVideoController;
+  bool _slotVideoInitialized = false;
+  int _activeSlotIndex = 0;
+  bool _isSeeking = false;
 
   @override
   void initState() {
@@ -58,11 +62,11 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   }
 
   void _disposeSlotPlayers() {
-    for (var controller in _slotControllers) {
-      controller.dispose();
-    }
-    _slotControllers.clear();
-    _slotsInitialized.clear();
+    _slotVideoController?.removeListener(_slotVideoListener);
+    _slotVideoController?.dispose();
+    _slotVideoController = null;
+    _slotVideoInitialized = false;
+    _isSeeking = false;
   }
 
   Future<void> _initializeFullPlayer() async {
@@ -89,53 +93,151 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     }
   }
 
+  Duration _getSlotStartTime(int i) {
+    final endTime = _getSlotEndTime(i);
+    return endTime > AppConfig.recapClipDuration
+        ? endTime - AppConfig.recapClipDuration
+        : Duration.zero;
+  }
+
+  Duration _getSlotEndTime(int i) {
+    final timestamps = widget.photoTimestamps;
+    final duration = _slotVideoController?.value.duration ?? Duration.zero;
+    if (i < timestamps.length) {
+      return timestamps[i];
+    }
+    return duration;
+  }
+
   Future<void> _initializeSlotPlayers() async {
     final videoPath = widget.videoFile.path;
-    final timestamps = widget.photoTimestamps;
-    final slots = widget.frame.slots;
 
     _disposeSlotPlayers();
 
-    for (int i = 0; i < slots.length; i++) {
-      final controller = kIsWeb
-          ? VideoPlayerController.networkUrl(Uri.parse(videoPath))
-          : VideoPlayerController.file(File(videoPath));
+    final controller = kIsWeb
+        ? VideoPlayerController.networkUrl(Uri.parse(videoPath))
+        : VideoPlayerController.file(File(videoPath));
 
-      _slotControllers.add(controller);
-      _slotsInitialized.add(false);
+    _slotVideoController = controller;
+    _slotVideoInitialized = false;
+    _activeSlotIndex = 0;
 
-      try {
-        await controller.initialize();
+    try {
+      await controller.initialize();
+      await controller.setVolume(0); // Always mute slots
 
-        // Logic for clip loop
-        final endTime = i < timestamps.length
-            ? timestamps[i]
-            : controller.value.duration;
-        final startTime = endTime > AppConfig.recapClipDuration
-            ? endTime - AppConfig.recapClipDuration
-            : Duration.zero;
+      final startTime = _getSlotStartTime(0);
+      await controller.seekTo(startTime);
 
-        await controller.setVolume(0); // Always mute slots
-        await controller.seekTo(startTime);
+      controller.addListener(_slotVideoListener);
 
-        controller.addListener(() {
-          if (controller.value.position >= endTime) {
-            controller.seekTo(startTime);
-          }
-        });
-
-        if (mounted && _slotControllers.contains(controller)) {
-          final idx = _slotControllers.indexOf(controller);
-          if (idx != -1) {
-            setState(() => _slotsInitialized[idx] = true);
-            if (_isPlaying) {
-              controller.play();
-            }
-          }
+      if (mounted && _slotVideoController == controller) {
+        setState(() => _slotVideoInitialized = true);
+        if (_isPlaying) {
+          controller.play();
         }
-      } catch (e) {
-        debugPrint('Error initializing slot $i player: $e');
       }
+    } catch (e) {
+      debugPrint('Error initializing slot player: $e');
+    }
+  }
+
+  void _slotVideoListener() {
+    final controller = _slotVideoController;
+    if (controller == null ||
+        !mounted ||
+        _viewMode != RecapViewMode.frame ||
+        !_isPlaying) {
+      return;
+    }
+
+    final endTime = _getSlotEndTime(_activeSlotIndex);
+    if (!_isSeeking && controller.value.position >= endTime) {
+      _isSeeking = true;
+
+      // Move to next slot
+      setState(() {
+        _activeSlotIndex = (_activeSlotIndex + 1) % widget.frame.slots.length;
+      });
+
+      final nextStartTime = _getSlotStartTime(_activeSlotIndex);
+      controller
+          .seekTo(nextStartTime)
+          .then((_) {
+            _isSeeking = false;
+          })
+          .catchError((dynamic e) {
+            _isSeeking = false;
+            debugPrint('Error seeking to next slot $_activeSlotIndex: $e');
+          });
+    }
+  }
+
+  void _goToPreviousSlot() {
+    if (_slotVideoController == null || !_slotVideoInitialized || _isSeeking) {
+      return;
+    }
+
+    _isSeeking = true;
+
+    if (_activeSlotIndex == 0) {
+      final startTime = _getSlotStartTime(0);
+      _slotVideoController!
+          .seekTo(startTime)
+          .then((_) {
+            _isSeeking = false;
+          })
+          .catchError((dynamic e) {
+            _isSeeking = false;
+            debugPrint('Error seeking to start of slot 0: $e');
+          });
+    } else {
+      setState(() {
+        _activeSlotIndex--;
+      });
+
+      final nextStartTime = _getSlotStartTime(_activeSlotIndex);
+      _slotVideoController!
+          .seekTo(nextStartTime)
+          .then((_) {
+            _isSeeking = false;
+          })
+          .catchError((dynamic e) {
+            _isSeeking = false;
+            debugPrint('Error seeking to previous slot $_activeSlotIndex: $e');
+          });
+    }
+  }
+
+  void _goToNextSlot() {
+    if (_slotVideoController == null || !_slotVideoInitialized || _isSeeking) {
+      return;
+    }
+
+    _isSeeking = true;
+    setState(() {
+      _activeSlotIndex = (_activeSlotIndex + 1) % widget.frame.slots.length;
+    });
+
+    final nextStartTime = _getSlotStartTime(_activeSlotIndex);
+    _slotVideoController!
+        .seekTo(nextStartTime)
+        .then((_) {
+          _isSeeking = false;
+        })
+        .catchError((dynamic e) {
+          _isSeeking = false;
+          debugPrint('Error seeking to next slot $_activeSlotIndex: $e');
+        });
+  }
+
+  void _handleTap(TapUpDetails details, double width) {
+    if (_viewMode != RecapViewMode.frame) return;
+
+    if (details.localPosition.dx < width / 2) {
+      _goToPreviousSlot();
+    } else {
+      _goToNextSlot();
     }
   }
 
@@ -149,12 +251,10 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
           _fullController?.pause();
         }
       } else {
-        for (var controller in _slotControllers) {
-          if (_isPlaying) {
-            controller.play();
-          } else {
-            controller.pause();
-          }
+        if (_isPlaying) {
+          _slotVideoController?.play();
+        } else {
+          _slotVideoController?.pause();
         }
       }
     });
@@ -167,20 +267,39 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
         _fullController?.seekTo(Duration.zero);
         _fullController?.play();
       } else {
-        final timestamps = widget.photoTimestamps;
-        for (int i = 0; i < _slotControllers.length; i++) {
-          final endTime = i < timestamps.length
-              ? timestamps[i]
-              : _slotControllers[i].value.duration;
-          final startTime = endTime > AppConfig.recapClipDuration
-              ? endTime - AppConfig.recapClipDuration
-              : Duration.zero;
-
-          _slotControllers[i].seekTo(startTime);
-          _slotControllers[i].play();
-        }
+        _activeSlotIndex = 0;
+        final startTime = _getSlotStartTime(0);
+        _slotVideoController?.seekTo(startTime);
+        _slotVideoController?.play();
       }
     });
+  }
+
+  Widget _buildStoryProgressBar() {
+    if (_slotVideoController == null || !_slotVideoInitialized) {
+      return const SizedBox.shrink();
+    }
+
+    return ValueListenableBuilder<VideoPlayerValue>(
+      valueListenable: _slotVideoController!,
+      builder: (context, value, child) {
+        final startTime = _getSlotStartTime(_activeSlotIndex);
+        final endTime = _getSlotEndTime(_activeSlotIndex);
+        final totalMs = endTime.inMilliseconds - startTime.inMilliseconds;
+        double progress = 0.0;
+        if (totalMs > 0) {
+          final currentMs =
+              value.position.inMilliseconds - startTime.inMilliseconds;
+          progress = (currentMs / totalMs).clamp(0.0, 1.0);
+        }
+
+        return _StoryProgressIndicator(
+          count: widget.frame.slots.length,
+          activeIndex: _activeSlotIndex,
+          activeProgress: progress,
+        );
+      },
+    );
   }
 
   @override
@@ -207,47 +326,67 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
 
           // Main Content Area
           Expanded(
-            child: Stack(
-              children: [
-                // Background Glow
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        colors: [
-                          colorScheme.primary.withValues(alpha: 0.15),
-                          Colors.transparent,
-                        ],
-                        radius: 1.2,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Video Display
-                Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: ScaleTransition(
-                          scale: Tween<double>(begin: 0.95, end: 1.0).animate(
-                            CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOutCubic,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapUp: (details) {
+                    _handleTap(details, constraints.maxWidth);
+                  },
+                  child: Stack(
+                    children: [
+                      // Background Glow
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              colors: [
+                                colorScheme.primary.withValues(alpha: 0.15),
+                                Colors.transparent,
+                              ],
+                              radius: 1.2,
                             ),
                           ),
-                          child: child,
                         ),
-                      );
-                    },
-                    child: _viewMode == RecapViewMode.full
-                        ? _buildFullView()
-                        : _buildFrameView(),
+                      ),
+
+                      // Video Display
+                      Center(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 500),
+                          transitionBuilder: (child, animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: ScaleTransition(
+                                scale: Tween<double>(begin: 0.95, end: 1.0)
+                                    .animate(
+                                      CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOutCubic,
+                                      ),
+                                    ),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: _viewMode == RecapViewMode.full
+                              ? _buildFullView()
+                              : _buildFrameView(),
+                        ),
+                      ),
+
+                      // Story Progress Bar
+                      if (_viewMode == RecapViewMode.frame)
+                        Positioned(
+                          top: 8,
+                          left: 24,
+                          right: 24,
+                          child: _buildStoryProgressBar(),
+                        ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
 
@@ -434,7 +573,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
 
             return Stack(
               children: [
-                // Slot Video Players
+                // Slot Video Players / Photo Previews
                 for (int i = 0; i < frame.slots.length; i++)
                   Positioned(
                     left: frame.slots[i].left * scaleX,
@@ -443,26 +582,53 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                     height: frame.slots[i].height * scaleY,
                     child: Container(
                       color: Colors.black,
-                      child:
-                          _slotsInitialized.length > i && _slotsInitialized[i]
-                          ? ClipRRect(
-                              child: FittedBox(
-                                fit: BoxFit.cover,
-                                child: SizedBox(
-                                  width: _slotControllers[i].value.size.width,
-                                  height: _slotControllers[i].value.size.height,
-                                  child: Transform.scale(
-                                    scaleX: widget.isMirrored == kIsWeb
-                                        ? 1
-                                        : -1,
-                                    child: VideoPlayer(_slotControllers[i]),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
+                      child: i == _activeSlotIndex
+                          ? (_slotVideoInitialized &&
+                                    _slotVideoController != null
+                                ? ClipRRect(
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      child: SizedBox(
+                                        width: _slotVideoController!
+                                            .value
+                                            .size
+                                            .width,
+                                        height: _slotVideoController!
+                                            .value
+                                            .size
+                                            .height,
+                                        child: Transform.scale(
+                                          scaleX: widget.isMirrored == kIsWeb
+                                              ? 1
+                                              : -1,
+                                          child: VideoPlayer(
+                                            _slotVideoController!,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ))
+                          : (widget.photos.length > i
+                                ? ClipRRect(
+                                    child: Transform.scale(
+                                      scaleX: widget.isMirrored ? -1 : 1,
+                                      child: kIsWeb
+                                          ? Image.network(
+                                              widget.photos[i].path,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Image.file(
+                                              File(widget.photos[i].path),
+                                              fit: BoxFit.cover,
+                                            ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink()),
                     ),
                   ),
                 // Frame Overlay
@@ -636,7 +802,6 @@ class _VideoProgressBarState extends State<_VideoProgressBar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final value = widget.controller.value;
     final duration = value.duration.inMilliseconds;
     final position = value.position.inMilliseconds;
@@ -646,10 +811,10 @@ class _VideoProgressBarState extends State<_VideoProgressBar> {
         trackHeight: 4,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-        activeTrackColor: colorScheme.primary,
-        inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+        activeTrackColor: Colors.white,
+        inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
         thumbColor: Colors.white,
-        overlayColor: colorScheme.primary.withValues(alpha: 0.2),
+        overlayColor: Colors.white.withValues(alpha: 0.2),
       ),
       child: Slider(
         value: duration > 0 ? (position / duration).clamp(0.0, 1.0) : 0.0,
@@ -658,6 +823,76 @@ class _VideoProgressBarState extends State<_VideoProgressBar> {
           widget.controller.seekTo(target);
         },
       ),
+    );
+  }
+}
+
+class _StoryProgressIndicator extends StatelessWidget {
+  final int count;
+  final int activeIndex;
+  final double activeProgress;
+
+  const _StoryProgressIndicator({
+    required this.count,
+    required this.activeIndex,
+    required this.activeProgress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(count, (index) {
+        double progress = 0.0;
+        if (index < activeIndex) {
+          progress = 1.0;
+        } else if (index == activeIndex) {
+          progress = activeProgress;
+        }
+
+        return Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth;
+
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.linear,
+                    width: maxWidth * progress,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }),
     );
   }
 }
