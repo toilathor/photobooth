@@ -98,5 +98,15 @@
     "grant_description": "Please grant Google Drive access so the app can create folders and store your photos/videos.",
     "grant_btn": "GRANT ACCESS & CONTINUE",
     "grant_failed": "Failed to grant access. Please try again."
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "description": "Use keyboard shortcuts to navigate quickly",
+    "space": "Start / Cancel capturing",
+    "key_s": "Switch Camera",
+    "key_m": "Toggle Mirror Mode",
+    "key_v": "Toggle Video Recap",
+    "key_r": "Start Over (Reset)",
+    "key_f": "Toggle Fullscreen"
   }
 }

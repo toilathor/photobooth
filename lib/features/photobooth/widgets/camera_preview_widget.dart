@@ -75,7 +75,9 @@ class CameraPreviewWidget extends StatelessWidget {
                             provider.currentCountdownValue > 0)
                           Center(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                              ),
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: provider.isPreparing
@@ -88,65 +90,61 @@ class CameraPreviewWidget extends StatelessWidget {
                                             ),
                                             textStyle: GoogleFonts.inter(
                                               fontSize: isMobile ? 56 : 96,
-                                          fontWeight: FontWeight.w900,
-                                          color: colorScheme.secondary,
-                                          shadows: [
-                                            Shadow(
-                                              blurRadius: 20,
-                                              color: Colors.black.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                              offset: const Offset(0, 4),
+                                              fontWeight: FontWeight.w900,
+                                              color: colorScheme.secondary,
+                                              shadows: [
+                                                Shadow(
+                                                  blurRadius: 20,
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.7),
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                                Shadow(
+                                                  blurRadius: 40,
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.5),
+                                                ),
+                                              ],
                                             ),
-                                            Shadow(
-                                              blurRadius: 40,
-                                              color: Colors.black.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
+                                        ],
+                                        isRepeatingAnimation: false,
+                                      )
+                                    : AnimatedTextKit(
+                                        key: ValueKey(
+                                          provider.currentCountdownValue,
                                         ),
+                                        animatedTexts: [
+                                          ScaleAnimatedText(
+                                            '${provider.currentCountdownValue}',
+                                            textStyle: GoogleFonts.outfit(
+                                              fontSize: isMobile ? 80 : 140,
+                                              fontWeight: FontWeight.w900,
+                                              color: Colors.white,
+                                              shadows: [
+                                                Shadow(
+                                                  blurRadius: 30,
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.7),
+                                                  offset: const Offset(0, 6),
+                                                ),
+                                                Shadow(
+                                                  blurRadius: 60,
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.5),
+                                                ),
+                                              ],
+                                            ),
+                                            duration: const Duration(
+                                              milliseconds: 800,
+                                            ),
+                                          ),
+                                        ],
+                                        isRepeatingAnimation: false,
                                       ),
-                                    ],
-                                    isRepeatingAnimation: false,
-                                  )
-                                : AnimatedTextKit(
-                                    key: ValueKey(
-                                      provider.currentCountdownValue,
-                                    ),
-                                    animatedTexts: [
-                                      ScaleAnimatedText(
-                                        '${provider.currentCountdownValue}',
-                                        textStyle: GoogleFonts.outfit(
-                                          fontSize: isMobile ? 80 : 140,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                          shadows: [
-                                            Shadow(
-                                              blurRadius: 30,
-                                              color: Colors.black.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                              offset: const Offset(0, 6),
-                                            ),
-                                            Shadow(
-                                              blurRadius: 60,
-                                              color: Colors.black.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        duration: const Duration(
-                                          milliseconds: 800,
-                                        ),
-                                      ),
-                                    ],
-                                    isRepeatingAnimation: false,
-                                  ),
-                                ),
                               ),
                             ),
+                          ),
                         if (provider.isAutoCapturing)
                           Positioned(
                             bottom: 24,
@@ -178,19 +176,19 @@ class _CancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.red.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
                 color: Colors.red.withValues(alpha: 0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 4),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -198,11 +196,11 @@ class _CancelButton extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: onTap,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+                  horizontal: 16,
+                  vertical: 8,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -210,15 +208,15 @@ class _CancelButton extends StatelessWidget {
                     const Icon(
                       Icons.close_rounded,
                       color: Colors.white,
-                      size: 20,
+                      size: 16,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Text(
                       t.actions.cancel,
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
-                        fontSize: 14,
+                        fontSize: 11,
                         letterSpacing: 1.2,
                       ),
                     ),

@@ -98,5 +98,15 @@
     "grant_description": "Vui lòng cấp quyền truy cập Google Drive để ứng dụng có thể tạo thư mục và lưu trữ ảnh/video của bạn.",
     "grant_btn": "CẤP QUYỀN & TIẾP TỤC",
     "grant_failed": "Cấp quyền truy cập thất bại. Vui lòng thử lại."
+  },
+  "shortcuts": {
+    "title": "Phím Tắt Bàn Phím",
+    "description": "Sử dụng phím tắt để thao tác nhanh hơn",
+    "space": "Bắt đầu / Hủy chụp ảnh",
+    "key_s": "Chuyển đổi Camera",
+    "key_m": "Bật / Tắt Gương",
+    "key_v": "Bật / Tắt Video Recap",
+    "key_r": "Bắt đầu lại (Reset)",
+    "key_f": "Toàn màn hình"
   }
 }

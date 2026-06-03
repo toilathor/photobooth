@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
@@ -13,6 +15,7 @@ import 'package:th_photobooth/features/photobooth/widgets/camera_preview_widget.
 import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.dart';
 import 'package:th_photobooth/features/photobooth/widgets/previews_footer.dart';
 import 'package:th_photobooth/features/photobooth/widgets/settings_panel.dart';
+import 'package:th_photobooth/features/photobooth/widgets/shortcut_guide_widget.dart';
 
 class PhotoboothScreen extends StatefulWidget {
   const PhotoboothScreen({super.key});
@@ -24,16 +27,21 @@ class PhotoboothScreen extends StatefulWidget {
 class _PhotoboothScreenState extends State<PhotoboothScreen>
     with WidgetsBindingObserver {
   final GlobalKey _cameraPreviewKey = GlobalKey();
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
@@ -47,6 +55,33 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
       provider.stopCamera();
     } else if (state == AppLifecycleState.resumed) {
       provider.startCamera();
+      // Re-focus node when app resumes
+      _keyboardFocusNode.requestFocus();
+    }
+  }
+
+  void _handleKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent) return;
+
+    final provider = context.read<PhotoboothProvider>();
+    final logicalKey = event.logicalKey;
+
+    if (logicalKey == LogicalKeyboardKey.space) {
+      if (provider.isCapturing) {
+        provider.cancelAutoCapture();
+      } else {
+        provider.startAutoCapture();
+      }
+    } else if (logicalKey == LogicalKeyboardKey.keyS) {
+      provider.toggleCamera();
+    } else if (logicalKey == LogicalKeyboardKey.keyM) {
+      provider.toggleMirror();
+    } else if (logicalKey == LogicalKeyboardKey.keyV) {
+      provider.toggleVideoRecap(!provider.isVideoRecap);
+    } else if (logicalKey == LogicalKeyboardKey.keyR) {
+      provider.resetCapture();
+    } else if (logicalKey == LogicalKeyboardKey.keyF) {
+      provider.enterFullscreen();
     }
   }
 
@@ -126,17 +161,17 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
     final bool isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
 
-    return Scaffold(
+    final Widget screenContent = Scaffold(
       backgroundColor: colorScheme.surface,
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       floatingActionButton: (!isMobile && !provider.isFullscreen)
           ? FloatingActionButton.small(
-              onPressed: () => provider.enterFullscreen(),
-              backgroundColor: colorScheme.surface,
-              foregroundColor: colorScheme.onSurface,
-              elevation: 4,
-              child: const Icon(Icons.fullscreen_rounded),
-            )
+               onPressed: () => provider.enterFullscreen(),
+               backgroundColor: colorScheme.surface,
+               foregroundColor: colorScheme.onSurface,
+               elevation: 4,
+               child: const Icon(Icons.fullscreen_rounded),
+             )
           : null,
       bottomNavigationBar: isMobile
           ? SafeArea(
@@ -200,6 +235,26 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
                       ),
                     ),
             ),
+          ],
+        ),
+      ),
+    );
+
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: GestureDetector(
+        onTap: () {
+          if (!_keyboardFocusNode.hasFocus) {
+            _keyboardFocusNode.requestFocus();
+          }
+        },
+        child: Stack(
+          children: [
+            screenContent,
+            if (kIsWeb && !isMobile)
+              const ShortcutGuideWidget(),
           ],
         ),
       ),
