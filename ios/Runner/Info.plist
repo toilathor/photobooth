@@ -53,5 +53,12 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>We need local network access to find AirPrint printers.</string>
+		<key>NSBonjourServices</key>
+		<array>
+			<string>_ipp._tcp</string>
+			<string>_printer._tcp</string>
+		</array>
 	</dict>
 </plist>

@@ -49,7 +49,10 @@
     "saveToDevice": "LƯU VỀ THIẾT BỊ",
     "saveToDeviceSuccess": "Đã lưu toàn bộ ảnh và video vào thiết bị!",
     "saveToDeviceCancel": "Đã hủy lưu tệp.",
-    "chooseFrame": "Chọn khung hình"
+    "chooseFrame": "Chọn khung hình",
+    "printing": "Đang chuẩn bị in...",
+    "printSuccess": "Đã gửi lệnh in thành công!",
+    "printError": "Lỗi khi in: $error"
   },
   "dialogs": {
     "photoSelection": {

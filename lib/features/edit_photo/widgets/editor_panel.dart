@@ -28,6 +28,7 @@ class EditorPanel extends StatefulWidget {
   final void Function(double) onFilterIntensityChanged;
   final VoidCallback? onQRRequested;
   final VoidCallback? onSaveRequested;
+  final VoidCallback? onPrintRequested;
 
   const EditorPanel({
     super.key,
@@ -45,6 +46,7 @@ class EditorPanel extends StatefulWidget {
     required this.onFilterIntensityChanged,
     this.onQRRequested,
     this.onSaveRequested,
+    this.onPrintRequested,
     this.isMobile = false,
   });
 
@@ -145,9 +147,7 @@ class _EditorPanelState extends State<EditorPanel> {
                     Expanded(
                       flex: 3,
                       child: PrimaryButton(
-                        onTap: () {
-                          // TODO: Implement print logic
-                        },
+                        onTap: widget.onPrintRequested,
                         label: t.editor.printPhoto,
                         icon: Icons.local_printshop_rounded,
                         height: btnHeight,

@@ -17,10 +17,17 @@ Future<String> saveFilesToDeviceWeb(Map<String, Uint8List> files) async {
       // If supported (typically Desktop Chrome/Edge), save files individually in the selected directory
       for (final entry in files.entries) {
         final bytes = entry.value;
-        final isPng = entry.key.endsWith('.png');
+        final String mimeType;
+        if (entry.key.endsWith('.png')) {
+          mimeType = 'image/png';
+        } else if (entry.key.endsWith('.jpg') || entry.key.endsWith('.jpeg')) {
+          mimeType = 'image/jpeg';
+        } else {
+          mimeType = 'video/mp4';
+        }
         final blob = web.Blob(
           [bytes.toJS].toJS,
-          web.BlobPropertyBag(type: isPng ? 'image/png' : 'video/mp4'),
+          web.BlobPropertyBag(type: mimeType),
         );
         jsFiles.setProperty(entry.key.toJS, blob);
       }

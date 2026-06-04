@@ -42,6 +42,11 @@ class ThemeConfig {
         fontWeight: FontWeight.w600,
       ),
     ),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: Color(0xFF202124),
+      actionTextColor: Color(0xFF1A73E8),
+      contentTextStyle: TextStyle(color: Colors.white),
+    ),
   );
 
   static final ThemeData commercialDarkTheme = ThemeData(
@@ -76,6 +81,11 @@ class ThemeConfig {
         fontWeight: FontWeight.w600,
       ),
     ),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: Color(0xFF303134),
+      actionTextColor: Color(0xFF8AB4F8),
+      contentTextStyle: TextStyle(color: Colors.white),
+    ),
   );
 
   static final ThemeData weddingTheme = ThemeData(
@@ -105,6 +115,11 @@ class ThemeConfig {
         fontWeight: FontWeight.w700,
         color: Color(0xFFD4AF37),
       ),
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: Color(0xFF3A0000),
+      actionTextColor: Color(0xFFFFD700),
+      contentTextStyle: TextStyle(color: Colors.white),
     ),
   );
 }

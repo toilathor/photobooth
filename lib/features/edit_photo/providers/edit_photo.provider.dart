@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:image/image.dart' as img;
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/core/configs/frame_config.dart';
@@ -127,6 +128,7 @@ class EditPhotoProvider with ChangeNotifier {
     required void Function(String error) onShowError,
     required Future<Uint8List?> Function() capturePaper,
     required Future<Uint8List?> Function() captureStrip,
+    required Future<Uint8List?> Function() capturePrintContent,
   }) async {
     if (StorageConfig.activeStorage == StorageType.none) return;
 
@@ -163,6 +165,7 @@ class EditPhotoProvider with ChangeNotifier {
       final url = await uploadCollection(
         capturePaper: capturePaper,
         captureStrip: captureStrip,
+        capturePrintContent: capturePrintContent,
       );
 
       if (url != null) {
@@ -185,11 +188,13 @@ class EditPhotoProvider with ChangeNotifier {
   Future<String?> uploadCollection({
     required Future<Uint8List?> Function() capturePaper,
     required Future<Uint8List?> Function() captureStrip,
+    required Future<Uint8List?> Function() capturePrintContent,
   }) async {
     try {
       final filesToUpload = await generateAllFiles(
         capturePaper: capturePaper,
         captureStrip: captureStrip,
+        capturePrintContent: capturePrintContent,
       );
 
       if (filesToUpload == null || filesToUpload.isEmpty) return null;
@@ -224,6 +229,7 @@ class EditPhotoProvider with ChangeNotifier {
   Future<Map<String, Uint8List>?> generateAllFiles({
     required Future<Uint8List?> Function() capturePaper,
     required Future<Uint8List?> Function() captureStrip,
+    required Future<Uint8List?> Function() capturePrintContent,
   }) async {
     if (sessionId == null && capturedPhotos.isNotEmpty) {
       sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
@@ -252,7 +258,20 @@ class EditPhotoProvider with ChangeNotifier {
 
       final Uint8List? printCapture = await capturePaper();
       if (printCapture != null) {
-        filesToUpload['anh_ban_in_final.png'] = printCapture;
+        final jpgBytes = _convertToJpg(printCapture);
+        if (jpgBytes != null) {
+          filesToUpload['${sessionId}_anh_gia_lap_ban_in.jpg'] = jpgBytes;
+        }
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // 1.2. Chụp ảnh đem đi in (không có viền/perforation/indicator)
+      final Uint8List? printContentCapture = await capturePrintContent();
+      if (printContentCapture != null) {
+        final jpgBytes = _convertToJpg(printContentCapture);
+        if (jpgBytes != null) {
+          filesToUpload['${sessionId}_anh_dem_di_in.jpg'] = jpgBytes;
+        }
       }
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
@@ -274,13 +293,19 @@ class EditPhotoProvider with ChangeNotifier {
           ),
           isMirrored: isMirrored == kIsWeb ? false : true,
         );
-        filesToUpload['anh_da_ghep_khung.png'] = framedCapture;
+        final jpgBytes = _convertToJpg(framedCapture);
+        if (jpgBytes != null) {
+          filesToUpload['${sessionId}_anh_da_ghep_khung.jpg'] = jpgBytes;
+        }
       } catch (e) {
         debugPrint('Error merging photos with PhotoMergerService: $e');
         // Fallback to UI capture if something goes wrong
         final Uint8List? fallbackCapture = await captureStrip();
         if (fallbackCapture != null) {
-          filesToUpload['anh_da_ghep_khung.png'] = fallbackCapture;
+          final jpgBytes = _convertToJpg(fallbackCapture);
+          if (jpgBytes != null) {
+            filesToUpload['${sessionId}_anh_da_ghep_khung.jpg'] = jpgBytes;
+          }
         }
       }
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -322,7 +347,8 @@ class EditPhotoProvider with ChangeNotifier {
               await videoRecapFile?.readAsBytes() ?? Uint8List.fromList([]);
         }
 
-        filesToUpload['video_recap_goc$originalExt'] = finalOriginalBytes;
+        filesToUpload['${sessionId}_video_recap_goc$originalExt'] =
+            finalOriginalBytes;
 
         try {
           final result = await VideoRecapService.exportFramedVideo(
@@ -337,14 +363,15 @@ class EditPhotoProvider with ChangeNotifier {
 
           if (result != null) {
             final extension = _getExtensionFromMimeType(result.mimeType);
-            filesToUpload['video_recap_gan_khung$extension'] = result.bytes;
+            filesToUpload['${sessionId}_video_recap_gan_khung$extension'] =
+                result.bytes;
           } else {
-            filesToUpload['video_recap_gan_khung$originalExt'] =
+            filesToUpload['${sessionId}_video_recap_gan_khung$originalExt'] =
                 finalOriginalBytes;
           }
         } catch (e) {
           debugPrint('Error generating framed video: $e');
-          filesToUpload['video_recap_gan_khung$originalExt'] =
+          filesToUpload['${sessionId}_video_recap_gan_khung$originalExt'] =
               finalOriginalBytes;
         }
       }
@@ -377,7 +404,9 @@ class EditPhotoProvider with ChangeNotifier {
     final cleanMime = mimeType.toLowerCase();
     if (cleanMime.contains('webm')) return '.webm';
     if (cleanMime.contains('mp4')) return '.mp4';
-    if (cleanMime.contains('quicktime') || cleanMime.contains('mov')) return '.mov';
+    if (cleanMime.contains('quicktime') || cleanMime.contains('mov')) {
+      return '.mov';
+    }
     if (cleanMime.contains('3gpp')) return '.3gp';
     if (cleanMime.contains('ogg')) return '.ogv';
     if (cleanMime.contains('avi')) return '.avi';
@@ -397,5 +426,16 @@ class EditPhotoProvider with ChangeNotifier {
     if (path.endsWith('.mp4')) return 'video/mp4';
     if (path.endsWith('.mov')) return 'video/quicktime';
     return null;
+  }
+
+  Uint8List? _convertToJpg(Uint8List pngBytes) {
+    try {
+      final image = img.decodeImage(pngBytes);
+      if (image == null) return null;
+      return img.encodeJpg(image, quality: 90);
+    } catch (e) {
+      debugPrint('Error converting image to JPG: $e');
+      return null;
+    }
   }
 }

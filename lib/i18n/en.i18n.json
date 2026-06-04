@@ -49,7 +49,10 @@
     "saveToDevice": "SAVE TO DEVICE",
     "saveToDeviceSuccess": "Saved all photos and videos to device!",
     "saveToDeviceCancel": "Save cancelled.",
-    "chooseFrame": "Choose Frame"
+    "chooseFrame": "Choose Frame",
+    "printing": "Preparing to print...",
+    "printSuccess": "Print job sent successfully!",
+    "printError": "Print error: $error"
   },
   "dialogs": {
     "photoSelection": {

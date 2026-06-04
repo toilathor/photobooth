@@ -26,6 +26,7 @@ import 'package:th_photobooth/features/edit_photo/widgets/virtual_paper.dart';
 import 'package:th_photobooth/helper/web_download_noop.dart'
     if (dart.library.js_interop) 'package:th_photobooth/helper/web_download_web.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/services/print_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
 
 class EditPhotoScreen extends StatefulWidget {
@@ -86,6 +87,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       },
       capturePaper: () => _capturePaperIndependent(provider),
       captureStrip: () => _captureStripIndependent(provider),
+      capturePrintContent: () => _capturePrintContentIndependent(provider),
     );
   }
 
@@ -98,6 +100,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       final files = await provider.generateAllFiles(
         capturePaper: () => _capturePaperIndependent(provider),
         captureStrip: () => _captureStripIndependent(provider),
+        capturePrintContent: () => _capturePrintContentIndependent(provider),
       );
 
       if (files != null && files.isNotEmpty) {
@@ -135,13 +138,13 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
           final fileName = entry.key;
           final bytes = entry.value;
 
+          final file = File('${tempDir.path}/$fileName');
+          await file.writeAsBytes(bytes);
+
           if (fileName.endsWith('.mp4') || fileName.endsWith('.webm')) {
-            final file = File('${tempDir.path}/$fileName');
-            await file.writeAsBytes(bytes);
             await Gal.putVideo(file.path);
           } else {
-            // Assume it's an image
-            await Gal.putImageBytes(bytes);
+            await Gal.putImage(file.path);
           }
         }
 
@@ -176,6 +179,75 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     } finally {
       if (!dialogPopped && context.mounted && Navigator.canPop(context)) {
         Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<void> _handlePrintRequest(BuildContext context) async {
+    final provider = context.read<EditPhotoProvider>();
+    _showSimpleLoading(context);
+    bool dialogPopped = false;
+
+    try {
+      final files = await provider.generateAllFiles(
+        capturePaper: () => _capturePaperIndependent(provider),
+        captureStrip: () => _captureStripIndependent(provider),
+        capturePrintContent: () => _capturePrintContentIndependent(provider),
+      );
+
+      if (files != null && files.isNotEmpty) {
+        final printBytes =
+            _findFileBytes(files, 'anh_dem_di_in.jpg') ??
+            _findFileBytes(files, 'anh_gia_lap_ban_in.jpg') ??
+            _findFileBytes(files, 'anh_da_ghep_khung.jpg');
+
+        if (context.mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+          dialogPopped = true;
+        }
+
+        if (context.mounted && printBytes != null) {
+          final printSuccess = await PrintService.printImage(
+            printBytes,
+            name: 'photobooth_${provider.sessionId ?? 'photo'}',
+          );
+
+          if (context.mounted) {
+            if (printSuccess) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(t.editor.printSuccess)));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(t.editor.printError(error: 'Unknown error')),
+                ),
+              );
+            }
+          }
+        }
+      } else {
+        if (context.mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+          dialogPopped = true;
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(t.editor.printError(error: 'No files generated')),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (!dialogPopped && context.mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+        dialogPopped = true;
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.editor.printError(error: e.toString()))),
+        );
       }
     }
   }
@@ -228,7 +300,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       return await _stripController.captureFromWidget(
         Material(color: Colors.transparent, child: widget),
         targetSize: provider.selectedFrame.size,
-        pixelRatio: 2.0, // Tăng độ sắc nét
+        pixelRatio: 1.0,
       );
     } catch (e) {
       debugPrint('Error capturing strip independently: $e');
@@ -303,6 +375,79 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     }
   }
 
+  Uint8List? _findFileBytes(Map<String, Uint8List> files, String suffix) {
+    for (final entry in files.entries) {
+      if (entry.key.endsWith(suffix)) return entry.value;
+    }
+    return null;
+  }
+
+  Future<Uint8List?> _capturePrintContentIndependent(
+    EditPhotoProvider provider,
+  ) async {
+    try {
+      final double frameAspectRatio =
+          provider.selectedFrame.size.width /
+          provider.selectedFrame.size.height;
+      final bool isLandscape = frameAspectRatio > 0.5;
+
+      final strip = PhotoStrip(
+        photos: provider.capturedPhotos,
+        frame: provider.selectedFrame,
+        selectedFilter: provider.selectedFilter,
+        filterIntensity: provider.filterIntensity,
+        isMirrored: provider.isMirrored,
+      );
+
+      final Widget content;
+      if (provider.printTwoCopies) {
+        if (isLandscape) {
+          content = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(fit: FlexFit.loose, child: strip),
+              const SizedBox(height: 4),
+              Flexible(fit: FlexFit.loose, child: strip),
+            ],
+          );
+        } else {
+          content = Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(fit: FlexFit.loose, child: strip),
+              const SizedBox(width: 4),
+              Flexible(fit: FlexFit.loose, child: strip),
+            ],
+          );
+        }
+      } else {
+        content = strip;
+      }
+
+      final bool paperIsLandscape = isLandscape && !provider.printTwoCopies;
+      final double targetWidth = paperIsLandscape ? 1800 : 1200;
+      final double targetHeight = paperIsLandscape ? 1200 : 1800;
+
+      final widget = Container(
+        color: Colors.white,
+        child: Center(child: content),
+      );
+
+      return await _paperController.captureFromWidget(
+        Material(color: Colors.white, child: widget),
+        targetSize: Size(targetWidth, targetHeight),
+        pixelRatio: 1.0,
+      );
+    } catch (e) {
+      debugPrint('Error capturing print content independently: $e');
+      return null;
+    }
+  }
+
   Widget _buildPreviewPanel({
     required EditPhotoProvider provider,
     required bool isMobile,
@@ -348,6 +493,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
           ? null
           : () => _handleQRRequest(context),
       onSaveRequested: () => _handleSaveRequest(context),
+      onPrintRequested: () => _handlePrintRequest(context),
       isMobile: isMobile,
     );
   }
@@ -442,9 +588,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                               Expanded(
                                 flex: 3,
                                 child: PrimaryButton(
-                                  onTap: () {
-                                    // TODO: Implement print logic
-                                  },
+                                  onTap: () => _handlePrintRequest(context),
                                   label: t.editor.printPhoto,
                                   icon: Icons.local_printshop_rounded,
                                   height: 56,
