@@ -49,6 +49,5 @@ app.*.map.json
 env/
 
 # Assets
-assets/frames/collected/*
 gen/*
 
