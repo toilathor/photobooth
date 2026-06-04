@@ -29,7 +29,11 @@ class SecondaryButton extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Center(
-            child: Icon(icon, color: colorScheme.onSurface, size: height > 60 ? 28 : 20),
+            child: Icon(
+              icon,
+              color: colorScheme.onSurface,
+              size: height > 60 ? 28 : 20,
+            ),
           ),
         ),
       ),

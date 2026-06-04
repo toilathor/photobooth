@@ -28,7 +28,9 @@ void main() async {
 
       final destFile = File('${thumbnailsDir.path}/$filename');
       if (!destFile.existsSync()) {
-        print('Processing $filename in $label (${count + 1}/${files.length})...');
+        print(
+          'Processing $filename in $label (${count + 1}/${files.length})...',
+        );
         try {
           _generateThumbnail(file, destFile);
           count++;

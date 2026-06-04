@@ -308,7 +308,8 @@ class PhotoboothProvider extends ChangeNotifier {
           if (expectedRemaining == cdLastTriggeredSecond - 1) {
             currentCountdownValue = expectedRemaining;
             notifyListeners();
-            if (currentCountdownValue > 0 && _numberSounds.containsKey(currentCountdownValue)) {
+            if (currentCountdownValue > 0 &&
+                _numberSounds.containsKey(currentCountdownValue)) {
               _playSound(_numberSounds[currentCountdownValue]!);
             }
           } else {

@@ -19,14 +19,16 @@ void main() async {
 
   // Ensure "Frame Custom" category exists
   const customCategoryId = '99';
-  bool hasCustomCategory = categories.any((cat) => cat['id'].toString() == customCategoryId);
+  bool hasCustomCategory = categories.any(
+    (cat) => cat['id'].toString() == customCategoryId,
+  );
   if (!hasCustomCategory) {
     print('Adding category "Frame Custom" (ID $customCategoryId)...');
     categories.add({
       "id": 99,
       "name": "Frame Custom",
       "created_at": DateTime.now().toIso8601String(),
-      "updated_at": DateTime.now().toIso8601String()
+      "updated_at": DateTime.now().toIso8601String(),
     });
   }
 
@@ -71,8 +73,8 @@ void main() async {
             "id": 99,
             "name": "Frame Custom",
             "created_at": DateTime.now().toIso8601String(),
-            "updated_at": DateTime.now().toIso8601String()
-          }
+            "updated_at": DateTime.now().toIso8601String(),
+          },
         });
       }
     }
@@ -105,8 +107,8 @@ void main() async {
             "id": 99,
             "name": "Frame Custom",
             "created_at": DateTime.now().toIso8601String(),
-            "updated_at": DateTime.now().toIso8601String()
-          }
+            "updated_at": DateTime.now().toIso8601String(),
+          },
         });
       }
     }

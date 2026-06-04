@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:th_photobooth/gen/assets.gen.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
 
 class FrameData {
   final String filename;
@@ -47,30 +47,16 @@ class FrameData {
       filename.startsWith('standard_custom_') ||
       filename.startsWith('group_custom_');
 
-  /// Dynamic getter to resolve the local asset path
+  /// Dynamic getter to resolve the local or network asset path
   String get path {
     if (filename.isEmpty) return '';
 
-    // Check in custom standard frames list from flutter_gen
-    for (final asset in Assets.frames.custom.standard.values) {
-      if (asset.path.endsWith(filename)) {
-        return asset.path;
-      }
+    if (filename.startsWith('standard_custom_')) {
+      return 'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/custom/standard/$filename';
+    } else if (filename.startsWith('group_custom_')) {
+      return 'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/custom/group/$filename';
+    } else {
+      return '${AppConfig.githubFramesBaseUrl}$filename';
     }
-    // Check in custom group frames list from flutter_gen
-    for (final asset in Assets.frames.custom.group.values) {
-      if (asset.path.endsWith(filename)) {
-        return asset.path;
-      }
-    }
-    // Check in collected frames list from flutter_gen
-    for (final asset in Assets.frames.collected.values) {
-      if (asset.path.endsWith(filename)) {
-        return asset.path;
-      }
-    }
-
-    // Fallback if not found in type-safe lists
-    return 'assets/frames/collected/$filename';
   }
 }

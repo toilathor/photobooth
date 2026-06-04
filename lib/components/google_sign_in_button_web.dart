@@ -175,9 +175,7 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(40),
           ),
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -211,13 +209,18 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: (showGrantUI ? const Color(0xFF34A853) : const Color(0xFF4285F4))
-                    .withValues(alpha: 0.1),
+                color:
+                    (showGrantUI
+                            ? const Color(0xFF34A853)
+                            : const Color(0xFF4285F4))
+                        .withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 showGrantUI ? Icons.vpn_key_rounded : Icons.lock_person_rounded,
-                color: showGrantUI ? const Color(0xFF34A853) : const Color(0xFF4285F4),
+                color: showGrantUI
+                    ? const Color(0xFF34A853)
+                    : const Color(0xFF4285F4),
                 size: 36,
               ),
             ),
@@ -262,7 +265,9 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
                       ),
                       elevation: 2,
                     ),
-                    onPressed: _isRequestingScopes ? null : _handleGrantPermission,
+                    onPressed: _isRequestingScopes
+                        ? null
+                        : _handleGrantPermission,
                     icon: _isRequestingScopes
                         ? const SizedBox(
                             width: 20,

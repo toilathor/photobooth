@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:th_photobooth/core/js/video_exporter_js.dart' as js_bridge;
 import 'package:th_photobooth/models/frame_data.dart';
 import 'package:web/web.dart' as web;
+import 'package:th_photobooth/services/frame_service.dart';
 
 import 'video_recap_service.dart';
 
@@ -23,7 +23,9 @@ class VideoRecapService {
     String? frameBlobUrl;
     try {
       // 1. Chuyển đổi Frame Asset thành Blob URL để JS có thể truy cập dễ dàng
-      final ByteData frameByteData = await rootBundle.load(frame.path);
+      final ByteData frameByteData = await FrameService.loadFrameBytes(
+        frame.path,
+      );
       final Uint8List frameBytes = frameByteData.buffer.asUint8List();
       final web.Blob frameBlob = web.Blob(
         [frameBytes.toJS].toJS,

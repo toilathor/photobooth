@@ -662,7 +662,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                 if (frame.path.isNotEmpty)
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: Image.asset(frame.path, fit: BoxFit.fill),
+                      child: Image.network(frame.path, fit: BoxFit.fill),
                     ),
                   ),
               ],
@@ -673,5 +673,3 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     );
   }
 }
-
-

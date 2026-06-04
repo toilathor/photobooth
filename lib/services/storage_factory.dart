@@ -21,6 +21,5 @@ class StorageFactory {
   }
 
   /// Kiểm tra storage có được kích hoạt hay không
-  static bool get isEnabled =>
-      StorageConfig.activeStorage != StorageType.none;
+  static bool get isEnabled => StorageConfig.activeStorage != StorageType.none;
 }

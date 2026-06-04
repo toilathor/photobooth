@@ -25,8 +25,7 @@ class NoOpStorageService implements StorageService {
     required Map<String, Uint8List> files,
     required String folderName,
     void Function(int current, int total)? onProgress,
-  }) async =>
-      null;
+  }) async => null;
 
   @override
   dynamic get currentUser => null;

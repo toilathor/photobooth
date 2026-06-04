@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/services/frame_service.dart';
 
 class PhotoMergerService {
   /// Merges captured photos and a frame into a single high-quality image.
@@ -97,18 +98,10 @@ class PhotoMergerService {
     }
 
     // 2. Draw the transparent Frame PNG on top
-    late final Uint8List frameBytes;
-    if (frameData.path.startsWith('http')) {
-      // If frame is from network
-      final ByteData data = await NetworkAssetBundle(
-        Uri.parse(frameData.path),
-      ).load('');
-      frameBytes = data.buffer.asUint8List();
-    } else {
-      // If frame is a local asset
-      final ByteData data = await rootBundle.load(frameData.path);
-      frameBytes = data.buffer.asUint8List();
-    }
+    final ByteData frameByteData = await FrameService.loadFrameBytes(
+      frameData.path,
+    );
+    final Uint8List frameBytes = frameByteData.buffer.asUint8List();
 
     final ui.Codec frameCodec = await ui.instantiateImageCodec(frameBytes);
     final ui.FrameInfo frameFrameInfo = await frameCodec.getNextFrame();

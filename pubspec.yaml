@@ -63,8 +63,3 @@ flutter:
   assets:
     - assets/sounds/
     - assets/images/
-    - assets/frames/
-    - assets/frames/collected/
-    - assets/frames/thumbnails/
-    - assets/frames/custom/standard/
-    - assets/frames/custom/group/

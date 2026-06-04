@@ -44,6 +44,8 @@ class AppConfig {
   static const List<int> photoCounts = [1, 4];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
+  static const String githubFramesBaseUrl =
+      'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/collected/';
 
   // Filter settings
   static List<String> get filters => FilterConfig.availableFilters;

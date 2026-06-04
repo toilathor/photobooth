@@ -41,14 +41,16 @@ class PlatformAudioService {
       final path = 'assets/sounds/$fileName';
       final byteData = await rootBundle.load(path);
       final u8list = byteData.buffer.asUint8List();
-      
+
       final audioContext = _audioContext ??= web.AudioContext();
       if (audioContext.state == 'suspended') {
         await audioContext.resume().toDart;
       }
-      
+
       final jsArrayBuffer = u8list.buffer.toJS;
-      final audioBuffer = await audioContext.decodeAudioData(jsArrayBuffer).toDart;
+      final audioBuffer = await audioContext
+          .decodeAudioData(jsArrayBuffer)
+          .toDart;
       _buffers[fileName] = audioBuffer;
     } catch (e) {
       debugPrint('AudioService Web Error loading sound $fileName: $e');

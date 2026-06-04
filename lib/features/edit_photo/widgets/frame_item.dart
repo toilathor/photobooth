@@ -14,13 +14,6 @@ class FrameItem extends StatelessWidget {
     required this.onTap,
   });
 
-  String get _thumbnailPath {
-    if (framePath.isEmpty) return '';
-    if (framePath.startsWith('http')) return framePath;
-    final filename = Uri.parse(framePath).pathSegments.last;
-    return 'assets/frames/thumbnails/$filename';
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -58,7 +51,7 @@ class FrameItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: Stack(
               children: [
-                if (_thumbnailPath.isEmpty)
+                if (framePath.isEmpty)
                   Container(
                     color: colorScheme.errorContainer,
                     child: Icon(
@@ -68,18 +61,38 @@ class FrameItem extends StatelessWidget {
                     ),
                   )
                 else
-                  Image.asset(
-                    _thumbnailPath,
+                  Image.network(
+                    framePath,
                     fit: BoxFit.cover,
+
+                    cacheWidth:
+                        150, // Optimize image memory and decoding time for smooth scrolling
                     frameBuilder:
                         (context, child, frame, wasSynchronouslyLoaded) {
                           if (wasSynchronouslyLoaded) return child;
                           return AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 200),
                             child: frame != null
                                 ? child
                                 : Container(
-                                    color: colorScheme.surfaceContainerHighest,
+                                    padding: const EdgeInsets.all(24),
+                                    color: colorScheme.onSurface.withValues(
+                                      alpha: 0.05,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              colorScheme.secondary.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                            ),
+                                      ),
+                                    ),
                                   ),
                           );
                         },

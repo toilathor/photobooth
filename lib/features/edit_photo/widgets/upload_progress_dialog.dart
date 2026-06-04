@@ -7,10 +7,7 @@ import 'package:th_photobooth/i18n/strings.g.dart';
 class UploadProgressDialog extends StatelessWidget {
   final EditPhotoProvider provider;
 
-  const UploadProgressDialog({
-    super.key,
-    required this.provider,
-  });
+  const UploadProgressDialog({super.key, required this.provider});
 
   static Future<void> show(BuildContext context, EditPhotoProvider provider) {
     return showDialog<void>(
@@ -40,10 +37,7 @@ class UploadProgressDialog extends StatelessWidget {
           elevation: 0,
           child: Container(
             width: 360,
-            padding: const EdgeInsets.symmetric(
-              vertical: 48,
-              horizontal: 32,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 32),
             decoration: BoxDecoration(
               color: colorScheme.surface.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(40),
@@ -82,9 +76,7 @@ class UploadProgressDialog extends StatelessWidget {
                               value: 1.0,
                               strokeWidth: 12,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.primary.withValues(
-                                  alpha: 0.05,
-                                ),
+                                colorScheme.primary.withValues(alpha: 0.05),
                               ),
                             ),
                           ),
@@ -118,7 +110,9 @@ class UploadProgressDialog extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: colorScheme.secondary.withValues(alpha: 0.5),
+                                    color: colorScheme.secondary.withValues(
+                                      alpha: 0.5,
+                                    ),
                                     letterSpacing: 2,
                                   ),
                                 ),
@@ -126,10 +120,7 @@ class UploadProgressDialog extends StatelessWidget {
                             )
                           else
                             TweenAnimationBuilder<double>(
-                              tween: Tween<double>(
-                                begin: 0.8,
-                                end: 1.2,
-                              ),
+                              tween: Tween<double>(begin: 0.8, end: 1.2),
                               duration: const Duration(seconds: 1),
                               curve: Curves.easeInOutSine,
                               builder: (context, scale, child) {
@@ -170,9 +161,7 @@ class UploadProgressDialog extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15,
-                      color: colorScheme.onSurface.withValues(
-                        alpha: 0.7,
-                      ),
+                      color: colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),

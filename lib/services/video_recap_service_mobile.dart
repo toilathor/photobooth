@@ -5,9 +5,9 @@ import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/services/frame_service.dart';
 
 import 'video_recap_service.dart';
 
@@ -28,8 +28,10 @@ class VideoRecapService {
       final String frameImagePath =
           '${tempDir.path}/frame_${DateTime.now().millisecondsSinceEpoch}.png';
 
-      // 1. Tải ảnh frame từ assets và lưu vào file tạm để FFmpeg có thể đọc
-      final ByteData frameByteData = await rootBundle.load(frame.path);
+      // 1. Tải ảnh frame từ assets hoặc mạng và lưu vào file tạm để FFmpeg có thể đọc
+      final ByteData frameByteData = await FrameService.loadFrameBytes(
+        frame.path,
+      );
       final File frameFile = File(frameImagePath);
       await frameFile.writeAsBytes(frameByteData.buffer.asUint8List());
 

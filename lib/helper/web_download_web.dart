@@ -11,7 +11,9 @@ Future<String> saveFilesToDeviceWeb(Map<String, Uint8List> files) async {
     final jsFiles = JSObject();
 
     // Check if window.showDirectoryPicker is supported
-    final hasDirectoryPicker = web.window.hasProperty('showDirectoryPicker'.toJS).toDart;
+    final hasDirectoryPicker = web.window
+        .hasProperty('showDirectoryPicker'.toJS)
+        .toDart;
 
     if (hasDirectoryPicker) {
       // If supported (typically Desktop Chrome/Edge), save files individually in the selected directory
@@ -36,11 +38,7 @@ Future<String> saveFilesToDeviceWeb(Map<String, Uint8List> files) async {
       final archive = Archive();
       for (final entry in files.entries) {
         final bytes = entry.value;
-        final archiveFile = ArchiveFile(
-          entry.key,
-          bytes.length,
-          bytes,
-        );
+        final archiveFile = ArchiveFile(entry.key, bytes.length, bytes);
         archive.addFile(archiveFile);
       }
 

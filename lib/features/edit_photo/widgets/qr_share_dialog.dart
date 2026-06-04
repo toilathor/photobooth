@@ -134,9 +134,7 @@ class QRShareDialog extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                              image: AssetImage(
-                                Assets.images.icLauncher.path,
-                              ),
+                              image: AssetImage(Assets.images.icLauncher.path),
                               fit: BoxFit.cover,
                             ),
                             border: Border.all(color: Colors.white, width: 1.5),
