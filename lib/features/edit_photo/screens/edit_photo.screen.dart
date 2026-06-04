@@ -377,70 +377,12 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
             builder: (context, editPhotoProvider, child) {
               return Scaffold(
                 backgroundColor: colorScheme.surface,
-                bottomNavigationBar: isMobile
-                    ? SafeArea(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: isLandscape ? 0 : 0,
-                          ),
-                          child: SizedBox(
-                            height: isLandscape ? 48 : null,
-                            child: Row(
-                              children: [
-                                if (kIsWeb) ...[
-                                  if (StorageConfig.activeStorage !=
-                                      StorageType.none) ...[
-                                    Expanded(
-                                      flex: 1,
-                                      child: SecondaryButton(
-                                        onTap: () => _handleQRRequest(context),
-                                        icon: Icons.qr_code_2_rounded,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                  ],
-                                  Expanded(
-                                    flex: 1,
-                                    child: SecondaryButton(
-                                      onTap: () => _handleSaveRequest(context),
-                                      icon: Icons.save_alt_rounded,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                ] else ...[
-                                  Expanded(
-                                    flex: 1,
-                                    child: SecondaryButton(
-                                      onTap: () => _handleSaveRequest(context),
-                                      icon: Icons.save_alt_rounded,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                ],
-                                // Print Button
-                                Expanded(
-                                  flex: 3,
-                                  child: PrimaryButton(
-                                    onTap: () {
-                                      // TODO: Implement print logic
-                                    },
-                                    label: t.editor.printPhoto,
-                                    icon: Icons.local_printshop_rounded,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    : null,
-                body: NestedScrollView(
-                  headerSliverBuilder: (context, innerBoxIsScrolled) {
-                    return [
-                      SliverAppBar.medium(
+                appBar: (isMobile && isLandscape)
+                    ? null
+                    : AppBar(
                         elevation: 0,
                         scrolledUnderElevation: 0,
+                        backgroundColor: Colors.transparent,
                         leading: Center(
                           child: IconButton.filledTonal(
                             icon: const Icon(
@@ -456,101 +398,176 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                             ),
                           ),
                         ),
-                        title: Text(
-                          t.editor.title,
-                          style: TextStyle(
-                            color: colorScheme.secondary,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2,
+                      ),
+                bottomNavigationBar: (isMobile && !isLandscape)
+                    ? SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Row(
+                            children: [
+                              if (kIsWeb) ...[
+                                if (StorageConfig.activeStorage !=
+                                    StorageType.none) ...[
+                                  Expanded(
+                                    flex: 1,
+                                    child: SecondaryButton(
+                                      onTap: () => _handleQRRequest(context),
+                                      icon: Icons.qr_code_2_rounded,
+                                      height: 56,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                ],
+                                Expanded(
+                                  flex: 1,
+                                  child: SecondaryButton(
+                                    onTap: () => _handleSaveRequest(context),
+                                    icon: Icons.save_alt_rounded,
+                                    height: 56,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ] else ...[
+                                Expanded(
+                                  flex: 1,
+                                  child: SecondaryButton(
+                                    onTap: () => _handleSaveRequest(context),
+                                    icon: Icons.save_alt_rounded,
+                                    height: 56,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
+                              // Print Button
+                              Expanded(
+                                flex: 3,
+                                child: PrimaryButton(
+                                  onTap: () {
+                                    // TODO: Implement print logic
+                                  },
+                                  label: t.editor.printPhoto,
+                                  icon: Icons.local_printshop_rounded,
+                                  height: 56,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        centerTitle: true,
-                      ),
-                    ];
-                  },
-                  body: SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: isMobile
-                          ? EdgeInsets.symmetric(
-                              horizontal: isLandscape ? 8.0 : 12.0,
-                              vertical: isLandscape ? 4.0 : 8.0,
-                            )
-                          : const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: isMobile
-                                ? (isLandscape
-                                      // Landscape mobile: Row layout
-                                      ? Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Left: Preview (scrollable)
-                                            Expanded(
-                                              flex: 2,
-                                              child: SingleChildScrollView(
-                                                child: _buildPreviewPanel(
-                                                  provider: editPhotoProvider,
-                                                  isMobile: true,
+                      )
+                    : null,
+                body: SafeArea(
+                  child: Padding(
+                    padding: isMobile
+                        ? EdgeInsets.symmetric(
+                            horizontal: isLandscape ? 8.0 : 12.0,
+                            vertical: isLandscape ? 4.0 : 8.0,
+                          )
+                        : const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: isMobile
+                              ? (isLandscape
+                                    // Landscape mobile: Row layout
+                                    ? Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Left: Preview (scrollable)
+                                          Expanded(
+                                            flex: 3,
+                                            child: Stack(
+                                              children: [
+                                                Positioned.fill(
+                                                  child: _buildPreviewPanel(
+                                                    provider: editPhotoProvider,
+                                                    isMobile: true,
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                            const Gap(8),
-                                            // Right: Editor (scrollable)
-                                            Expanded(
-                                              flex: 3,
-                                              child: SingleChildScrollView(
-                                                child: _buildEditorPanel(
-                                                  context: context,
-                                                  provider: editPhotoProvider,
-                                                  isMobile: true,
+                                                Positioned(
+                                                  top: 8,
+                                                  left: 8,
+                                                  child: IconButton.filledTonal(
+                                                    icon: const Icon(
+                                                      Icons
+                                                          .arrow_back_ios_new_rounded,
+                                                      size: 16,
+                                                    ),
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                    style: IconButton.styleFrom(
+                                                      backgroundColor:
+                                                          colorScheme.surface
+                                                              .withValues(
+                                                                alpha: 0.8,
+                                                              ),
+                                                      foregroundColor:
+                                                          colorScheme.secondary,
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            8,
+                                                          ),
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
+                                              ],
                                             ),
-                                          ],
-                                        )
-                                      // Portrait mobile: vertical scroll
-                                      : SingleChildScrollView(
-                                          child: Column(
-                                            children: [
-                                              _buildPreviewPanel(
-                                                provider: editPhotoProvider,
-                                                isMobile: true,
-                                              ),
-                                              const Gap(16),
-                                              _buildEditorPanel(
-                                                context: context,
-                                                provider: editPhotoProvider,
-                                                isMobile: true,
-                                              ),
-                                            ],
                                           ),
-                                        ))
-                                : Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: _buildPreviewPanel(
-                                          provider: editPhotoProvider,
-                                          isMobile: false,
-                                        ),
+                                          const Gap(8),
+                                          // Right: Editor
+                                          Expanded(
+                                            flex: 3,
+                                            child: _buildEditorPanel(
+                                              context: context,
+                                              provider: editPhotoProvider,
+                                              isMobile: true,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    // Portrait mobile: Column layout (no page scroll)
+                                    : Column(
+                                        children: [
+                                          Expanded(
+                                            flex: 5,
+                                            child: _buildPreviewPanel(
+                                              provider: editPhotoProvider,
+                                              isMobile: true,
+                                            ),
+                                          ),
+                                          const Gap(12),
+                                          Expanded(
+                                            flex: 3,
+                                            child: _buildEditorPanel(
+                                              context: context,
+                                              provider: editPhotoProvider,
+                                              isMobile: true,
+                                            ),
+                                          ),
+                                        ],
+                                      ))
+                              : Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: _buildPreviewPanel(
+                                        provider: editPhotoProvider,
+                                        isMobile: false,
                                       ),
-                                      const Gap(24),
-                                      Expanded(
-                                        flex: 3,
-                                        child: _buildEditorPanel(
-                                          context: context,
-                                          provider: editPhotoProvider,
-                                          isMobile: false,
-                                        ),
+                                    ),
+                                    const Gap(24),
+                                    Expanded(
+                                      flex: 3,
+                                      child: _buildEditorPanel(
+                                        context: context,
+                                        provider: editPhotoProvider,
+                                        isMobile: false,
                                       ),
-                                    ],
-                                  ),
-                          ),
-                        ],
-                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

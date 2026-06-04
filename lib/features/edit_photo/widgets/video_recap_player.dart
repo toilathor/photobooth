@@ -8,6 +8,7 @@ import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 import 'package:video_player/video_player.dart';
+import 'video_recap_components.dart';
 
 enum RecapViewMode { full, frame }
 
@@ -44,6 +45,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   bool _slotVideoInitialized = false;
   int _activeSlotIndex = 0;
   bool _isSeeking = false;
+  Duration? _seekTarget;
+  final GlobalKey _slotVideoKey = GlobalKey(debugLabel: 'slot_video_player');
 
   @override
   void initState() {
@@ -67,6 +70,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     _slotVideoController = null;
     _slotVideoInitialized = false;
     _isSeeking = false;
+    _seekTarget = null;
   }
 
   Future<void> _initializeFullPlayer() async {
@@ -121,6 +125,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     _slotVideoController = controller;
     _slotVideoInitialized = false;
     _activeSlotIndex = 0;
+    _seekTarget = null;
 
     try {
       await controller.initialize();
@@ -152,6 +157,17 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     }
 
     final endTime = _getSlotEndTime(_activeSlotIndex);
+
+    if (_seekTarget != null) {
+      final currentPos = controller.value.position;
+      final diff = (currentPos - _seekTarget!).abs();
+      if (diff < const Duration(milliseconds: 500) || currentPos < endTime) {
+        _seekTarget = null;
+      } else {
+        return;
+      }
+    }
+
     if (!_isSeeking && controller.value.position >= endTime) {
       _isSeeking = true;
 
@@ -161,6 +177,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       });
 
       final nextStartTime = _getSlotStartTime(_activeSlotIndex);
+      _seekTarget = nextStartTime;
       controller
           .seekTo(nextStartTime)
           .then((_) {
@@ -168,6 +185,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
           })
           .catchError((dynamic e) {
             _isSeeking = false;
+            _seekTarget = null;
             debugPrint('Error seeking to next slot $_activeSlotIndex: $e');
           });
     }
@@ -182,6 +200,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
 
     if (_activeSlotIndex == 0) {
       final startTime = _getSlotStartTime(0);
+      _seekTarget = startTime;
       _slotVideoController!
           .seekTo(startTime)
           .then((_) {
@@ -189,6 +208,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
           })
           .catchError((dynamic e) {
             _isSeeking = false;
+            _seekTarget = null;
             debugPrint('Error seeking to start of slot 0: $e');
           });
     } else {
@@ -197,6 +217,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       });
 
       final nextStartTime = _getSlotStartTime(_activeSlotIndex);
+      _seekTarget = nextStartTime;
       _slotVideoController!
           .seekTo(nextStartTime)
           .then((_) {
@@ -204,6 +225,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
           })
           .catchError((dynamic e) {
             _isSeeking = false;
+            _seekTarget = null;
             debugPrint('Error seeking to previous slot $_activeSlotIndex: $e');
           });
     }
@@ -220,6 +242,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
     });
 
     final nextStartTime = _getSlotStartTime(_activeSlotIndex);
+    _seekTarget = nextStartTime;
     _slotVideoController!
         .seekTo(nextStartTime)
         .then((_) {
@@ -227,6 +250,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
         })
         .catchError((dynamic e) {
           _isSeeking = false;
+          _seekTarget = null;
           debugPrint('Error seeking to next slot $_activeSlotIndex: $e');
         });
   }
@@ -269,6 +293,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       } else {
         _activeSlotIndex = 0;
         final startTime = _getSlotStartTime(0);
+        _seekTarget = startTime;
         _slotVideoController?.seekTo(startTime);
         _slotVideoController?.play();
       }
@@ -293,10 +318,11 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
           progress = (currentMs / totalMs).clamp(0.0, 1.0);
         }
 
-        return _StoryProgressIndicator(
+        return StoryProgressIndicator(
           count: widget.frame.slots.length,
           activeIndex: _activeSlotIndex,
           activeProgress: progress,
+          isSeeking: _isSeeking || _seekTarget != null,
         );
       },
     );
@@ -444,7 +470,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
               ),
               const Gap(16),
               // Mode Selector
-              _ModeSelector(
+              RecapModeSelector(
                 currentMode: _viewMode,
                 onChanged: (mode) {
                   if (mode == _viewMode) return;
@@ -494,13 +520,13 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
               _fullController != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: _VideoProgressBar(controller: _fullController!),
+              child: RecapVideoProgressBar(controller: _fullController!),
             ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Playback Controls
-              _ControlButton(
+              RecapControlButton(
                 icon: _isPlaying
                     ? Icons.pause_rounded
                     : Icons.play_arrow_rounded,
@@ -510,7 +536,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                 onPressed: _togglePlayback,
               ),
               const Gap(16),
-              _ControlButton(
+              RecapControlButton(
                 icon: Icons.replay_rounded,
                 label: t.video_recap.controls.restart,
                 onPressed: _restartPlayback,
@@ -603,6 +629,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                                               : -1,
                                           child: VideoPlayer(
                                             _slotVideoController!,
+                                            key: _slotVideoKey,
                                           ),
                                         ),
                                       ),
@@ -647,252 +674,4 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
   }
 }
 
-class _ModeSelector extends StatelessWidget {
-  final RecapViewMode currentMode;
-  final ValueChanged<RecapViewMode> onChanged;
 
-  const _ModeSelector({required this.currentMode, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ModeItem(
-            isSelected: currentMode == RecapViewMode.frame,
-            icon: Icons.grid_view_rounded,
-            label: t.editor.frame_mode,
-            onTap: () => onChanged(RecapViewMode.frame),
-          ),
-          _ModeItem(
-            isSelected: currentMode == RecapViewMode.full,
-            icon: Icons.fullscreen_rounded,
-            label: t.editor.full_mode,
-            onTap: () => onChanged(RecapViewMode.full),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModeItem extends StatelessWidget {
-  final bool isSelected;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ModeItem({
-    required this.isSelected,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.secondary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.secondary.withValues(alpha: 0.3),
-                    blurRadius: 10,
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected
-                  ? colorScheme.onSecondary
-                  : Colors.white.withValues(alpha: 0.5),
-            ),
-            if (isSelected) ...[
-              const Gap(8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: colorScheme.onSecondary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ControlButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  const _ControlButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: label,
-      child: Material(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Icon(icon, color: Colors.white, size: 24),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _VideoProgressBar extends StatefulWidget {
-  final VideoPlayerController controller;
-
-  const _VideoProgressBar({required this.controller});
-
-  @override
-  State<_VideoProgressBar> createState() => _VideoProgressBarState();
-}
-
-class _VideoProgressBarState extends State<_VideoProgressBar> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_update);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_update);
-    super.dispose();
-  }
-
-  void _update() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
-    final value = widget.controller.value;
-    final duration = value.duration.inMilliseconds;
-    final position = value.position.inMilliseconds;
-
-    return SliderTheme(
-      data: SliderThemeData(
-        trackHeight: 4,
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-        overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-        activeTrackColor: Colors.white,
-        inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-        thumbColor: Colors.white,
-        overlayColor: Colors.white.withValues(alpha: 0.2),
-      ),
-      child: Slider(
-        value: duration > 0 ? (position / duration).clamp(0.0, 1.0) : 0.0,
-        onChanged: (val) {
-          final target = Duration(milliseconds: (val * duration).toInt());
-          widget.controller.seekTo(target);
-        },
-      ),
-    );
-  }
-}
-
-class _StoryProgressIndicator extends StatelessWidget {
-  final int count;
-  final int activeIndex;
-  final double activeProgress;
-
-  const _StoryProgressIndicator({
-    required this.count,
-    required this.activeIndex,
-    required this.activeProgress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(count, (index) {
-        double progress = 0.0;
-        if (index < activeIndex) {
-          progress = 1.0;
-        } else if (index == activeIndex) {
-          progress = activeProgress;
-        }
-
-        return Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = constraints.maxWidth;
-
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 2,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.linear,
-                    width: maxWidth * progress,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      }),
-    );
-  }
-}

@@ -72,14 +72,13 @@ class PreviewsFooter extends StatelessWidget {
                     }
                   }
                 : null,
-            height: isLandscape ? 48 : 60,
+            height: isLandscape ? 48 : 56,
             label: provider.capturedPhotos.length >= provider.selectedPhotoCount
                 ? t.preview.continue_btn
                 : t.preview.not_enough_photos,
             icon: Icons.arrow_forward_ios_rounded,
           ),
         ),
-        Gap(isLandscape ? 4 : 16),
       ],
     );
   }

@@ -73,7 +73,7 @@ class _EditorPanelState extends State<EditorPanel> {
           // Tab Switcher
           Padding(
             padding: widget.isMobile
-                ? const EdgeInsets.all(16)
+                ? const EdgeInsets.fromLTRB(12, 12, 12, 8)
                 : const EdgeInsets.all(24),
             child: ExpressiveButtonGroup(
               selectedIndex: _selectedTabIndex,
@@ -92,62 +92,73 @@ class _EditorPanelState extends State<EditorPanel> {
           ),
 
           // Tab Content
-          widget.isMobile
-              ? SizedBox(height: 180, child: _buildTabContent(colorScheme))
-              : Expanded(child: _buildTabContent(colorScheme)),
+          Expanded(child: _buildTabContent(colorScheme)),
 
-          if (!widget.isMobile)
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                children: [
-                  if (kIsWeb) ...[
-                    if (widget.onQRRequested != null) ...[
-                      Expanded(
-                        flex: 1,
-                        child: SecondaryButton(
-                          onTap: widget.onQRRequested!,
-                          icon: Icons.qr_code_2_rounded,
+          (() {
+            final bool isLandscape =
+                MediaQuery.orientationOf(context) == Orientation.landscape;
+            if (!widget.isMobile || isLandscape) {
+              final double btnHeight = widget.isMobile ? 48.0 : 72.0;
+              return Padding(
+                padding: widget.isMobile
+                    ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                    : const EdgeInsets.all(24.0),
+                child: Row(
+                  children: [
+                    if (kIsWeb) ...[
+                      if (widget.onQRRequested != null) ...[
+                        Expanded(
+                          flex: 1,
+                          child: SecondaryButton(
+                            onTap: widget.onQRRequested!,
+                            icon: Icons.qr_code_2_rounded,
+                            height: btnHeight,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                    ],
-                    if (widget.onSaveRequested != null) ...[
-                      Expanded(
-                        flex: 1,
-                        child: SecondaryButton(
-                          onTap: widget.onSaveRequested!,
-                          icon: Icons.save_alt_rounded,
+                        const SizedBox(width: 16),
+                      ],
+                      if (widget.onSaveRequested != null) ...[
+                        Expanded(
+                          flex: 1,
+                          child: SecondaryButton(
+                            onTap: widget.onSaveRequested!,
+                            icon: Icons.save_alt_rounded,
+                            height: btnHeight,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                    ],
-                  ] else ...[
-                    if (widget.onSaveRequested != null) ...[
-                      Expanded(
-                        flex: 1,
-                        child: SecondaryButton(
-                          onTap: widget.onSaveRequested!,
-                          icon: Icons.save_alt_rounded,
+                        const SizedBox(width: 16),
+                      ],
+                    ] else ...[
+                      if (widget.onSaveRequested != null) ...[
+                        Expanded(
+                          flex: 1,
+                          child: SecondaryButton(
+                            onTap: widget.onSaveRequested!,
+                            icon: Icons.save_alt_rounded,
+                            height: btnHeight,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
+                        const SizedBox(width: 16),
+                      ],
                     ],
-                  ],
-                  // Print Button
-                  Expanded(
-                    flex: 3,
-                    child: PrimaryButton(
-                      onTap: () {
-                        // TODO: Implement print logic
-                      },
-                      label: t.editor.printPhoto,
-                      icon: Icons.local_printshop_rounded,
+                    // Print Button
+                    Expanded(
+                      flex: 3,
+                      child: PrimaryButton(
+                        onTap: () {
+                          // TODO: Implement print logic
+                        },
+                        label: t.editor.printPhoto,
+                        icon: Icons.local_printshop_rounded,
+                        height: btnHeight,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          })(),
         ],
       ),
     );
@@ -162,6 +173,7 @@ class _EditorPanelState extends State<EditorPanel> {
           availableFrames: widget.availableFrames,
           selectedFrame: widget.selectedFrame,
           onFrameSelected: widget.onFrameSelected,
+          isMobile: widget.isMobile,
         ),
 
         // Filters Tab
@@ -173,6 +185,7 @@ class _EditorPanelState extends State<EditorPanel> {
                 selectedFilter: widget.selectedFilter,
                 onFilterSelected: widget.onFilterSelected,
                 colorScheme: colorScheme,
+                isMobile: widget.isMobile,
               ),
             ),
             Visibility(
@@ -218,7 +231,7 @@ class _EditorPanelState extends State<EditorPanel> {
                 ),
               ),
             ),
-            Gap(16),
+            const Gap(16),
           ],
         ),
       ],

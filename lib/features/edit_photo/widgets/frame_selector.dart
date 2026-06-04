@@ -9,12 +9,14 @@ class FrameSelector extends StatefulWidget {
   final List<FrameData> availableFrames;
   final String selectedFrame;
   final void Function(FrameData) onFrameSelected;
+  final bool isMobile;
 
   const FrameSelector({
     super.key,
     required this.availableFrames,
     required this.selectedFrame,
     required this.onFrameSelected,
+    this.isMobile = false,
   });
 
   @override
@@ -32,6 +34,26 @@ class _FrameSelectorState extends State<FrameSelector> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isMobile) {
+      return ListView.builder(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        itemCount: widget.availableFrames.length,
+        itemBuilder: (context, index) {
+          final frame = widget.availableFrames[index];
+          return Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FrameItem(
+              framePath: frame.path,
+              isSelected: widget.selectedFrame == frame.path,
+              onTap: () => widget.onFrameSelected(frame),
+            ),
+          );
+        },
+      );
+    }
+
     return CustomScrollbar(
       controller: _scrollController,
       padding: const EdgeInsets.only(right: 4, top: 12, bottom: 20),

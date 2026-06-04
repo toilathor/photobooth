@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,12 +8,12 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/copyright_watermark.dart';
 import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/core/di/service_locator.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/screens/photobooth.screen.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/cache_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
-import 'package:th_photobooth/core/di/service_locator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +64,15 @@ Future<void> main() async {
   );
 }
 
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+  };
+}
+
 class PhotoboothApp extends StatelessWidget {
   const PhotoboothApp({super.key});
 
@@ -72,6 +83,7 @@ class PhotoboothApp extends StatelessWidget {
       theme: AppConfig.theme,
       darkTheme: AppConfig.darkTheme,
       themeMode: ThemeMode.system,
+      scrollBehavior: AppScrollBehavior(),
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,

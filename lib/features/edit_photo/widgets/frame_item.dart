@@ -70,7 +70,7 @@ class FrameItem extends StatelessWidget {
                 else
                   Image.asset(
                     _thumbnailPath,
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.cover,
                     frameBuilder:
                         (context, child, frame, wasSynchronouslyLoaded) {
                           if (wasSynchronouslyLoaded) return child;

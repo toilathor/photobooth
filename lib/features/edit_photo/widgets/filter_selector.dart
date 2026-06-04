@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:th_photobooth/components/custom_scrollbar.dart';
@@ -13,6 +14,7 @@ class FilterSelector extends StatefulWidget {
   final ColorScheme colorScheme;
   final String? previewImagePath;
   final bool isDisabled;
+  final bool isMobile;
 
   const FilterSelector({
     super.key,
@@ -22,6 +24,7 @@ class FilterSelector extends StatefulWidget {
     required this.colorScheme,
     this.previewImagePath,
     this.isDisabled = false,
+    this.isMobile = false,
   });
 
   @override
@@ -39,24 +42,52 @@ class _FilterSelectorState extends State<FilterSelector> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isMobile) {
+      return CustomScrollbar(
+        controller: _scrollController,
+        padding: const EdgeInsets.only(bottom: 2, left: 24, right: 24),
+        child: ListView.builder(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(24, 2, 24, 2),
+          itemCount: widget.filters.length,
+          itemBuilder: (context, index) {
+            final filterKey = widget.filters[index];
+            return Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: _FilterThumbnail(
+                filterKey: filterKey,
+                isSelected: widget.selectedFilter == filterKey,
+                onTap: widget.isDisabled
+                    ? null
+                    : () => widget.onFilterSelected(filterKey),
+                colorScheme: widget.colorScheme,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
     return CustomScrollbar(
       controller: _scrollController,
-      padding: const EdgeInsets.only(bottom: 2, left: 24, right: 24),
-      child: ListView.builder(
+      padding: const EdgeInsets.only(right: 4, top: 12, bottom: 20),
+      child: MasonryGridView.count(
         controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(24, 4, 24, 14),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+        crossAxisCount: 6,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
         itemCount: widget.filters.length,
         itemBuilder: (context, index) {
           final filterKey = widget.filters[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: _FilterThumbnail(
-              filterKey: filterKey,
-              isSelected: widget.selectedFilter == filterKey,
-              onTap: widget.isDisabled ? null : () => widget.onFilterSelected(filterKey),
-              colorScheme: widget.colorScheme,
-            ),
+          return _FilterThumbnail(
+            filterKey: filterKey,
+            isSelected: widget.selectedFilter == filterKey,
+            onTap: widget.isDisabled
+                ? null
+                : () => widget.onFilterSelected(filterKey),
+            colorScheme: widget.colorScheme,
           );
         },
       ),
@@ -147,7 +178,7 @@ class _FilterThumbnail extends StatelessWidget {
               ],
             ),
           ),
-          const Gap(4),
+          const Gap(2),
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: GoogleFonts.plusJakartaSans(

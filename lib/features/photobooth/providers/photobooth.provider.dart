@@ -19,6 +19,7 @@ class PhotoboothProvider extends ChangeNotifier {
   int _currentCameraIndex = 0;
   bool isMirrored = false;
   bool isVeryHighResolution = false;
+  bool _isCameraOperationInProgress = false;
 
   int selectedPhotoCount = 4;
   int countdown = 3;
@@ -74,12 +75,16 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> toggleCamera() async {
+    while (_isCameraOperationInProgress) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
     if (AppConfig.cameras.isEmpty ||
         AppConfig.cameras.length < 2 ||
         isSwitchingCamera) {
       return;
     }
 
+    _isCameraOperationInProgress = true;
     isSwitchingCamera = true;
     notifyListeners();
 
@@ -102,24 +107,38 @@ class PhotoboothProvider extends ChangeNotifier {
       await cameraController?.initialize();
     } catch (e) {
       debugPrint('Error switching camera: $e');
+      cameraController = null;
     } finally {
       isSwitchingCamera = false;
+      _isCameraOperationInProgress = false;
       notifyListeners();
     }
   }
 
   Future<void> stopCamera() async {
-    if (cameraController != null) {
+    while (_isCameraOperationInProgress) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    if (cameraController == null) return;
+
+    _isCameraOperationInProgress = true;
+    try {
       final oldController = cameraController;
       cameraController = null;
       notifyListeners();
       await oldController?.dispose();
+    } finally {
+      _isCameraOperationInProgress = false;
     }
   }
 
   Future<void> startCamera() async {
+    while (_isCameraOperationInProgress) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
     if (cameraController != null) return;
 
+    _isCameraOperationInProgress = true;
     if (AppConfig.cameras.isNotEmpty) {
       isSwitchingCamera = true;
       notifyListeners();
@@ -144,10 +163,14 @@ class PhotoboothProvider extends ChangeNotifier {
         }
       } catch (e) {
         debugPrint('Error starting camera: $e');
+        cameraController = null;
       } finally {
         isSwitchingCamera = false;
+        _isCameraOperationInProgress = false;
         notifyListeners();
       }
+    } else {
+      _isCameraOperationInProgress = false;
     }
   }
 

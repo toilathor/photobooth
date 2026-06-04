@@ -14,103 +14,72 @@ class ActionButtonsWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final bool isMobile = MediaQuery.of(context).size.width < 850;
 
-    return Column(
-      children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _ActionIcon(
-                icon: Icons.touch_app,
-                label: t.actions.manual,
-                colorScheme: colorScheme,
-                onTap: provider.takeManualPhoto,
-                isEnabled:
-                    !provider.isAutoCapturing &&
-                    provider.capturedPhotos.length <
-                        provider.selectedPhotoCount,
-              ),
-              Gap(isMobile ? 16 : 32),
-              _ActionIcon(
-                icon: Icons.camera_alt,
-                label: t.actions.auto,
-                colorScheme: colorScheme,
-                isPrimary: true,
-                onTap: provider.startAutoCapture,
-                isEnabled: !provider.isAutoCapturing,
-              ),
-              Gap(isMobile ? 16 : 32),
-              _ActionIcon(
-                icon: Icons.refresh,
-                label: t.actions.retake,
-                colorScheme: colorScheme,
-                onTap: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(t.dialogs.resetSession.title),
-                      content: Text(t.dialogs.resetSession.content),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          style: TextButton.styleFrom(
-                            foregroundColor: colorScheme.onSurface.withValues(
-                              alpha: 0.8,
-                            ),
-                          ),
-                          child: Text(t.dialogs.resetSession.cancel),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ActionIcon(
+            icon: Icons.refresh,
+            label: t.actions.retake,
+            colorScheme: colorScheme,
+            onTap: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(t.dialogs.resetSession.title),
+                  content: Text(t.dialogs.resetSession.content),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: TextButton.styleFrom(
+                        foregroundColor: colorScheme.onSurface.withValues(
+                          alpha: 0.8,
                         ),
-                        FilledButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: colorScheme.secondary,
-                            foregroundColor: colorScheme.onSecondary,
-                          ),
-                          child: Text(t.dialogs.resetSession.confirm),
-                        ),
-                      ],
+                      ),
+                      child: Text(t.dialogs.resetSession.cancel),
                     ),
-                  );
-
-                  if (confirmed == true && context.mounted) {
-                    await provider.clearSession();
-                  }
-                },
-                isEnabled:
-                    !provider.isAutoCapturing &&
-                    provider.capturedPhotos.isNotEmpty,
-              ),
-            ],
-          ),
-        ),
-        const Gap(16),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Switch(
-                value: provider.isVideoRecap,
-                onChanged: provider.isAutoCapturing
-                    ? null
-                    : provider.toggleVideoRecap,
-                activeThumbColor: colorScheme.secondary,
-              ),
-              Text(
-                t.actions.videoRecap,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                  letterSpacing: 2,
+                    FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.secondary,
+                        foregroundColor: colorScheme.onSecondary,
+                      ),
+                      child: Text(t.dialogs.resetSession.confirm),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              );
+
+              if (confirmed == true && context.mounted) {
+                await provider.clearSession();
+              }
+            },
+            isEnabled:
+                !provider.isAutoCapturing && provider.capturedPhotos.isNotEmpty,
           ),
-        ),
-      ],
+          Gap(isMobile ? 16 : 32),
+          _ActionIcon(
+            icon: Icons.camera_alt,
+            label: t.actions.auto,
+            colorScheme: colorScheme,
+            isPrimary: true,
+            onTap: provider.startAutoCapture,
+            isEnabled: !provider.isAutoCapturing,
+          ),
+          Gap(isMobile ? 16 : 32),
+          _ActionIcon(
+            icon: Icons.touch_app,
+            label: t.actions.manual,
+            colorScheme: colorScheme,
+            onTap: provider.takeManualPhoto,
+            isEnabled:
+                !provider.isAutoCapturing &&
+                provider.capturedPhotos.length < provider.selectedPhotoCount,
+          ),
+        ],
+      ),
     );
   }
 }

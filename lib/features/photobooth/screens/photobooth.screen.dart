@@ -1,12 +1,12 @@
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
@@ -47,11 +47,11 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (kIsWeb) return;
     if (ModalRoute.of(context)?.isCurrent != true) return;
 
     final provider = context.read<PhotoboothProvider>();
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused) {
       provider.stopCamera();
     } else if (state == AppLifecycleState.resumed) {
       provider.startCamera();
@@ -166,17 +166,17 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       floatingActionButton: (!isMobile && !provider.isFullscreen)
           ? FloatingActionButton.small(
-               onPressed: () => provider.enterFullscreen(),
-               backgroundColor: colorScheme.surface,
-               foregroundColor: colorScheme.onSurface,
-               elevation: 4,
-               child: const Icon(Icons.fullscreen_rounded),
-             )
+              onPressed: () => provider.enterFullscreen(),
+              backgroundColor: colorScheme.surface,
+              foregroundColor: colorScheme.onSurface,
+              elevation: 4,
+              child: const Icon(Icons.fullscreen_rounded),
+            )
           : null,
       bottomNavigationBar: isMobile
           ? SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: const PreviewsFooter(),
               ),
             )
@@ -253,8 +253,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
         child: Stack(
           children: [
             screenContent,
-            if (kIsWeb && !isMobile)
-              const ShortcutGuideWidget(),
+            if (kIsWeb && !isMobile) const ShortcutGuideWidget(),
           ],
         ),
       ),
@@ -335,30 +334,27 @@ class _MobileLandscapePanel extends StatelessWidget {
         // Right: Actions + Thumbnails (scrollable vertically)
         Expanded(
           flex: 2,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(8, 4, 16, 4),
-            child: Column(
-              children: [
-                // Settings icon in top-right
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.settings_rounded,
-                      color: colorScheme.secondary,
-                      size: 24,
-                    ),
-                    onPressed: onSettingsTap,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+          child: Column(
+            children: [
+              // Settings icon in top-right
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.settings_rounded,
+                    color: colorScheme.secondary,
+                    size: 24,
                   ),
+                  onPressed: onSettingsTap,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
-                const Gap(4),
-                const ActionButtonsWidget(),
-                const Gap(8),
-                const PhotoPreviewsPanel(isMobile: true),
-              ],
-            ),
+              ),
+              Expanded(child: const PhotoPreviewsPanel(isMobile: true)),
+              const Gap(16),
+              const ActionButtonsWidget(),
+              const Gap(8),
+            ],
           ),
         ),
       ],

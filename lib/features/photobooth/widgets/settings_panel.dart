@@ -141,23 +141,69 @@ class SettingsPanel extends StatelessWidget {
             );
           },
         ),
+        const Gap(20),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 65) {
+              return const SizedBox.shrink();
+            }
+
+            if (constraints.maxWidth < 160) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.settings.saveVideo,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const Gap(8),
+                  Switch(
+                    value: provider.isVideoRecap,
+                    onChanged: provider.isAutoCapturing
+                        ? null
+                        : (val) => provider.toggleVideoRecap(val),
+                    activeThumbColor: colorScheme.secondary,
+                  ),
+                ],
+              );
+            }
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: constraints.maxWidth - 68,
+                  child: Text(
+                    t.settings.saveVideo,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Gap(8),
+                Switch(
+                  value: provider.isVideoRecap,
+                  onChanged: provider.isAutoCapturing
+                      ? null
+                      : (val) => provider.toggleVideoRecap(val),
+                  activeThumbColor: colorScheme.secondary,
+                ),
+              ],
+            );
+          },
+        ),
         if (isBottomSheet) ...[
           const Gap(20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                t.settings.language,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const Gap(10),
-              const Center(child: LanguageSwitcher(isMobile: true)),
-            ],
-          ),
+          const Center(child: LanguageSwitcher(isMobile: true)),
         ],
         const Gap(24),
       ],

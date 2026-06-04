@@ -12,7 +12,8 @@
     "seconds": "sec",
     "language": "Language",
     "mirror": "Mirror",
-    "veryHighResolution": "FullHD"
+    "veryHighResolution": "FullHD",
+    "saveVideo": "SAVE VIDEO RECAP"
   },
   "actions": {
     "manual": "Manual",
@@ -34,7 +35,7 @@
     "portrait": "PORTRAIT"
   },
   "editor": {
-    "title": "EDIT",
+    "title": "Edit",
     "watchVideoRecap": "WATCH VIDEO RECAP",
     "printPhoto": "PRINT PHOTO",
     "frame_mode": "WITH FRAME",

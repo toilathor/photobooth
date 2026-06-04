@@ -12,7 +12,8 @@
     "seconds": "giây",
     "language": "Ngôn ngữ",
     "mirror": "Gương",
-    "veryHighResolution": "FullHD"
+    "veryHighResolution": "FullHD",
+    "saveVideo": "Lưu video recap"
   },
   "actions": {
     "manual": "Chụp tay",
@@ -34,7 +35,7 @@
     "portrait": "DỌC"
   },
   "editor": {
-    "title": "CHỈNH SỬA ẢNH",
+    "title": "Chỉnh sửa ảnh",
     "watchVideoRecap": "XEM VIDEO RECAP",
     "printPhoto": "IN ẢNH",
     "frame_mode": "GẮN KHUNG",

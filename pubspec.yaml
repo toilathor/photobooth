@@ -1,8 +1,8 @@
 name: th_photobooth
-description: "A new Flutter project."
+description: "Lưu giữ mọi khoảnh khắc"
 publish_to: "none"
 
-version: 1.1.1+4
+version: 1.1.2+5
 environment:
   sdk: ^3.12.0
 

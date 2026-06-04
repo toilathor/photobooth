@@ -45,7 +45,7 @@ class PrimaryButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, color: Colors.white, size: height > 50 ? 28 : 20),
+                  Icon(icon, color: Colors.white, size: height > 60 ? 28 : 20),
                   const SizedBox(width: 12),
                   Flexible(
                     child: Text(
@@ -53,7 +53,7 @@ class PrimaryButton extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: height > 50 ? 18 : 14,
+                        fontSize: height > 60 ? 18 : 14,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2,
                       ),
