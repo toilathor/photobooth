@@ -6,16 +6,24 @@ class FrameData {
   final int photoSlots;
   final Size size;
   final List<Rect> slots;
+  final String categoryId;
+  final String categoryName;
 
   const FrameData({
     this.filename = '',
     required this.photoSlots,
     this.size = Size.zero,
     this.slots = const [],
+    this.categoryId = '',
+    this.categoryName = '',
   });
 
   /// Factory for standard frames (4 slots)
-  factory FrameData.standard({String filename = ''}) {
+  factory FrameData.standard({
+    String filename = '',
+    String categoryId = '',
+    String categoryName = '',
+  }) {
     return FrameData(
       filename: filename,
       photoSlots: 4,
@@ -26,16 +34,24 @@ class FrameData {
         Rect.fromLTWH(40, 1280, 800, 600),
         Rect.fromLTWH(40, 1900, 800, 600),
       ],
+      categoryId: categoryId,
+      categoryName: categoryName,
     );
   }
 
   /// Factory for group frames (1 slot)
-  factory FrameData.group({String filename = ''}) {
+  factory FrameData.group({
+    String filename = '',
+    String categoryId = '',
+    String categoryName = '',
+  }) {
     return FrameData(
       filename: filename,
       photoSlots: 1,
       size: const Size(2800, 2000),
       slots: const [Rect.fromLTWH(350, 212, 2100, 1575)],
+      categoryId: categoryId,
+      categoryName: categoryName,
     );
   }
 

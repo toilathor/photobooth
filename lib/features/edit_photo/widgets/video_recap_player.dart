@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -662,7 +663,22 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                 if (frame.path.isNotEmpty)
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: Image.network(frame.path, fit: BoxFit.fill),
+                      child: CachedNetworkImage(
+                        imageUrl: frame.path,
+                        fit: BoxFit.fill,
+                        placeholder: (context, url) => Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(
+                                context,
+                              ).colorScheme.secondary.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error_outline),
+                      ),
                     ),
                   ),
               ],

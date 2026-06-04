@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -61,51 +62,34 @@ class FrameItem extends StatelessWidget {
                     ),
                   )
                 else
-                  Image.network(
-                    framePath,
+                  CachedNetworkImage(
+                    imageUrl: framePath,
                     fit: BoxFit.cover,
-
-                    cacheWidth:
-                        150, // Optimize image memory and decoding time for smooth scrolling
-                    frameBuilder:
-                        (context, child, frame, wasSynchronouslyLoaded) {
-                          if (wasSynchronouslyLoaded) return child;
-                          return AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: frame != null
-                                ? child
-                                : Container(
-                                    padding: const EdgeInsets.all(24),
-                                    color: colorScheme.onSurface.withValues(
-                                      alpha: 0.05,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              colorScheme.secondary.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                          );
-                        },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: colorScheme.errorContainer,
-                        child: Icon(
-                          Icons.error_outline,
-                          color: colorScheme.error,
-                          size: 40,
+                    maxWidthDiskCache: 150,
+                    memCacheWidth: 150,
+                    placeholder: (context, url) => Container(
+                      padding: const EdgeInsets.all(24),
+                      color: colorScheme.onSurface.withValues(alpha: 0.05),
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.secondary.withValues(alpha: 0.5),
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: colorScheme.errorContainer,
+                      child: Icon(
+                        Icons.error_outline,
+                        color: colorScheme.error,
+                        size: 40,
+                      ),
+                    ),
                   ),
                 if (isSelected)
                   Positioned(

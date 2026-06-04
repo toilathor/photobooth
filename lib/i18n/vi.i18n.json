@@ -50,6 +50,7 @@
     "saveToDeviceSuccess": "Đã lưu toàn bộ ảnh và video vào thiết bị!",
     "saveToDeviceCancel": "Đã hủy lưu tệp.",
     "chooseFrame": "Chọn khung hình",
+    "all": "Tất cả",
     "printing": "Đang chuẩn bị in...",
     "printSuccess": "Đã gửi lệnh in thành công!",
     "printError": "Lỗi khi in: $error"

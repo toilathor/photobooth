@@ -29,11 +29,27 @@ class FrameService {
         final String filename = imgData['filename']?.toString() ?? '';
         final String frameType = imgData['frame']?.toString() ?? '';
         final String layoutType = imgData['layout_type']?.toString() ?? '';
+        final String categoryId = imgData['category_id']?.toString() ?? '';
+
+        final categoryMap = imgData['category'] as Map<String, dynamic>?;
+        final String categoryName = categoryMap?['name']?.toString() ?? '';
 
         if (layoutType == 'standard' || frameType == 'square') {
-          frames.add(FrameData.standard(filename: filename));
+          frames.add(
+            FrameData.standard(
+              filename: filename,
+              categoryId: categoryId,
+              categoryName: categoryName,
+            ),
+          );
         } else if (layoutType == 'group' || frameType == 'group') {
-          frames.add(FrameData.group(filename: filename));
+          frames.add(
+            FrameData.group(
+              filename: filename,
+              categoryId: categoryId,
+              categoryName: categoryName,
+            ),
+          );
         }
       }
     } catch (e) {
