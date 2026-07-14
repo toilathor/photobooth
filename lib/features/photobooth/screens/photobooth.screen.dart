@@ -131,7 +131,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
                             height: 5,
                             decoration: BoxDecoration(
                               color: colorScheme.onSurface.withValues(
-                                alpha: 0.2,
+                                alpha: 0.4,
                               ),
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -165,7 +165,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
       backgroundColor: colorScheme.surface,
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       floatingActionButton: (!isMobile && !provider.isFullscreen)
-          ? FloatingActionButton.small(
+          ? FloatingActionButton(
               onPressed: () => provider.enterFullscreen(),
               backgroundColor: colorScheme.surface,
               foregroundColor: colorScheme.onSurface,

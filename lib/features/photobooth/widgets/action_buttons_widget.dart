@@ -21,7 +21,7 @@ class ActionButtonsWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _ActionIcon(
-            icon: Icons.refresh,
+            icon: Icons.refresh_rounded,
             label: t.actions.retake,
             colorScheme: colorScheme,
             onTap: () async {
@@ -61,7 +61,7 @@ class ActionButtonsWidget extends StatelessWidget {
           ),
           Gap(isMobile ? 16 : 32),
           _ActionIcon(
-            icon: Icons.camera_alt,
+            icon: Icons.camera_alt_rounded,
             label: t.actions.auto,
             colorScheme: colorScheme,
             isPrimary: true,
@@ -70,7 +70,7 @@ class ActionButtonsWidget extends StatelessWidget {
           ),
           Gap(isMobile ? 16 : 32),
           _ActionIcon(
-            icon: Icons.touch_app,
+            icon: Icons.touch_app_rounded,
             label: t.actions.manual,
             colorScheme: colorScheme,
             onTap: provider.takeManualPhoto,
@@ -84,13 +84,12 @@ class ActionButtonsWidget extends StatelessWidget {
   }
 }
 
-class _ActionIcon extends StatelessWidget {
+class _ActionIcon extends StatefulWidget {
   final IconData icon;
   final String label;
   final ColorScheme colorScheme;
   final bool isPrimary;
   final VoidCallback? onTap;
-
   final bool isEnabled;
 
   const _ActionIcon({
@@ -103,96 +102,115 @@ class _ActionIcon extends StatelessWidget {
   });
 
   @override
+  State<_ActionIcon> createState() => _ActionIconState();
+}
+
+class _ActionIconState extends State<_ActionIcon> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 850;
-    final double outerSize = isPrimary
+    final double outerSize = widget.isPrimary
         ? (isMobile ? 72 : 84)
         : (isMobile ? 54 : 64);
-    final double innerSize = isPrimary
+    final double innerSize = widget.isPrimary
         ? (isMobile ? 60 : 70)
         : (isMobile ? 42 : 50);
-    final double iconSize = isPrimary
+    final double iconSize = widget.isPrimary
         ? (isMobile ? 28 : 36)
         : (isMobile ? 20 : 24);
-    final bool useGradient = isPrimary;
+    final bool useGradient = widget.isPrimary;
     final Color lighterSecondary =
-        Color.lerp(colorScheme.secondary, Colors.white, 0.4) ?? Colors.white;
+        Color.lerp(widget.colorScheme.secondary, Colors.white, 0.4) ?? Colors.white;
 
     return Opacity(
-      opacity: isEnabled ? 1.0 : 0.4,
+      opacity: widget.isEnabled ? 1.0 : 0.4,
       child: Column(
         children: [
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: isEnabled ? onTap : null,
+              onTap: widget.isEnabled ? widget.onTap : null,
+              onHighlightChanged: (isHighlighted) {
+                if (widget.isEnabled) {
+                  setState(() {
+                    _isPressed = isHighlighted;
+                  });
+                }
+              },
               customBorder: const CircleBorder(),
               splashColor:
-                  (useGradient ? colorScheme.secondary : colorScheme.onSurface)
+                  (useGradient ? widget.colorScheme.secondary : widget.colorScheme.onSurface)
                       .withValues(alpha: 0.3),
               highlightColor:
-                  (useGradient ? colorScheme.secondary : colorScheme.onSurface)
+                  (useGradient ? widget.colorScheme.secondary : widget.colorScheme.onSurface)
                       .withValues(alpha: 0.1),
-              child: Container(
-                width: outerSize,
-                height: outerSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color:
-                        (useGradient
-                                ? colorScheme.secondary
-                                : colorScheme.onSurface)
-                            .withValues(alpha: isPrimary ? 0.6 : 0.2),
-                    width: 1,
-                  ),
-                  boxShadow: isPrimary && isEnabled
-                      ? [
-                          BoxShadow(
-                            color: colorScheme.secondary.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Center(
-                  child: Container(
-                    width: innerSize,
-                    height: innerSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: useGradient
-                          ? LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                colorScheme.secondary,
-                                lighterSecondary,
-                                colorScheme.secondary,
-                              ],
-                            )
-                          : null,
-                      color: useGradient
-                          ? null
-                          : colorScheme.onSurface.withValues(alpha: 0.1),
-                      border: isPrimary
-                          ? Border.all(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              width: 1.5,
-                            )
-                          : Border.all(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: 0.1,
-                              ),
-                            ),
+              child: AnimatedScale(
+                scale: _isPressed ? 0.92 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOutCubic,
+                child: Container(
+                  width: outerSize,
+                  height: outerSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          (useGradient
+                                  ? widget.colorScheme.secondary
+                                  : widget.colorScheme.onSurface)
+                              .withValues(alpha: widget.isPrimary ? 0.6 : 0.2),
+                      width: 1,
                     ),
-                    child: Icon(
-                      icon,
-                      size: iconSize,
-                      color: isPrimary
-                          ? colorScheme.onSecondary
-                          : colorScheme.onSurface,
+                    boxShadow: widget.isPrimary && widget.isEnabled
+                        ? [
+                            BoxShadow(
+                              color: widget.colorScheme.secondary.withValues(alpha: 0.3),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: innerSize,
+                      height: innerSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: useGradient
+                            ? LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  widget.colorScheme.secondary,
+                                  lighterSecondary,
+                                  widget.colorScheme.secondary,
+                                ],
+                              )
+                            : null,
+                        color: useGradient
+                            ? null
+                            : widget.colorScheme.onSurface.withValues(alpha: 0.1),
+                        border: widget.isPrimary
+                            ? Border.all(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                width: 1.5,
+                              )
+                            : Border.all(
+                                color: widget.colorScheme.onSurface.withValues(
+                                  alpha: 0.1,
+                                ),
+                              ),
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        size: iconSize,
+                        color: widget.isPrimary
+                            ? widget.colorScheme.onSecondary
+                            : widget.colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -201,11 +219,11 @@ class _ActionIcon extends StatelessWidget {
           ),
           const Gap(12),
           Text(
-            label.toUpperCase(),
+            widget.label.toUpperCase(),
             style: GoogleFonts.inter(
-              fontSize: isPrimary ? (isMobile ? 12 : 14) : (isMobile ? 10 : 12),
+              fontSize: widget.isPrimary ? (isMobile ? 12 : 14) : (isMobile ? 10 : 12),
               fontWeight: FontWeight.w800,
-              color: isPrimary ? colorScheme.secondary : colorScheme.onSurface,
+              color: widget.isPrimary ? widget.colorScheme.secondary : widget.colorScheme.onSurface,
               letterSpacing: 1.5,
             ),
           ),
