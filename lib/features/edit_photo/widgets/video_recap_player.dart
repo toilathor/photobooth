@@ -570,7 +570,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       child: AspectRatio(
         aspectRatio: _fullController?.value.aspectRatio ?? 1,
         child: Transform.scale(
-          scaleX: widget.isMirrored == kIsWeb ? 1 : -1,
+          scaleX: widget.isMirrored ? -1 : 1,
           child: VideoPlayer(_fullController!),
         ),
       ),
@@ -625,9 +625,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                                             .size
                                             .height,
                                         child: Transform.scale(
-                                          scaleX: widget.isMirrored == kIsWeb
-                                              ? 1
-                                              : -1,
+                                          scaleX: widget.isMirrored ? -1 : 1,
                                           child: VideoPlayer(
                                             _slotVideoController!,
                                             key: _slotVideoKey,

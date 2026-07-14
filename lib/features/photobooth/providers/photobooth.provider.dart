@@ -37,6 +37,13 @@ class PhotoboothProvider extends ChangeNotifier {
 
   bool get isDoneTakingPhotos => capturedPhotos.length >= selectedPhotoCount;
 
+  bool get requiresFlip {
+    if (cameraController == null) return isMirrored;
+    final isFrontCamera = cameraController!.description.lensDirection ==
+        CameraLensDirection.front;
+    return isFrontCamera != isMirrored;
+  }
+
   final VideoService _videoService = VideoService();
   XFile? get videoRecapFile => _videoService.videoRecapFile;
   List<Duration> get photoTimestamps => _videoService.photoTimestamps;

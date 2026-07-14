@@ -291,7 +291,7 @@ class EditPhotoProvider with ChangeNotifier {
             selectedFilter,
             filterIntensity,
           ),
-          isMirrored: isMirrored == kIsWeb ? false : true,
+          isMirrored: isMirrored,
         );
         final jpgBytes = _convertToJpg(framedCapture);
         if (jpgBytes != null) {
@@ -330,7 +330,7 @@ class EditPhotoProvider with ChangeNotifier {
         try {
           final flippedResult = await VideoRecapService.flipVideo(
             videoUrl: videoRecapFile?.path ?? '',
-            isMirrored: isMirrored == kIsWeb ? false : true,
+            isMirrored: isMirrored,
             preferredMimeType: _getVideoMimeType(videoRecapFile!),
           );
 
@@ -358,7 +358,7 @@ class EditPhotoProvider with ChangeNotifier {
             recapDurationSeconds:
                 AppConfig.recapClipDuration.inMilliseconds / 1000.0,
             preferredMimeType: _getVideoMimeType(videoRecapFile),
-            isMirrored: isMirrored == kIsWeb ? false : true,
+            isMirrored: isMirrored,
           );
 
           if (result != null) {

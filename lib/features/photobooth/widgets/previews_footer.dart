@@ -57,7 +57,7 @@ class PreviewsFooter extends StatelessWidget {
                         builder: (context) => EditPhotoScreen(
                           photos: provider.capturedPhotos,
                           photoCount: provider.selectedPhotoCount,
-                          isMirrored: provider.isMirrored,
+                          isMirrored: provider.requiresFlip,
                           videoFile: provider.videoRecapFile,
                           timestamps: provider.photoTimestamps,
                         ),
