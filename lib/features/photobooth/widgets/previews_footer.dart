@@ -46,6 +46,9 @@ class PreviewsFooter extends StatelessWidget {
                         provider.selectedPhotoCount &&
                     !provider.isCapturing)
                 ? () async {
+                    final bool photoRequiresFlip = provider.photoRequiresFlip;
+                    final bool videoRequiresFlip = provider.videoRequiresFlip;
+
                     try {
                       await provider.stopCamera();
                     } catch (_) {}
@@ -57,7 +60,8 @@ class PreviewsFooter extends StatelessWidget {
                         builder: (context) => EditPhotoScreen(
                           photos: provider.capturedPhotos,
                           photoCount: provider.selectedPhotoCount,
-                          isMirrored: provider.requiresFlip,
+                          photoIsMirrored: photoRequiresFlip,
+                          videoIsMirrored: videoRequiresFlip,
                           videoFile: provider.videoRecapFile,
                           timestamps: provider.photoTimestamps,
                         ),

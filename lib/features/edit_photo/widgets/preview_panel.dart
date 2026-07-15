@@ -23,7 +23,8 @@ class PreviewPanel extends StatelessWidget {
   final List<Duration> photoTimestamps;
   final String selectedFilter;
   final double filterIntensity;
-  final bool isMirrored;
+  final bool photoIsMirrored;
+  final bool videoIsMirrored;
   final ScreenshotController? stripController;
   final ScreenshotController? paperController;
 
@@ -40,7 +41,8 @@ class PreviewPanel extends StatelessWidget {
     this.photoTimestamps = const [],
     required this.selectedFilter,
     required this.filterIntensity,
-    required this.isMirrored,
+    required this.photoIsMirrored,
+    required this.videoIsMirrored,
     this.stripController,
     this.paperController,
     this.isMobile = false,
@@ -71,7 +73,8 @@ class PreviewPanel extends StatelessWidget {
                 videoFile: videoRecapFile!,
                 frame: selectedFrame,
                 photoTimestamps: photoTimestamps,
-                isMirrored: isMirrored,
+                videoIsMirrored: videoIsMirrored,
+                photoIsMirrored: photoIsMirrored,
                 photos: photos,
               ),
             ),
@@ -289,7 +292,8 @@ class PreviewPanel extends StatelessWidget {
                         videoFile: videoRecapFile!,
                         frame: selectedFrame,
                         photoTimestamps: photoTimestamps,
-                        isMirrored: isMirrored,
+                        videoIsMirrored: videoIsMirrored,
+                        photoIsMirrored: photoIsMirrored,
                         isMobile: isMobile,
                         photos: photos,
                       ),
@@ -352,7 +356,7 @@ class PreviewPanel extends StatelessWidget {
       frame: selectedFrame,
       selectedFilter: selectedFilter,
       filterIntensity: filterIntensity,
-      isMirrored: isMirrored,
+      isMirrored: photoIsMirrored,
     );
 
     if (printTwoCopies) {
@@ -422,7 +426,8 @@ class _CompactVideoRecapButton extends StatelessWidget {
   final XFile videoFile;
   final FrameData frame;
   final List<Duration> photoTimestamps;
-  final bool isMirrored;
+  final bool videoIsMirrored;
+  final bool photoIsMirrored;
   final bool isMobile;
   final List<XFile> photos;
 
@@ -430,7 +435,8 @@ class _CompactVideoRecapButton extends StatelessWidget {
     required this.videoFile,
     required this.frame,
     required this.photoTimestamps,
-    required this.isMirrored,
+    required this.videoIsMirrored,
+    required this.photoIsMirrored,
     required this.isMobile,
     required this.photos,
   });
@@ -478,7 +484,8 @@ class _CompactVideoRecapButton extends StatelessWidget {
                         videoFile: videoFile,
                         frame: frame,
                         photoTimestamps: photoTimestamps,
-                        isMirrored: isMirrored,
+                        videoIsMirrored: videoIsMirrored,
+                        photoIsMirrored: photoIsMirrored,
                         photos: photos,
                       ),
                     ),

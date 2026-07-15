@@ -1,0 +1,104 @@
+sau khi bạn sửa và tôi test lại
+Kết quả test lại
+TC1.1:
++ Camera Preview ngược => pass
++ Danh sách ảnh hiển thị trước ngược => pass
+Màn Edit:
++ Ảnh preview ngược => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị ngược => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+TC1.2:
++ Camera Preview thuận => pass
++ Danh sách ảnh hiển thị trước thuận => pass
+Màn Edit:
++ Ảnh preview thuận => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị thuận => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+TC1.3:
++ Camera Preview thuận => pass
++ Danh sách ảnh hiển thị trước thuận => pass
+Màn Edit:
++ Ảnh preview thuận => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị thuận => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+TC1.4:
++ Camera Preview ngược => pass
++ Danh sách ảnh hiển thị trước ngược => pass
+Màn Edit:
++ Ảnh preview ngược => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị ngược => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+---
+TC2.1:
++ Camera Preview ngược => pass
++ Danh sách ảnh hiển thị trước ngược => pass
+Màn Edit:
++ Ảnh preview ngược => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị ngược => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+TC2.2:
++ Camera Preview thuận => pass
++ Danh sách ảnh hiển thị trước thuận => pass
+Màn Edit:
++ Ảnh preview thuận => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị thuận => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+TC2.3:
++ Camera preview thuận => pass
++ Danh sách ảnh hiển thị trước thuận => pass
+Màn Edit:
++ Ảnh preview thuận => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị thuận => pass
+ * Khi play giống với camera preview => pass
++ Video full recap: 
+ * Video play giống với camera preview => pass
+
+ ---
+ TC3.1:
++ Camera Preview ngược => pass
++ Danh sách ảnh hiển thị trước ngược => pass
+Màn Edit:
++ Ảnh preview ngược => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị ngược => pass
+ * Khi play thì ngược => pass
++ Video full recap: 
+ * Video play ngược => pass
+
+ TC3.2:
+ + Camera preview thuận => pass
++ Danh sách ảnh hiển thị trước thuận => pass
+Màn Edit:
++ Ảnh preview thuận => pass
++ Video recap with frame: 
+ * Ảnh tĩnh đang bị thuận => pass
+ * Khi play thì thuận => pass
++ Video full recap: 
+ * Video play thuận => pass
+
+TC3.3 và TC3.4 chưa test được vì chưa có máy tính có camera fuji

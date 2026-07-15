@@ -1,79 +1,53 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Web - Personal",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--web-port",
-                "5050",
-                "--web-define=FLAVOR=personal"
-            ]
-        },
-        {
-            "name": "Web - Commercial",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--web-port",
-                "5050",
-                "--web-define=FLAVOR=commercial"
-            ]
-        },
-        {
-            "name": "Android - Personal",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--flavor",
-                "personal"
-            ]
-        },
-        {
-            "name": "Android - Commercial",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--flavor",
-                "commercial"
-            ]
-        },
-        {
-            "name": "iOS - Personal",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--flavor",
-                "personal"
-            ]
-        },
-        {
-            "name": "iOS - Commercial",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--flavor",
-                "commercial"
-            ]
-        },
-        {
-            "name": "macOS - Personal",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--flavor",
-                "personal"
-            ]
-        },
-        {
-            "name": "macOS - Commercial",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--flavor",
-                "commercial"
-            ]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Web - Personal",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--web-port", "5050", "--web-define=FLAVOR=personal"]
+    },
+    {
+      "name": "Web - Commercial",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--web-port", "5050", "--web-define=FLAVOR=commercial"]
+    },
+    {
+      "name": "Android - Personal",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "personal"]
+    },
+    {
+      "name": "Android - Commercial",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "commercial"]
+    },
+    {
+      "name": "iOS - Personal",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "personal"]
+    },
+    {
+      "name": "iOS - Commercial",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "commercial"]
+    },
+    {
+      "name": "macOS - Personal",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "personal"]
+    },
+    {
+      "name": "macOS - Commercial",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "commercial"]
+    }
+  ]
 }

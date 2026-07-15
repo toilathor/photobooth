@@ -50,7 +50,7 @@ class _PhotoPreviewsPanelState extends State<PhotoPreviewsPanel> {
                           ? provider.capturedPhotos[index]
                           : null,
                       isCapturing: provider.isCapturing,
-                      isMirrored: provider.requiresFlip,
+                      isMirrored: provider.photoRequiresFlip,
                       onDelete: () => provider.removePhoto(index),
                       isNextCapture:
                           provider.isCapturing &&
@@ -78,7 +78,7 @@ class _PhotoPreviewsPanelState extends State<PhotoPreviewsPanel> {
                       ? provider.capturedPhotos[index]
                       : null,
                   isCapturing: provider.isCapturing,
-                  isMirrored: provider.requiresFlip,
+                  isMirrored: provider.photoRequiresFlip,
                   onDelete: () => provider.removePhoto(index),
                   isNextCapture:
                       provider.isCapturing &&
