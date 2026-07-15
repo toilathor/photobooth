@@ -67,10 +67,10 @@ Future<void> main() async {
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.trackpad,
-  };
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
 }
 
 class PhotoboothApp extends StatelessWidget {
@@ -88,13 +88,12 @@ class PhotoboothApp extends StatelessWidget {
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
-        final bool isDesktop =
-            MediaQuery.sizeOf(context).width >= 850 &&
+        final bool isDesktop = MediaQuery.sizeOf(context).width >= 850 &&
             MediaQuery.sizeOf(context).height >= 500;
         return ResponsiveBreakpoints.builder(
           child: Stack(
             children: [
-              ?child,
+              child ?? const SizedBox.shrink(),
               if (isDesktop)
                 const Positioned(
                   top: 0,

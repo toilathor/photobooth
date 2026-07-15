@@ -20,6 +20,7 @@ class PhotoboothProvider extends ChangeNotifier {
   bool isMirrored = false;
   bool isVeryHighResolution = false;
   bool _isCameraOperationInProgress = false;
+  CameraLensDirection? _lastLensDirection;
 
   int selectedPhotoCount = 4;
   int countdown = 3;
@@ -36,6 +37,25 @@ class PhotoboothProvider extends ChangeNotifier {
   AppLocale currentLocale = LocaleSettings.currentLocale;
 
   bool get isDoneTakingPhotos => capturedPhotos.length >= selectedPhotoCount;
+
+  bool get isFrontCamera {
+    final direction =
+        cameraController?.description.lensDirection ?? _lastLensDirection;
+    return direction == CameraLensDirection.front ||
+        direction == CameraLensDirection.external;
+  }
+
+  bool get photoRequiresFlip {
+    if (kIsWeb) {
+      return isMirrored;
+    } else {
+      return isFrontCamera != isMirrored;
+    }
+  }
+
+  bool get videoRequiresFlip {
+    return isFrontCamera != isMirrored;
+  }
 
   final VideoService _videoService = VideoService();
   XFile? get videoRecapFile => _videoService.videoRecapFile;
@@ -105,6 +125,8 @@ class PhotoboothProvider extends ChangeNotifier {
 
     try {
       await cameraController?.initialize();
+      _lastLensDirection = camera.lensDirection;
+      isMirrored = false; // Reset mirror when switching cameras
     } catch (e) {
       debugPrint('Error switching camera: $e');
       cameraController = null;
@@ -154,6 +176,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
       try {
         await cameraController?.initialize();
+        _lastLensDirection = camera.lensDirection;
         if (!kIsWeb) {
           try {
             await cameraController?.setZoomLevel(1.0);

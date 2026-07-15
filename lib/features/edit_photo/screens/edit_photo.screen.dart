@@ -32,7 +32,8 @@ import 'package:th_photobooth/services/storage_factory.dart';
 class EditPhotoScreen extends StatefulWidget {
   final List<XFile> photos;
   final int photoCount;
-  final bool isMirrored;
+  final bool photoIsMirrored;
+  final bool videoIsMirrored;
   final XFile? videoFile;
   final List<Duration>? timestamps;
 
@@ -40,7 +41,8 @@ class EditPhotoScreen extends StatefulWidget {
     super.key,
     required this.photos,
     required this.photoCount,
-    required this.isMirrored,
+    required this.photoIsMirrored,
+    required this.videoIsMirrored,
     this.videoFile,
     this.timestamps,
   });
@@ -294,7 +296,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         frame: provider.selectedFrame,
         selectedFilter: provider.selectedFilter,
         filterIntensity: provider.filterIntensity,
-        isMirrored: provider.isMirrored,
+        isMirrored: provider.photoIsMirrored,
       );
 
       return await _stripController.captureFromWidget(
@@ -323,7 +325,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         frame: provider.selectedFrame,
         selectedFilter: provider.selectedFilter,
         filterIntensity: provider.filterIntensity,
-        isMirrored: provider.isMirrored,
+        isMirrored: provider.photoIsMirrored,
       );
 
       final Widget content;
@@ -396,7 +398,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         frame: provider.selectedFrame,
         selectedFilter: provider.selectedFilter,
         filterIntensity: provider.filterIntensity,
-        isMirrored: provider.isMirrored,
+        isMirrored: provider.photoIsMirrored,
       );
 
       final Widget content;
@@ -466,7 +468,8 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       photoTimestamps: provider.photoTimestamps,
       selectedFilter: provider.selectedFilter,
       filterIntensity: provider.filterIntensity,
-      isMirrored: provider.isMirrored,
+      photoIsMirrored: provider.photoIsMirrored,
+      videoIsMirrored: provider.videoIsMirrored,
       isMobile: isMobile,
     );
   }
@@ -505,7 +508,8 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         ..initWithPhotoboothData(
           photos: widget.photos,
           photoCount: widget.photoCount,
-          isMirrored: widget.isMirrored,
+          photoIsMirrored: widget.photoIsMirrored,
+          videoIsMirrored: widget.videoIsMirrored,
           videoFile: widget.videoFile,
           timestamps: widget.timestamps,
         ),

@@ -33,7 +33,8 @@ class EditPhotoProvider with ChangeNotifier {
   XFile? videoRecapFile;
   List<Duration> photoTimestamps = [];
   String? sessionId;
-  bool isMirrored = false;
+  bool photoIsMirrored = false;
+  bool videoIsMirrored = false;
 
   // Upload State
   bool isUploading = false;
@@ -59,7 +60,8 @@ class EditPhotoProvider with ChangeNotifier {
   Future<void> initWithPhotoboothData({
     required List<XFile> photos,
     required int photoCount,
-    required bool isMirrored,
+    required bool photoIsMirrored,
+    required bool videoIsMirrored,
     XFile? videoFile,
     List<Duration>? timestamps,
   }) async {
@@ -67,7 +69,8 @@ class EditPhotoProvider with ChangeNotifier {
     videoRecapFile = videoFile;
     photoTimestamps = timestamps ?? [];
     sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
-    this.isMirrored = isMirrored;
+    this.photoIsMirrored = photoIsMirrored;
+    this.videoIsMirrored = videoIsMirrored;
 
     allFrames = await FrameService.loadFrames();
 
@@ -291,7 +294,7 @@ class EditPhotoProvider with ChangeNotifier {
             selectedFilter,
             filterIntensity,
           ),
-          isMirrored: isMirrored == kIsWeb ? false : true,
+          isMirrored: photoIsMirrored,
         );
         final jpgBytes = _convertToJpg(framedCapture);
         if (jpgBytes != null) {
@@ -330,7 +333,7 @@ class EditPhotoProvider with ChangeNotifier {
         try {
           final flippedResult = await VideoRecapService.flipVideo(
             videoUrl: videoRecapFile?.path ?? '',
-            isMirrored: isMirrored == kIsWeb ? false : true,
+            isMirrored: videoIsMirrored,
             preferredMimeType: _getVideoMimeType(videoRecapFile!),
           );
 
@@ -358,7 +361,7 @@ class EditPhotoProvider with ChangeNotifier {
             recapDurationSeconds:
                 AppConfig.recapClipDuration.inMilliseconds / 1000.0,
             preferredMimeType: _getVideoMimeType(videoRecapFile),
-            isMirrored: isMirrored == kIsWeb ? false : true,
+            isMirrored: videoIsMirrored,
           );
 
           if (result != null) {

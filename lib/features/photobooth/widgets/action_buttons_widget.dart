@@ -122,7 +122,8 @@ class _ActionIconState extends State<_ActionIcon> {
         : (isMobile ? 20 : 24);
     final bool useGradient = widget.isPrimary;
     final Color lighterSecondary =
-        Color.lerp(widget.colorScheme.secondary, Colors.white, 0.4) ?? Colors.white;
+        Color.lerp(widget.colorScheme.secondary, Colors.white, 0.4) ??
+        Colors.white;
 
     return Opacity(
       opacity: widget.isEnabled ? 1.0 : 0.4,
@@ -141,10 +142,14 @@ class _ActionIconState extends State<_ActionIcon> {
               },
               customBorder: const CircleBorder(),
               splashColor:
-                  (useGradient ? widget.colorScheme.secondary : widget.colorScheme.onSurface)
+                  (useGradient
+                          ? widget.colorScheme.secondary
+                          : widget.colorScheme.onSurface)
                       .withValues(alpha: 0.3),
               highlightColor:
-                  (useGradient ? widget.colorScheme.secondary : widget.colorScheme.onSurface)
+                  (useGradient
+                          ? widget.colorScheme.secondary
+                          : widget.colorScheme.onSurface)
                       .withValues(alpha: 0.1),
               child: AnimatedScale(
                 scale: _isPressed ? 0.92 : 1.0,
@@ -166,7 +171,9 @@ class _ActionIconState extends State<_ActionIcon> {
                     boxShadow: widget.isPrimary && widget.isEnabled
                         ? [
                             BoxShadow(
-                              color: widget.colorScheme.secondary.withValues(alpha: 0.3),
+                              color: widget.colorScheme.secondary.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
@@ -192,7 +199,9 @@ class _ActionIconState extends State<_ActionIcon> {
                             : null,
                         color: useGradient
                             ? null
-                            : widget.colorScheme.onSurface.withValues(alpha: 0.1),
+                            : widget.colorScheme.onSurface.withValues(
+                                alpha: 0.1,
+                              ),
                         border: widget.isPrimary
                             ? Border.all(
                                 color: Colors.white.withValues(alpha: 0.5),
@@ -221,9 +230,13 @@ class _ActionIconState extends State<_ActionIcon> {
           Text(
             widget.label.toUpperCase(),
             style: GoogleFonts.inter(
-              fontSize: widget.isPrimary ? (isMobile ? 12 : 14) : (isMobile ? 10 : 12),
+              fontSize: widget.isPrimary
+                  ? (isMobile ? 12 : 14)
+                  : (isMobile ? 10 : 12),
               fontWeight: FontWeight.w800,
-              color: widget.isPrimary ? widget.colorScheme.secondary : widget.colorScheme.onSurface,
+              color: widget.isPrimary
+                  ? widget.colorScheme.secondary
+                  : widget.colorScheme.onSurface,
               letterSpacing: 1.5,
             ),
           ),

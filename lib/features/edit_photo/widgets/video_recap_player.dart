@@ -17,7 +17,8 @@ class VideoRecapPlayer extends StatefulWidget {
   final XFile videoFile;
   final FrameData frame;
   final List<Duration> photoTimestamps;
-  final bool isMirrored;
+  final bool videoIsMirrored;
+  final bool photoIsMirrored;
   final List<XFile> photos;
 
   const VideoRecapPlayer({
@@ -26,7 +27,8 @@ class VideoRecapPlayer extends StatefulWidget {
     required this.frame,
     required this.photoTimestamps,
     required this.photos,
-    this.isMirrored = false,
+    this.videoIsMirrored = false,
+    this.photoIsMirrored = false,
   });
 
   @override
@@ -570,7 +572,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
       child: AspectRatio(
         aspectRatio: _fullController?.value.aspectRatio ?? 1,
         child: Transform.scale(
-          scaleX: widget.isMirrored == kIsWeb ? 1 : -1,
+          scaleX: widget.videoIsMirrored ? -1 : 1,
           child: VideoPlayer(_fullController!),
         ),
       ),
@@ -625,9 +627,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                                             .size
                                             .height,
                                         child: Transform.scale(
-                                          scaleX: widget.isMirrored == kIsWeb
-                                              ? 1
-                                              : -1,
+                                          scaleX: widget.videoIsMirrored ? -1 : 1,
                                           child: VideoPlayer(
                                             _slotVideoController!,
                                             key: _slotVideoKey,
@@ -644,7 +644,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                           : (widget.photos.length > i
                                 ? ClipRRect(
                                     child: Transform.scale(
-                                      scaleX: widget.isMirrored ? -1 : 1,
+                                      scaleX: widget.photoIsMirrored ? -1 : 1,
                                       child: kIsWeb
                                           ? Image.network(
                                               widget.photos[i].path,
