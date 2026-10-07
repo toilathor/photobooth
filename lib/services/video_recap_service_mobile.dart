@@ -21,6 +21,8 @@ class VideoRecapService {
     String? preferredMimeType,
     bool isMirrored = false,
   }) async {
+    File? frameFile;
+    File? outputFile;
     try {
       final tempDir = await getTemporaryDirectory();
       final String outputPath =
@@ -32,7 +34,8 @@ class VideoRecapService {
       final ByteData frameByteData = await FrameService.loadFrameBytes(
         frame.path,
       );
-      final File frameFile = File(frameImagePath);
+      frameFile = File(frameImagePath);
+      outputFile = File(outputPath);
       await frameFile.writeAsBytes(frameByteData.buffer.asUint8List());
 
       // Làm sạch đường dẫn videoUrl (loại bỏ file:// nếu có)
@@ -58,19 +61,11 @@ class VideoRecapService {
             debugPrint('FFprobe Log: ${log.getMessage()}');
           }
         }
-        // Dọn dẹp frame tạm
-        if (await frameFile.exists()) {
-          await frameFile.delete();
-        }
         return null;
       }
 
       final streams = info.getStreams();
       if (streams.isEmpty) {
-        // Dọn dẹp frame tạm
-        if (await frameFile.exists()) {
-          await frameFile.delete();
-        }
         return null;
       }
 
@@ -169,37 +164,9 @@ class VideoRecapService {
         }
       }
 
-      // Phương pháp 3: Thực thi chạy thử FFmpeg chỉ để lấy log format
-      if (rotation == 0) {
-        try {
-          final dummySession = await FFmpegKit.execute('-i "$cleanVideoUrl"');
-          final dummyLogs = await dummySession.getLogs();
-          for (final log in dummyLogs) {
-            final message = log.getMessage();
-            if (message.contains('rotation of')) {
-              final match = RegExp(
-                r'rotation of (-?\d+(?:\.\d+)?)',
-              ).firstMatch(message);
-              if (match != null) {
-                final val = double.tryParse(match.group(1) ?? '');
-                if (val != null) {
-                  rotation = val.round().abs();
-                  break;
-                }
-              }
-            }
-          }
-          if (kDebugMode && rotation != 0) {
-            debugPrint('Detected rotation from dummy FFmpeg logs: $rotation');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            debugPrint('Error getting rotation from dummy FFmpeg logs: $e');
-          }
-        }
-      }
-
-      // Phương pháp 4: Dự phòng cuối cùng dựa trên thực tế thiết bị di động quay video dọc
+      // Phương pháp 3: Dự phòng cuối cùng dựa trên metadata kích thước.
+      // Không chạy thêm FFmpeg chỉ để đọc rotation: FFprobe đã được gọi ở trên
+      // và một invocation dư thừa làm tăng latency, pin usage và rủi ro lỗi.
       if (rotation == 0) {
         for (final stream in streams) {
           if (stream.getType() == 'video') {
@@ -257,10 +224,6 @@ class VideoRecapService {
       }
 
       if (videoWidth == 0 || videoHeight == 0) {
-        // Dọn dẹp frame tạm
-        if (await frameFile.exists()) {
-          await frameFile.delete();
-        }
         return null;
       }
 
@@ -298,18 +261,8 @@ class VideoRecapService {
       final session = await FFmpegKit.execute(command);
       final returnCode = await session.getReturnCode();
 
-      // Dọn dẹp frame tạm
-      if (await frameFile.exists()) {
-        await frameFile.delete();
-      }
-
       if (ReturnCode.isSuccess(returnCode)) {
-        final File outputFile = File(outputPath);
         final bytes = await outputFile.readAsBytes();
-
-        // Dọn dẹp video xuất
-        await outputFile.delete();
-
         return FramedVideoResult(bytes: bytes, mimeType: 'video/mp4');
       } else {
         if (kDebugMode) {
@@ -328,6 +281,9 @@ class VideoRecapService {
         debugPrint('Error exporting framed video recap: $e');
       }
       return null;
+    } finally {
+      await _deleteIfExists(frameFile);
+      await _deleteIfExists(outputFile);
     }
   }
 
@@ -348,10 +304,12 @@ class VideoRecapService {
       return null;
     }
 
+    File? outputFile;
     try {
       final tempDir = await getTemporaryDirectory();
       final String outputPath =
           '${tempDir.path}/flipped_${DateTime.now().millisecondsSinceEpoch}.mp4';
+      outputFile = File(outputPath);
 
       String cleanVideoUrl = videoUrl;
       if (cleanVideoUrl.startsWith('file://')) {
@@ -365,10 +323,7 @@ class VideoRecapService {
       final returnCode = await session.getReturnCode();
 
       if (ReturnCode.isSuccess(returnCode)) {
-        final File outputFile = File(outputPath);
         final bytes = await outputFile.readAsBytes();
-        await outputFile.delete();
-
         return FramedVideoResult(bytes: bytes, mimeType: 'video/mp4');
       } else {
         if (kDebugMode) {
@@ -385,6 +340,21 @@ class VideoRecapService {
         debugPrint('Error flipping raw video: $e');
       }
       return null;
+    } finally {
+      await _deleteIfExists(outputFile);
+    }
+  }
+
+  static Future<void> _deleteIfExists(File? file) async {
+    if (file == null) return;
+    try {
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Unable to delete temporary video file: $e');
+      }
     }
   }
 

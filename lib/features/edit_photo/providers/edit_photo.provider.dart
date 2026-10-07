@@ -12,9 +12,31 @@ import 'package:th_photobooth/models/frame_data.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 import 'package:th_photobooth/services/photo_merger_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
+import 'package:th_photobooth/services/storage_service_interface.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
+Future<Uint8List?> _encodeJpg(Uint8List pngBytes) async {
+  try {
+    final image = img.decodeImage(pngBytes);
+    if (image == null) return null;
+    return img.encodeJpg(image, quality: 90);
+  } catch (error) {
+    debugPrint('Error converting image to JPG: $error');
+    return null;
+  }
+}
+
 class EditPhotoProvider with ChangeNotifier {
+  final StorageService _storageService;
+
+  EditPhotoProvider({StorageService? storageService})
+    : _storageService = storageService ?? StorageFactory.instance {
+    filteredFrames = allFrames;
+    selectedFrame = allFrames.isNotEmpty
+        ? allFrames.first
+        : const FrameData(photoSlots: 0);
+  }
+
   bool isProcessing = false;
   String selectedFilter = 'normal';
   double filterIntensity = 0.5;
@@ -41,13 +63,6 @@ class EditPhotoProvider with ChangeNotifier {
   double uploadProgress = 0.0;
   String uploadStatusMessage = '';
   bool isPreparingUpload = false;
-
-  EditPhotoProvider() {
-    filteredFrames = allFrames;
-    selectedFrame = allFrames.isNotEmpty
-        ? allFrames.first
-        : const FrameData(photoSlots: 0);
-  }
 
   void initForPhotoCount(int count) {
     filteredFrames = allFrames.where((f) => f.photoSlots == count).toList();
@@ -143,9 +158,7 @@ class EditPhotoProvider with ChangeNotifier {
     try {
       // 1. Kiểm tra xem bộ ảnh này đã được upload chưa
       onShowLoading();
-      final existingUrl = await StorageFactory.instance.getFolderLink(
-        sessionId ?? '',
-      );
+      final existingUrl = await _storageService.getFolderLink(sessionId ?? '');
       onHideLoading();
 
       if (existingUrl != null) {
@@ -155,8 +168,8 @@ class EditPhotoProvider with ChangeNotifier {
 
       // 2. Kiểm tra đăng nhập và phân quyền (đối với Web)
       if (kIsWeb) {
-        final hasLoggedIn = StorageFactory.instance.currentUser != null;
-        final hasScopes = await StorageFactory.instance.hasRequiredScopes();
+        final hasLoggedIn = _storageService.currentUser != null;
+        final hasScopes = await _storageService.hasRequiredScopes();
         if (!hasLoggedIn || !hasScopes) {
           onShowLogin();
           return;
@@ -203,7 +216,7 @@ class EditPhotoProvider with ChangeNotifier {
       if (filesToUpload == null || filesToUpload.isEmpty) return null;
 
       // 4. Thực hiện upload
-      final String? url = await StorageFactory.instance.uploadCollection(
+      final String? url = await _storageService.uploadCollection(
         files: filesToUpload,
         folderName: sessionId!,
         onProgress: (int current, int total) {
@@ -261,7 +274,7 @@ class EditPhotoProvider with ChangeNotifier {
 
       final Uint8List? printCapture = await capturePaper();
       if (printCapture != null) {
-        final jpgBytes = _convertToJpg(printCapture);
+        final jpgBytes = await _convertToJpg(printCapture);
         if (jpgBytes != null) {
           filesToUpload['${sessionId}_anh_gia_lap_ban_in.jpg'] = jpgBytes;
         }
@@ -271,7 +284,7 @@ class EditPhotoProvider with ChangeNotifier {
       // 1.2. Chụp ảnh đem đi in (không có viền/perforation/indicator)
       final Uint8List? printContentCapture = await capturePrintContent();
       if (printContentCapture != null) {
-        final jpgBytes = _convertToJpg(printContentCapture);
+        final jpgBytes = await _convertToJpg(printContentCapture);
         if (jpgBytes != null) {
           filesToUpload['${sessionId}_anh_dem_di_in.jpg'] = jpgBytes;
         }
@@ -296,7 +309,7 @@ class EditPhotoProvider with ChangeNotifier {
           ),
           isMirrored: photoIsMirrored,
         );
-        final jpgBytes = _convertToJpg(framedCapture);
+        final jpgBytes = await _convertToJpg(framedCapture);
         if (jpgBytes != null) {
           filesToUpload['${sessionId}_anh_da_ghep_khung.jpg'] = jpgBytes;
         }
@@ -305,7 +318,7 @@ class EditPhotoProvider with ChangeNotifier {
         // Fallback to UI capture if something goes wrong
         final Uint8List? fallbackCapture = await captureStrip();
         if (fallbackCapture != null) {
-          final jpgBytes = _convertToJpg(fallbackCapture);
+          final jpgBytes = await _convertToJpg(fallbackCapture);
           if (jpgBytes != null) {
             filesToUpload['${sessionId}_anh_da_ghep_khung.jpg'] = jpgBytes;
           }
@@ -431,14 +444,7 @@ class EditPhotoProvider with ChangeNotifier {
     return null;
   }
 
-  Uint8List? _convertToJpg(Uint8List pngBytes) {
-    try {
-      final image = img.decodeImage(pngBytes);
-      if (image == null) return null;
-      return img.encodeJpg(image, quality: 90);
-    } catch (e) {
-      debugPrint('Error converting image to JPG: $e');
-      return null;
-    }
+  Future<Uint8List?> _convertToJpg(Uint8List pngBytes) {
+    return compute(_encodeJpg, pngBytes);
   }
 }

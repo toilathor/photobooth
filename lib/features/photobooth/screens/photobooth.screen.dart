@@ -271,7 +271,7 @@ class _CenterPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: CameraPreviewWidget(controller, key: cameraPreviewKey)),
+        const Expanded(child: CameraPreviewWidget()),
         const Gap(24),
         const ActionButtonsWidget(),
         const Gap(24),
@@ -292,7 +292,7 @@ class _MobilePanel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         children: [
-          CameraPreviewWidget(controller, key: cameraPreviewKey),
+          const CameraPreviewWidget(),
           const Gap(16),
           const ActionButtonsWidget(),
           const Gap(16),
@@ -328,7 +328,7 @@ class _MobileLandscapePanel extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
-            child: CameraPreviewWidget(controller, key: cameraPreviewKey),
+            child: const CameraPreviewWidget(),
           ),
         ),
         // Right: Actions + Thumbnails (scrollable vertically)

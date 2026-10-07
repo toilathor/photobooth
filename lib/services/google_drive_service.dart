@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../core/configs/google_drive_config.dart';
 import 'storage_service_interface.dart';
+import 'storage_user.dart';
 
 class _AuthenticatedClient extends http.BaseClient {
   final http.Client _inner = http.Client();
@@ -19,6 +20,9 @@ class _AuthenticatedClient extends http.BaseClient {
     request.headers['Authorization'] = 'Bearer $_accessToken';
     return _inner.send(request);
   }
+
+  @override
+  void close() => _inner.close();
 }
 
 class GoogleDriveService implements StorageService {
@@ -33,14 +37,22 @@ class GoogleDriveService implements StorageService {
   GoogleSignInAccount? _currentUser;
 
   @override
-  GoogleSignInAccount? get currentUser => _currentUser;
+  StorageUser? get currentUser => _toStorageUser(_currentUser);
 
-  final StreamController<GoogleSignInAccount?> _userStreamController =
-      StreamController<GoogleSignInAccount?>.broadcast();
+  final StreamController<StorageUser?> _userStreamController =
+      StreamController<StorageUser?>.broadcast();
 
   @override
-  Stream<GoogleSignInAccount?> get onCurrentUserChanged =>
-      _userStreamController.stream;
+  Stream<StorageUser?> get onCurrentUserChanged => _userStreamController.stream;
+
+  StorageUser? _toStorageUser(GoogleSignInAccount? account) {
+    if (account == null) return null;
+    return StorageUser(
+      id: account.id,
+      email: account.email,
+      displayName: account.displayName,
+    );
+  }
 
   @override
   Future<void> init() async {
@@ -52,7 +64,7 @@ class GoogleDriveService implements StorageService {
       _googleSignIn.authenticationEvents.listen((event) {
         if (event is GoogleSignInAuthenticationEventSignIn) {
           _currentUser = event.user;
-          _userStreamController.add(_currentUser);
+          _userStreamController.add(currentUser);
         } else if (event is GoogleSignInAuthenticationEventSignOut) {
           _currentUser = null;
           _userStreamController.add(null);
@@ -69,7 +81,7 @@ class GoogleDriveService implements StorageService {
       if (!kIsWeb) {
         try {
           _currentUser = await _googleSignIn.attemptLightweightAuthentication();
-          _userStreamController.add(_currentUser);
+          _userStreamController.add(currentUser);
         } catch (e) {
           if (kDebugMode) print('Lightweight auth failed: $e');
         }
@@ -85,7 +97,12 @@ class GoogleDriveService implements StorageService {
   }
 
   @override
-  Future<GoogleSignInAccount?> signIn() async {
+  Future<StorageUser?> signIn() async {
+    final account = await _signInAccount();
+    return _toStorageUser(account);
+  }
+
+  Future<GoogleSignInAccount?> _signInAccount() async {
     await init();
 
     try {
@@ -127,15 +144,16 @@ class GoogleDriveService implements StorageService {
     required String folderName,
     void Function(int current, int total)? onProgress,
   }) async {
+    _AuthenticatedClient? httpClient;
     try {
-      final account = await signIn();
+      final account = await _signInAccount();
       if (account == null) return null;
 
       final authorization = await account.authorizationClient.authorizeScopes(
         GoogleDriveConfig.scopes,
       );
 
-      final httpClient = _AuthenticatedClient(authorization.accessToken);
+      httpClient = _AuthenticatedClient(authorization.accessToken);
       final driveApi = drive.DriveApi(httpClient);
 
       // 1. Lấy/Tạo thư mục gốc (Photobooth)
@@ -227,25 +245,27 @@ class GoogleDriveService implements StorageService {
           await driveApi.files.get(sessionId, $fields: 'webViewLink')
               as drive.File;
 
-      httpClient.close();
       return folderMetadata.webViewLink;
     } catch (e) {
       if (kDebugMode) print('Error uploading collection: $e');
       rethrow;
+    } finally {
+      httpClient?.close();
     }
   }
 
   @override
   Future<String?> getFolderLink(String folderName) async {
+    _AuthenticatedClient? httpClient;
     try {
-      final account = await signIn();
+      final account = await _signInAccount();
       if (account == null) return null;
 
       final authorization = await account.authorizationClient.authorizeScopes(
         GoogleDriveConfig.scopes,
       );
 
-      final httpClient = _AuthenticatedClient(authorization.accessToken);
+      httpClient = _AuthenticatedClient(authorization.accessToken);
       final driveApi = drive.DriveApi(httpClient);
 
       // 1. Lấy thư mục gốc (Photobooth)
@@ -260,8 +280,6 @@ class GoogleDriveService implements StorageService {
         $fields: 'files(id, webViewLink)',
       );
 
-      httpClient.close();
-
       if (folderList.files != null && folderList.files?.isNotEmpty == true) {
         return folderList.files?.first.webViewLink;
       }
@@ -269,6 +287,8 @@ class GoogleDriveService implements StorageService {
     } catch (e) {
       if (kDebugMode) print('Error checking folder: $e');
       return null;
+    } finally {
+      httpClient?.close();
     }
   }
 
@@ -328,7 +348,7 @@ class GoogleDriveService implements StorageService {
       await account.authorizationClient.authorizeScopes(
         GoogleDriveConfig.scopes,
       );
-      _userStreamController.add(_currentUser);
+      _userStreamController.add(currentUser);
       return true;
     } catch (e) {
       if (kDebugMode) print('Error requesting scopes: $e');
