@@ -1,11 +1,12 @@
 import 'dart:typed_data';
+import 'storage_user.dart';
 
 abstract class StorageService {
   /// Khởi tạo dịch vụ
   Future<void> init();
 
   /// Đăng nhập (nếu cần)
-  Future<dynamic> signIn();
+  Future<StorageUser?> signIn();
 
   /// Đăng xuất
   Future<void> signOut();
@@ -21,13 +22,13 @@ abstract class StorageService {
   });
 
   /// Kiểm tra trạng thái người dùng hiện tại
-  dynamic get currentUser;
+  StorageUser? get currentUser;
 
   /// Kiểm tra xem thư mục đã tồn tại chưa và trả về URL
   Future<String?> getFolderLink(String folderName);
 
   /// Luồng sự kiện thay đổi người dùng
-  Stream<dynamic> get onCurrentUserChanged;
+  Stream<StorageUser?> get onCurrentUserChanged;
 
   /// Kiểm tra xem người dùng đã cấp quyền các scope cần thiết chưa (chỉ dùng cho Web)
   Future<bool> hasRequiredScopes();

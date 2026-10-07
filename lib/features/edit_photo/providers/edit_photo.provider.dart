@@ -12,9 +12,20 @@ import 'package:th_photobooth/models/frame_data.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 import 'package:th_photobooth/services/photo_merger_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
+import 'package:th_photobooth/services/storage_service_interface.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
 class EditPhotoProvider with ChangeNotifier {
+  final StorageService _storageService;
+
+  EditPhotoProvider({StorageService? storageService})
+    : _storageService = storageService ?? StorageFactory.instance {
+    filteredFrames = allFrames;
+    selectedFrame = allFrames.isNotEmpty
+        ? allFrames.first
+        : const FrameData(photoSlots: 0);
+  }
+
   bool isProcessing = false;
   String selectedFilter = 'normal';
   double filterIntensity = 0.5;
@@ -41,13 +52,6 @@ class EditPhotoProvider with ChangeNotifier {
   double uploadProgress = 0.0;
   String uploadStatusMessage = '';
   bool isPreparingUpload = false;
-
-  EditPhotoProvider() {
-    filteredFrames = allFrames;
-    selectedFrame = allFrames.isNotEmpty
-        ? allFrames.first
-        : const FrameData(photoSlots: 0);
-  }
 
   void initForPhotoCount(int count) {
     filteredFrames = allFrames.where((f) => f.photoSlots == count).toList();
@@ -143,9 +147,7 @@ class EditPhotoProvider with ChangeNotifier {
     try {
       // 1. Kiểm tra xem bộ ảnh này đã được upload chưa
       onShowLoading();
-      final existingUrl = await StorageFactory.instance.getFolderLink(
-        sessionId ?? '',
-      );
+      final existingUrl = await _storageService.getFolderLink(sessionId ?? '');
       onHideLoading();
 
       if (existingUrl != null) {
@@ -155,8 +157,8 @@ class EditPhotoProvider with ChangeNotifier {
 
       // 2. Kiểm tra đăng nhập và phân quyền (đối với Web)
       if (kIsWeb) {
-        final hasLoggedIn = StorageFactory.instance.currentUser != null;
-        final hasScopes = await StorageFactory.instance.hasRequiredScopes();
+        final hasLoggedIn = _storageService.currentUser != null;
+        final hasScopes = await _storageService.hasRequiredScopes();
         if (!hasLoggedIn || !hasScopes) {
           onShowLogin();
           return;
@@ -203,7 +205,7 @@ class EditPhotoProvider with ChangeNotifier {
       if (filesToUpload == null || filesToUpload.isEmpty) return null;
 
       // 4. Thực hiện upload
-      final String? url = await StorageFactory.instance.uploadCollection(
+      final String? url = await _storageService.uploadCollection(
         files: filesToUpload,
         folderName: sessionId!,
         onProgress: (int current, int total) {

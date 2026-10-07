@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'storage_service_interface.dart';
+import 'storage_user.dart';
 
 /// StorageService không thực hiện bất kỳ thao tác lưu trữ nào.
 /// Dùng cho bản Commercial khi không cần tích hợp storage bên ngoài.
@@ -12,7 +13,7 @@ class NoOpStorageService implements StorageService {
   }
 
   @override
-  Future<dynamic> signIn() async => null;
+  Future<StorageUser?> signIn() async => null;
 
   @override
   Future<void> signOut() async {}
@@ -28,13 +29,13 @@ class NoOpStorageService implements StorageService {
   }) async => null;
 
   @override
-  dynamic get currentUser => null;
+  StorageUser? get currentUser => null;
 
   @override
   Future<String?> getFolderLink(String folderName) async => null;
 
   @override
-  Stream<dynamic> get onCurrentUserChanged => const Stream.empty();
+  Stream<StorageUser?> get onCurrentUserChanged => const Stream.empty();
 
   @override
   Future<bool> hasRequiredScopes() async => true;
