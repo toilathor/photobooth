@@ -27,7 +27,6 @@ import 'package:th_photobooth/helper/web_download_noop.dart'
     if (dart.library.js_interop) 'package:th_photobooth/helper/web_download_web.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/print_service.dart';
-import 'package:th_photobooth/services/storage_factory.dart';
 
 class EditPhotoScreen extends StatefulWidget {
   final List<XFile> photos;
@@ -54,12 +53,6 @@ class EditPhotoScreen extends StatefulWidget {
 class _EditPhotoScreenState extends State<EditPhotoScreen> {
   final ScreenshotController _stripController = ScreenshotController();
   final ScreenshotController _paperController = ScreenshotController();
-
-  @override
-  void initState() {
-    super.initState();
-    StorageFactory.instance.init();
-  }
 
   Future<void> _handleQRRequest(BuildContext context) async {
     final provider = context.read<EditPhotoProvider>();
