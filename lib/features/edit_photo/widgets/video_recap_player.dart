@@ -627,7 +627,9 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                                             .size
                                             .height,
                                         child: Transform.scale(
-                                          scaleX: widget.videoIsMirrored ? -1 : 1,
+                                          scaleX: widget.videoIsMirrored
+                                              ? -1
+                                              : 1,
                                           child: VideoPlayer(
                                             _slotVideoController!,
                                             key: _slotVideoKey,
