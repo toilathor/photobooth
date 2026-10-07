@@ -4,19 +4,28 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/configs/asset_config.dart';
+import 'package:th_photobooth/core/async/cancellation_token.dart';
+import 'package:th_photobooth/core/async/countdown_runner.dart';
 import 'package:th_photobooth/helper/fullscreen_noop.dart'
     if (dart.library.js_interop) 'package:th_photobooth/helper/fullscreen_web.dart'
     as fullscreen;
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/services/audio_service.dart';
+import 'package:th_photobooth/services/camera_service.dart';
 import 'package:th_photobooth/services/cache_service.dart';
 import 'package:th_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
   bool _isDisposed = false;
-  CameraController? cameraController;
+  final CameraService _cameraService = CameraService();
+  CameraController? get cameraController => _cameraService.controller;
+  set cameraController(CameraController? value) {
+    _cameraService.controller = value;
+  }
+
   bool isFullscreen = false;
   final AudioService _audioService = AudioService();
+  final CountdownRunner _countdownRunner = CountdownRunner();
   int _currentCameraIndex = 0;
   bool isMirrored = false;
   bool isVeryHighResolution = false;
@@ -69,8 +78,8 @@ class PhotoboothProvider extends ChangeNotifier {
     startCamera();
 
     // Listen for fullscreen changes (e.g. Esc key)
-    fullscreen.onFullscreenChangeWeb((dynamic value) {
-      isFullscreen = value as bool;
+    fullscreen.onFullscreenChangeWeb((bool value) {
+      isFullscreen = value;
       notifyListeners();
     });
   }
@@ -125,7 +134,7 @@ class PhotoboothProvider extends ChangeNotifier {
     if (cameraController != null) {
       final oldController = cameraController;
       cameraController = null;
-      await oldController?.dispose();
+      await _cameraService.disposeController(oldController);
     }
 
     if (_isDisposed) {
@@ -134,10 +143,11 @@ class PhotoboothProvider extends ChangeNotifier {
       return;
     }
 
-    cameraController = CameraController(
-      camera,
-      isVeryHighResolution ? ResolutionPreset.veryHigh : ResolutionPreset.high,
-      enableAudio: false,
+    cameraController = _cameraService.createController(
+      description: camera,
+      resolution: isVeryHighResolution
+          ? ResolutionPreset.veryHigh
+          : ResolutionPreset.high,
     );
 
     try {
@@ -171,7 +181,7 @@ class PhotoboothProvider extends ChangeNotifier {
       final oldController = cameraController;
       cameraController = null;
       notifyListeners();
-      await oldController?.dispose();
+      await _cameraService.disposeController(oldController);
     } finally {
       _isCameraOperationInProgress = false;
     }
@@ -196,12 +206,11 @@ class PhotoboothProvider extends ChangeNotifier {
         _isCameraOperationInProgress = false;
         return;
       }
-      cameraController = CameraController(
-        camera,
-        isVeryHighResolution
+      cameraController = _cameraService.createController(
+        description: camera,
+        resolution: isVeryHighResolution
             ? ResolutionPreset.veryHigh
             : ResolutionPreset.high,
-        enableAudio: false,
       );
 
       try {
@@ -260,11 +269,11 @@ class PhotoboothProvider extends ChangeNotifier {
 
   final Map<int, String> _numberSounds = AppConfig.numberSounds;
 
-  bool _shouldCancelCapture = false;
+  final CancellationToken _captureCancellation = CancellationToken();
 
   void cancelAutoCapture() {
     if (isCapturing) {
-      _shouldCancelCapture = true;
+      _captureCancellation.cancel();
       notifyListeners();
     }
   }
@@ -281,7 +290,7 @@ class PhotoboothProvider extends ChangeNotifier {
     isCapturing = true;
     isAutoCapturing = true;
     isPreparing = true;
-    _shouldCancelCapture = false;
+    _captureCancellation.reset();
     capturedPhotos.clear();
     _videoService.reset();
     currentPhotoIndex = 0;
@@ -300,34 +309,17 @@ class PhotoboothProvider extends ChangeNotifier {
       }
     }
 
-    // Preparation Countdown
-    int prepCountdown = 2;
-    currentCountdownValue = prepCountdown;
-    notifyListeners();
-
-    DateTime prepStartTime = DateTime.now();
-    int prepLastTriggeredSecond = prepCountdown + 1;
-
-    while (currentCountdownValue > 0) {
-      if (_shouldCancelCapture || _isDisposed) break;
-
-      DateTime now = DateTime.now();
-      double elapsed = now.difference(prepStartTime).inMilliseconds / 1000.0;
-      int expectedRemaining = prepCountdown - elapsed.floor();
-
-      if (expectedRemaining < 0) expectedRemaining = 0;
-
-      if (expectedRemaining < prepLastTriggeredSecond) {
-        currentCountdownValue = expectedRemaining;
+    // Preparation countdown
+    final preparationCompleted = await _countdownRunner.run(
+      seconds: 2,
+      cancellation: _captureCancellation,
+      onTick: (remaining) {
+        currentCountdownValue = remaining;
         notifyListeners();
-        prepLastTriggeredSecond = expectedRemaining;
-      }
+      },
+    );
 
-      if (currentCountdownValue == 0) break;
-      await Future<void>.delayed(const Duration(milliseconds: 30));
-    }
-
-    if (_shouldCancelCapture) {
+    if (!preparationCompleted || _isDisposed) {
       await _cleanupAfterCancellation();
       return;
     }
@@ -336,49 +328,22 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
 
     for (int i = 0; i < selectedPhotoCount; i++) {
-      if (_shouldCancelCapture || _isDisposed) break;
+      if (_captureCancellation.isCancelled || _isDisposed) break;
 
       currentPhotoIndex = i + 1;
-      currentCountdownValue = countdown;
-      notifyListeners();
-      if (_numberSounds.containsKey(currentCountdownValue)) {
-        _playSound(_numberSounds[currentCountdownValue]!);
-      }
-
-      // Countdown using target-based DateTime delta loop
-      DateTime cdStartTime = DateTime.now();
-      int cdLastTriggeredSecond = countdown;
-
-      while (currentCountdownValue > 0) {
-        if (_shouldCancelCapture || _isDisposed) break;
-
-        DateTime now = DateTime.now();
-        double elapsed = now.difference(cdStartTime).inMilliseconds / 1000.0;
-        int expectedRemaining = countdown - elapsed.floor();
-
-        if (expectedRemaining < 0) expectedRemaining = 0;
-
-        if (expectedRemaining < cdLastTriggeredSecond) {
-          if (expectedRemaining == cdLastTriggeredSecond - 1) {
-            currentCountdownValue = expectedRemaining;
-            notifyListeners();
-            if (currentCountdownValue > 0 &&
-                _numberSounds.containsKey(currentCountdownValue)) {
-              _playSound(_numberSounds[currentCountdownValue]!);
-            }
-          } else {
-            // Main thread was blocked, update state without stacking audio calls
-            currentCountdownValue = expectedRemaining;
-            notifyListeners();
+      final countdownCompleted = await _countdownRunner.run(
+        seconds: countdown,
+        cancellation: _captureCancellation,
+        onTick: (remaining) {
+          currentCountdownValue = remaining;
+          notifyListeners();
+          if (remaining > 0 && _numberSounds.containsKey(remaining)) {
+            _playSound(_numberSounds[remaining]!);
           }
-          cdLastTriggeredSecond = expectedRemaining;
-        }
+        },
+      );
 
-        if (currentCountdownValue == 0) break;
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-      }
-
-      if (_shouldCancelCapture) break;
+      if (!countdownCompleted || _isDisposed) break;
 
       // Capture
       try {
@@ -402,7 +367,7 @@ class PhotoboothProvider extends ChangeNotifier {
       }
     }
 
-    if (_shouldCancelCapture) {
+    if (_captureCancellation.isCancelled || _isDisposed) {
       await _cleanupAfterCancellation();
       return;
     }
@@ -437,7 +402,7 @@ class PhotoboothProvider extends ChangeNotifier {
     isCapturing = false;
     isAutoCapturing = false;
     isPreparing = false;
-    _shouldCancelCapture = false;
+    _captureCancellation.reset();
     capturedPhotos.clear();
     _videoService.reset();
     currentCountdownValue = 0;
@@ -510,9 +475,10 @@ class PhotoboothProvider extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    _captureCancellation.cancel();
     final oldController = cameraController;
     cameraController = null;
-    oldController?.dispose();
+    _cameraService.disposeController(oldController);
     _audioService.dispose();
     super.dispose();
   }
