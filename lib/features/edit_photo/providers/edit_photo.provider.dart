@@ -15,6 +15,17 @@ import 'package:th_photobooth/services/storage_factory.dart';
 import 'package:th_photobooth/services/storage_service_interface.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
+Future<Uint8List?> _encodeJpg(Uint8List pngBytes) async {
+  try {
+    final image = img.decodeImage(pngBytes);
+    if (image == null) return null;
+    return img.encodeJpg(image, quality: 90);
+  } catch (error) {
+    debugPrint('Error converting image to JPG: $error');
+    return null;
+  }
+}
+
 class EditPhotoProvider with ChangeNotifier {
   final StorageService _storageService;
 
@@ -263,7 +274,7 @@ class EditPhotoProvider with ChangeNotifier {
 
       final Uint8List? printCapture = await capturePaper();
       if (printCapture != null) {
-        final jpgBytes = _convertToJpg(printCapture);
+        final jpgBytes = await _convertToJpg(printCapture);
         if (jpgBytes != null) {
           filesToUpload['${sessionId}_anh_gia_lap_ban_in.jpg'] = jpgBytes;
         }
@@ -273,7 +284,7 @@ class EditPhotoProvider with ChangeNotifier {
       // 1.2. Chụp ảnh đem đi in (không có viền/perforation/indicator)
       final Uint8List? printContentCapture = await capturePrintContent();
       if (printContentCapture != null) {
-        final jpgBytes = _convertToJpg(printContentCapture);
+        final jpgBytes = await _convertToJpg(printContentCapture);
         if (jpgBytes != null) {
           filesToUpload['${sessionId}_anh_dem_di_in.jpg'] = jpgBytes;
         }
@@ -298,7 +309,7 @@ class EditPhotoProvider with ChangeNotifier {
           ),
           isMirrored: photoIsMirrored,
         );
-        final jpgBytes = _convertToJpg(framedCapture);
+        final jpgBytes = await _convertToJpg(framedCapture);
         if (jpgBytes != null) {
           filesToUpload['${sessionId}_anh_da_ghep_khung.jpg'] = jpgBytes;
         }
@@ -307,7 +318,7 @@ class EditPhotoProvider with ChangeNotifier {
         // Fallback to UI capture if something goes wrong
         final Uint8List? fallbackCapture = await captureStrip();
         if (fallbackCapture != null) {
-          final jpgBytes = _convertToJpg(fallbackCapture);
+          final jpgBytes = await _convertToJpg(fallbackCapture);
           if (jpgBytes != null) {
             filesToUpload['${sessionId}_anh_da_ghep_khung.jpg'] = jpgBytes;
           }
@@ -433,14 +444,7 @@ class EditPhotoProvider with ChangeNotifier {
     return null;
   }
 
-  Uint8List? _convertToJpg(Uint8List pngBytes) {
-    try {
-      final image = img.decodeImage(pngBytes);
-      if (image == null) return null;
-      return img.encodeJpg(image, quality: 90);
-    } catch (e) {
-      debugPrint('Error converting image to JPG: $e');
-      return null;
-    }
+  Future<Uint8List?> _convertToJpg(Uint8List pngBytes) {
+    return compute(_encodeJpg, pngBytes);
   }
 }
