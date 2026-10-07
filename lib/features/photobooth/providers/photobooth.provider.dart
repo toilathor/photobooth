@@ -13,6 +13,7 @@ import 'package:th_photobooth/services/cache_service.dart';
 import 'package:th_photobooth/services/video_service.dart';
 
 class PhotoboothProvider extends ChangeNotifier {
+  bool _isDisposed = false;
   CameraController? cameraController;
   bool isFullscreen = false;
   final AudioService _audioService = AudioService();
@@ -95,8 +96,18 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> toggleCamera() async {
+    if (_isDisposed) {
+      isSwitchingCamera = false;
+      _isCameraOperationInProgress = false;
+      return;
+    }
     while (_isCameraOperationInProgress) {
       await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (_isDisposed) {
+        isSwitchingCamera = false;
+        _isCameraOperationInProgress = false;
+        return;
+      }
     }
     if (AppConfig.cameras.isEmpty ||
         AppConfig.cameras.length < 2 ||
@@ -115,6 +126,12 @@ class PhotoboothProvider extends ChangeNotifier {
       final oldController = cameraController;
       cameraController = null;
       await oldController?.dispose();
+    }
+
+    if (_isDisposed) {
+      isSwitchingCamera = false;
+      _isCameraOperationInProgress = false;
+      return;
     }
 
     cameraController = CameraController(
@@ -138,8 +155,14 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> stopCamera() async {
+    if (_isDisposed) return;
     while (_isCameraOperationInProgress) {
       await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (_isDisposed) {
+        isSwitchingCamera = false;
+        _isCameraOperationInProgress = false;
+        return;
+      }
     }
     if (cameraController == null) return;
 
@@ -155,8 +178,10 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> startCamera() async {
+    if (_isDisposed) return;
     while (_isCameraOperationInProgress) {
       await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (_isDisposed) return;
     }
     if (cameraController != null) return;
 
@@ -166,6 +191,11 @@ class PhotoboothProvider extends ChangeNotifier {
       notifyListeners();
 
       final camera = AppConfig.cameras[_currentCameraIndex];
+      if (_isDisposed) {
+        isSwitchingCamera = false;
+        _isCameraOperationInProgress = false;
+        return;
+      }
       cameraController = CameraController(
         camera,
         isVeryHighResolution
@@ -240,6 +270,7 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> startAutoCapture() async {
+    if (_isDisposed) return;
     _audioService.warmup();
     if (isCapturing ||
         cameraController == null ||
@@ -278,7 +309,7 @@ class PhotoboothProvider extends ChangeNotifier {
     int prepLastTriggeredSecond = prepCountdown + 1;
 
     while (currentCountdownValue > 0) {
-      if (_shouldCancelCapture) break;
+      if (_shouldCancelCapture || _isDisposed) break;
 
       DateTime now = DateTime.now();
       double elapsed = now.difference(prepStartTime).inMilliseconds / 1000.0;
@@ -305,7 +336,7 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
 
     for (int i = 0; i < selectedPhotoCount; i++) {
-      if (_shouldCancelCapture) break;
+      if (_shouldCancelCapture || _isDisposed) break;
 
       currentPhotoIndex = i + 1;
       currentCountdownValue = countdown;
@@ -319,7 +350,7 @@ class PhotoboothProvider extends ChangeNotifier {
       int cdLastTriggeredSecond = countdown;
 
       while (currentCountdownValue > 0) {
-        if (_shouldCancelCapture) break;
+        if (_shouldCancelCapture || _isDisposed) break;
 
         DateTime now = DateTime.now();
         double elapsed = now.difference(cdStartTime).inMilliseconds / 1000.0;
@@ -415,6 +446,7 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   Future<void> takeManualPhoto() async {
+    if (_isDisposed) return;
     _audioService.warmup();
     if (isCapturing ||
         cameraController == null ||
@@ -470,7 +502,14 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   @override
+  void notifyListeners() {
+    if (_isDisposed) return;
+    super.notifyListeners();
+  }
+
+  @override
   void dispose() {
+    _isDisposed = true;
     final oldController = cameraController;
     cameraController = null;
     oldController?.dispose();

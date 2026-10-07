@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:camera/camera.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,7 +12,7 @@ import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.
 import 'package:th_photobooth/i18n/strings.g.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
-  const CameraPreviewWidget(CameraController cameraController, {super.key});
+  const CameraPreviewWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
