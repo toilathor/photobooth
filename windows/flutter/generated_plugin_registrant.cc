@@ -7,12 +7,15 @@
 #include "generated_plugin_registrant.h"
 
 #include <audioplayers_windows/audioplayers_windows_plugin.h>
+#include <ffmpeg_kit_flutter_new/f_fmpeg_kit_flutter_plugin.h>
 #include <gal/gal_plugin_c_api.h>
 #include <printing/printing_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   AudioplayersWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("AudioplayersWindowsPlugin"));
+  FFmpegKitFlutterPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FFmpegKitFlutterPlugin"));
   GalPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("GalPluginCApi"));
   PrintingPluginRegisterWithRegistrar(

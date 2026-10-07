@@ -11,14 +11,14 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   camera: ^0.12.0+1
   provider: ^6.0.5
-  get_it: ^7.7.0
-  google_fonts: ^8.0.2
+  get_it: ^9.3.0
+  google_fonts: ^9.0.0
   gap: ^3.0.1
 
-  googleapis: ^16.0.0
+  googleapis: ^17.0.0
   google_sign_in: ^7.2.0
   extension_google_sign_in_as_googleapis_auth: ^3.0.0
   web: ^1.1.1
@@ -44,7 +44,7 @@ dependencies:
   archive: ^4.0.9
   printing: ^5.14.3
   pdf: ^3.12.0
-  cached_network_image: ^3.3.1
+  cached_network_image: ^4.0.4
 
 dev_dependencies:
   flutter_test:
