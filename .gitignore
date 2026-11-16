@@ -54,3 +54,7 @@ gen/*
 
 # FVM Version Cache
 .fvm/
+
+# Graphify Output
+graphify-out/
+
