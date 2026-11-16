@@ -32,6 +32,7 @@ dependencies:
   slang: any
   slang_flutter: any
   animated_toggle_switch: ^0.8.7
+  lottie: ^3.6.1
   colorfilter_generator: ^0.0.8
   qr_flutter: ^4.1.0
   http: ^1.6.0
@@ -62,5 +63,6 @@ flutter:
 
   uses-material-design: true
   assets:
+    - assets/animations/
     - assets/sounds/
     - assets/images/

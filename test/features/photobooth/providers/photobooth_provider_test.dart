@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

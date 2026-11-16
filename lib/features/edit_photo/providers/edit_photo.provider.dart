@@ -12,6 +12,7 @@ import 'package:th_photobooth/models/frame_data.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 import 'package:th_photobooth/services/photo_merger_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
+import 'package:th_photobooth/services/storage_section.dart';
 import 'package:th_photobooth/services/storage_service_interface.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
@@ -47,8 +48,10 @@ class EditPhotoProvider with ChangeNotifier {
 
   List<FrameData> filteredFrames = [];
   late FrameData selectedFrame;
-  bool printTwoCopies = true;
-  bool showPaperPreview = false;
+  StorageSection? storageSection;
+  String? galleryUrl;
+  bool isSectionReady = false;
+  bool get isEditorLocked => isSectionReady;
 
   // Photobooth Session Data
   List<XFile> capturedPhotos = [];
@@ -93,28 +96,21 @@ class EditPhotoProvider with ChangeNotifier {
   }
 
   void setSelectedFrame(FrameData frame) {
+    if (isEditorLocked) return;
     selectedFrame = frame;
     notifyListeners();
   }
 
   void setFilter(String filter) {
+    if (isEditorLocked) return;
     selectedFilter = filter;
     filterIntensity = 0.5; // Reset intensity to 50% when filter changes
     notifyListeners();
   }
 
   void setFilterIntensity(double intensity) {
+    if (isEditorLocked) return;
     filterIntensity = intensity;
-    notifyListeners();
-  }
-
-  void togglePrintTwoCopies(bool value) {
-    printTwoCopies = value;
-    notifyListeners();
-  }
-
-  void togglePaperPreview(bool value) {
-    showPaperPreview = value;
     notifyListeners();
   }
 
@@ -138,13 +134,11 @@ class EditPhotoProvider with ChangeNotifier {
 
   /// Xử lý yêu cầu lấy mã QR và upload
   Future<void> handleQRRequest({
-    required VoidCallback onShowLoading,
     required VoidCallback onHideLoading,
-    required void Function(String url) onShowQR,
     required VoidCallback onShowLogin,
     required VoidCallback onStartUpload,
+    required VoidCallback onUploadComplete,
     required void Function(String error) onShowError,
-    required Future<Uint8List?> Function() capturePaper,
     required Future<Uint8List?> Function() captureStrip,
     required Future<Uint8List?> Function() capturePrintContent,
   }) async {
@@ -156,17 +150,10 @@ class EditPhotoProvider with ChangeNotifier {
     _isHandlingQR = true;
 
     try {
-      // 1. Kiểm tra xem bộ ảnh này đã được upload chưa
-      onShowLoading();
-      final existingUrl = await _storageService.getFolderLink(sessionId ?? '');
-      onHideLoading();
-
-      if (existingUrl != null) {
-        onShowQR(existingUrl);
+      if (isSectionReady && galleryUrl != null) {
         return;
       }
 
-      // 2. Kiểm tra đăng nhập và phân quyền (đối với Web)
       if (kIsWeb) {
         final hasLoggedIn = _storageService.currentUser != null;
         final hasScopes = await _storageService.hasRequiredScopes();
@@ -176,21 +163,29 @@ class EditPhotoProvider with ChangeNotifier {
         }
       }
 
-      // 3. Thực hiện upload
       onStartUpload();
-      final url = await uploadCollection(
-        capturePaper: capturePaper,
+      storageSection ??= await _storageService.prepareSection(sessionId!);
+      if (storageSection == null) {
+        throw StateError('Unable to prepare Google Drive section');
+      }
+      galleryUrl = AppConfig.galleryUrl(storageSection!.id);
+      debugPrint('Gallery URL: $galleryUrl');
+      if (kDebugMode && kIsWeb) {
+        final localGalleryUrl = Uri.base.replace(
+          fragment: '/gallery/${Uri.encodeComponent(storageSection!.id)}',
+        );
+        debugPrint('Local gallery URL: $localGalleryUrl');
+      }
+      notifyListeners();
+
+      await uploadCollection(
         captureStrip: captureStrip,
         capturePrintContent: capturePrintContent,
       );
-
-      if (url != null) {
-        onHideLoading();
-        onShowQR(url);
-      } else {
-        onHideLoading();
-        onShowError('Upload failed');
-      }
+      isSectionReady = true;
+      notifyListeners();
+      onHideLoading();
+      onUploadComplete();
     } catch (e) {
       onHideLoading();
       onShowError(e.toString());
@@ -201,24 +196,23 @@ class EditPhotoProvider with ChangeNotifier {
 
   /// Thực hiện quy trình upload bộ sưu tập
   /// Cần truyền vào function capture để lấy dữ liệu từ UI (vì UI quản lý RepaintBoundary)
-  Future<String?> uploadCollection({
-    required Future<Uint8List?> Function() capturePaper,
+  Future<void> uploadCollection({
     required Future<Uint8List?> Function() captureStrip,
     required Future<Uint8List?> Function() capturePrintContent,
   }) async {
     try {
       final filesToUpload = await generateAllFiles(
-        capturePaper: capturePaper,
         captureStrip: captureStrip,
         capturePrintContent: capturePrintContent,
       );
 
-      if (filesToUpload == null || filesToUpload.isEmpty) return null;
+      if (filesToUpload == null || filesToUpload.isEmpty) {
+        throw StateError('No files generated');
+      }
 
-      // 4. Thực hiện upload
-      final String? url = await _storageService.uploadCollection(
+      await _storageService.uploadCollection(
         files: filesToUpload,
-        folderName: sessionId!,
+        sectionId: storageSection!.id,
         onProgress: (int current, int total) {
           setUploadState(
             isUploading: true,
@@ -230,8 +224,6 @@ class EditPhotoProvider with ChangeNotifier {
           );
         },
       );
-
-      return url;
     } catch (e) {
       debugPrint('Upload error: $e');
       rethrow;
@@ -243,7 +235,6 @@ class EditPhotoProvider with ChangeNotifier {
   /// Thực hiện quy trình upload bộ sưu tập
   /// Cần truyền vào function capture để lấy dữ liệu từ UI (vì UI quản lý RepaintBoundary)
   Future<Map<String, Uint8List>?> generateAllFiles({
-    required Future<Uint8List?> Function() capturePaper,
     required Future<Uint8List?> Function() captureStrip,
     required Future<Uint8List?> Function() capturePrintContent,
   }) async {
@@ -262,43 +253,20 @@ class EditPhotoProvider with ChangeNotifier {
     try {
       final Map<String, Uint8List> filesToUpload = {};
 
-      // Đợi một chút để UI ổn định
-      await Future<void>.delayed(const Duration(milliseconds: 600));
-
-      // 1. Chụp Ảnh bản in dạng final trên giấy in
-      final bool originalPaperMode = showPaperPreview;
-      if (!originalPaperMode) {
-        togglePaperPreview(true);
+      // 1. Giữ nguyên các ảnh gốc dùng để fill khung
+      for (var index = 0; index < capturedPhotos.length; index++) {
+        final photo = capturedPhotos[index];
+        final number = (index + 1).toString().padLeft(2, '0');
+        filesToUpload['${sessionId}_anh_goc_$number${_getImageExtension(photo)}'] =
+            await photo.readAsBytes();
       }
-      await Future<void>.delayed(const Duration(milliseconds: 600));
 
-      final Uint8List? printCapture = await capturePaper();
-      if (printCapture != null) {
-        final jpgBytes = await _convertToJpg(printCapture);
-        if (jpgBytes != null) {
-          filesToUpload['${sessionId}_anh_gia_lap_ban_in.jpg'] = jpgBytes;
-        }
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      // 1.2. Chụp ảnh đem đi in (không có viền/perforation/indicator)
+      // 2. Chụp ảnh đem đi in (không có viền/perforation/indicator)
       final Uint8List? printContentCapture = await capturePrintContent();
       if (printContentCapture != null) {
-        final jpgBytes = await _convertToJpg(printContentCapture);
-        if (jpgBytes != null) {
-          filesToUpload['${sessionId}_anh_dem_di_in.jpg'] = jpgBytes;
-        }
+        filesToUpload['${sessionId}_anh_dem_di_in.png'] = printContentCapture;
       }
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      // 2. Chụp Ảnh đã ghép vào frame
-      final bool originalPrintTwoCopies = printTwoCopies;
-      togglePaperPreview(false);
-      if (originalPrintTwoCopies) {
-        togglePrintTwoCopies(false);
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
+      // 3. Chụp Ảnh đã ghép vào frame
       try {
         final Uint8List framedCapture = await PhotoMergerService.mergePhotos(
           photos: capturedPhotos,
@@ -308,6 +276,7 @@ class EditPhotoProvider with ChangeNotifier {
             filterIntensity,
           ),
           isMirrored: photoIsMirrored,
+          galleryUrl: galleryUrl,
         );
         final jpgBytes = await _convertToJpg(framedCapture);
         if (jpgBytes != null) {
@@ -324,14 +293,7 @@ class EditPhotoProvider with ChangeNotifier {
           }
         }
       }
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      // Khôi phục trạng thái cũ
-      if (originalPaperMode) togglePaperPreview(true);
-      if (originalPrintTwoCopies) togglePrintTwoCopies(true);
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-
-      // 3. Xử lý video recap
+      // 4. Xử lý video recap
       if (videoRecapFile != null) {
         setUploadState(
           isUploading: true,
@@ -342,7 +304,7 @@ class EditPhotoProvider with ChangeNotifier {
         var originalExt = _getVideoExtension(videoRecapFile!);
         Uint8List finalOriginalBytes;
 
-        // 3.1. Xử lý video gốc (flip nếu cần)
+        // 4.1. Xử lý video gốc (flip nếu cần)
         try {
           final flippedResult = await VideoRecapService.flipVideo(
             videoUrl: videoRecapFile?.path ?? '',
@@ -399,6 +361,33 @@ class EditPhotoProvider with ChangeNotifier {
     } finally {
       setUploadState(isUploading: false);
     }
+  }
+
+  String _getImageExtension(XFile file) {
+    final sources = [
+      file.name.toLowerCase(),
+      file.path.toLowerCase().split('?').first,
+    ];
+    for (final extension in const [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.heic',
+      '.heif',
+      '.webp',
+      '.dng',
+    ]) {
+      if (sources.any((source) => source.endsWith(extension))) return extension;
+    }
+
+    return switch (file.mimeType?.toLowerCase()) {
+      'image/png' => '.png',
+      'image/heic' => '.heic',
+      'image/heif' => '.heif',
+      'image/webp' => '.webp',
+      'image/dng' => '.dng',
+      _ => '.jpg',
+    };
   }
 
   String _getVideoExtension(XFile file) {

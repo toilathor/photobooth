@@ -26,9 +26,9 @@ class EditorPanel extends StatefulWidget {
   final double filterIntensity;
   final void Function(String) onFilterSelected;
   final void Function(double) onFilterIntensityChanged;
-  final VoidCallback? onQRRequested;
   final VoidCallback? onSaveRequested;
-  final VoidCallback? onPrintRequested;
+  final VoidCallback onCompleteRequested;
+  final bool requiresQr;
 
   const EditorPanel({
     super.key,
@@ -44,9 +44,9 @@ class EditorPanel extends StatefulWidget {
     required this.filterIntensity,
     required this.onFilterSelected,
     required this.onFilterIntensityChanged,
-    this.onQRRequested,
     this.onSaveRequested,
-    this.onPrintRequested,
+    required this.onCompleteRequested,
+    this.requiresQr = false,
     this.isMobile = false,
   });
 
@@ -96,6 +96,31 @@ class _EditorPanelState extends State<EditorPanel> {
           // Tab Content
           Expanded(child: _buildTabContent(colorScheme)),
 
+          if (widget.requiresQr)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: colorScheme.secondary,
+                  ),
+                  const Gap(8),
+                  Expanded(
+                    child: Text(
+                      t.editor.completeEditingHint,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface.withValues(alpha: 0.65),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           (() {
             final bool isLandscape =
                 MediaQuery.orientationOf(context) == Orientation.landscape;
@@ -108,24 +133,19 @@ class _EditorPanelState extends State<EditorPanel> {
                 child: Row(
                   children: [
                     if (kIsWeb) ...[
-                      if (widget.onQRRequested != null) ...[
+                      if (widget.onSaveRequested != null ||
+                          widget.requiresQr) ...[
                         Expanded(
                           flex: 1,
-                          child: SecondaryButton(
-                            onTap: widget.onQRRequested!,
-                            icon: Icons.qr_code_2_rounded,
-                            height: btnHeight,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      if (widget.onSaveRequested != null) ...[
-                        Expanded(
-                          flex: 1,
-                          child: SecondaryButton(
-                            onTap: widget.onSaveRequested!,
-                            icon: Icons.save_alt_rounded,
-                            height: btnHeight,
+                          child: Tooltip(
+                            message: widget.onSaveRequested == null
+                                ? t.editor.completeBeforeDownload
+                                : t.editor.saveToDevice,
+                            child: SecondaryButton(
+                              onTap: widget.onSaveRequested,
+                              icon: Icons.save_alt_rounded,
+                              height: btnHeight,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -134,23 +154,27 @@ class _EditorPanelState extends State<EditorPanel> {
                       if (widget.onSaveRequested != null) ...[
                         Expanded(
                           flex: 1,
-                          child: SecondaryButton(
-                            onTap: widget.onSaveRequested!,
-                            icon: Icons.save_alt_rounded,
-                            height: btnHeight,
+                          child: Tooltip(
+                            message: t.editor.saveToDevice,
+                            child: SecondaryButton(
+                              onTap: widget.onSaveRequested!,
+                              icon: Icons.save_alt_rounded,
+                              height: btnHeight,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
                       ],
                     ],
-                    // Print Button
                     Expanded(
                       flex: 3,
-                      child: PrimaryButton(
-                        onTap: widget.onPrintRequested,
-                        label: t.editor.printPhoto,
-                        icon: Icons.local_printshop_rounded,
-                        height: btnHeight,
+                      child: Tooltip(
+                        message: t.editor.completeEditing,
+                        child: PrimaryButton(
+                          onTap: widget.onCompleteRequested,
+                          label: t.editor.completeEditing,
+                          height: btnHeight,
+                        ),
                       ),
                     ),
                   ],

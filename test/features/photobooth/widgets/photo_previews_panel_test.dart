@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.dart';
+import 'package:provider/provider.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
-import '../../../test_app.dart';
+import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.dart';
+
+import '../../../support/test_app.dart';
 
 void main() {
   setUp(() {
@@ -13,7 +16,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      testApp(child: const Scaffold(body: PhotoPreviewsPanel())),
+      testApp(
+        child: ChangeNotifierProvider(
+          create: (_) => PhotoboothProvider(),
+          child: const Scaffold(body: PhotoPreviewsPanel()),
+        ),
+      ),
     );
 
     expect(find.byIcon(Icons.image_outlined), findsNWidgets(4));

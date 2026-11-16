@@ -6,9 +6,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/copyright_watermark.dart';
-import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/di/service_locator.dart';
+import 'package:th_photobooth/core/routes/gallery_route.dart';
+import 'package:th_photobooth/features/gallery/screens/gallery.screen.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/screens/photobooth.screen.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -17,6 +18,19 @@ import 'package:th_photobooth/services/storage_factory.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (GalleryRoute.matches(Uri.base)) {
+    final gallerySectionId = GalleryRoute.sectionIdFrom(Uri.base) ?? '';
+    runApp(
+      TranslationProvider(
+        child: PhotoboothApp(
+          gallerySectionId: gallerySectionId,
+          galleryLocation: Uri.base.fragment,
+        ),
+      ),
+    );
+    return;
+  }
 
   List<CameraDescription> allCameras = [];
   try {
@@ -79,11 +93,24 @@ class AppScrollBehavior extends MaterialScrollBehavior {
 }
 
 class PhotoboothApp extends StatelessWidget {
-  const PhotoboothApp({super.key});
+  final String? gallerySectionId;
+  final String? galleryLocation;
+
+  const PhotoboothApp({super.key, this.gallerySectionId, this.galleryLocation});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: galleryLocation,
+      onGenerateRoute: galleryLocation == null
+          ? null
+          : (settings) => settings.name == galleryLocation
+                ? MaterialPageRoute<void>(
+                    settings: settings,
+                    builder: (_) =>
+                        GalleryScreen(sectionId: gallerySectionId ?? ''),
+                  )
+                : null,
       title: AppConfig.appName,
       theme: AppConfig.theme,
       darkTheme: AppConfig.darkTheme,
@@ -93,22 +120,10 @@ class PhotoboothApp extends StatelessWidget {
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
-        final bool isDesktop =
-            MediaQuery.sizeOf(context).width >= 850 &&
-            MediaQuery.sizeOf(context).height >= 500;
         return ResponsiveBreakpoints.builder(
           child: Stack(
             children: [
               child ?? const SizedBox.shrink(),
-              if (isDesktop)
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: LanguageSwitcher(),
-                  ),
-                ),
               const CopyrightWatermark(),
             ],
           ),
@@ -120,7 +135,7 @@ class PhotoboothApp extends StatelessWidget {
           ],
         );
       },
-      home: const PhotoboothScreen(),
+      home: galleryLocation == null ? const PhotoboothScreen() : null,
       debugShowCheckedModeBanner: false,
     );
   }

@@ -8,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
+import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
@@ -253,6 +254,15 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
         child: Stack(
           children: [
             screenContent,
+            if (!isMobile)
+              const Positioned(
+                top: 0,
+                left: 0,
+                child: Material(
+                  color: Colors.transparent,
+                  child: LanguageSwitcher(),
+                ),
+              ),
             if (kIsWeb && !isMobile) const ShortcutGuideWidget(),
           ],
         ),

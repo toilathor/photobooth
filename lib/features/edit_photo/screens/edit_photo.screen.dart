@@ -11,18 +11,20 @@ import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:th_photobooth/components/google_sign_in_button.dart';
+import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/components/primary_button.dart';
 import 'package:th_photobooth/components/secondary_button.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/configs/storage_config.dart';
 import 'package:th_photobooth/core/di/service_locator.dart';
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
+import 'package:th_photobooth/features/edit_photo/widgets/completion_check_animation.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/editor_panel.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/photo_strip.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/preview_panel.dart';
-import 'package:th_photobooth/features/edit_photo/widgets/qr_share_dialog.dart';
+import 'package:th_photobooth/features/edit_photo/widgets/qr_share_panel.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/upload_progress_dialog.dart';
-import 'package:th_photobooth/features/edit_photo/widgets/virtual_paper.dart';
 import 'package:th_photobooth/helper/web_download_noop.dart'
     if (dart.library.js_interop) 'package:th_photobooth/helper/web_download_web.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -53,20 +55,23 @@ class EditPhotoScreen extends StatefulWidget {
 class _EditPhotoScreenState extends State<EditPhotoScreen> {
   final ScreenshotController _stripController = ScreenshotController();
   final ScreenshotController _paperController = ScreenshotController();
+  bool _showCompletionAnimation = false;
+
+  void _playCompletionAnimation() {
+    if (!mounted || MediaQuery.disableAnimationsOf(context)) return;
+
+    setState(() => _showCompletionAnimation = true);
+    Future<void>.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted) setState(() => _showCompletionAnimation = false);
+    });
+  }
 
   Future<void> _handleQRRequest(BuildContext context) async {
     final provider = context.read<EditPhotoProvider>();
 
     await provider.handleQRRequest(
-      onShowLoading: () => _showSimpleLoading(context),
       onHideLoading: () {
         if (Navigator.canPop(context)) Navigator.pop(context);
-      },
-      onShowQR: (url) {
-        showDialog<void>(
-          context: context,
-          builder: (context) => QRShareDialog(url: url),
-        );
       },
       onShowLogin: () {
         showWebLoginDialog(
@@ -75,12 +80,12 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         );
       },
       onStartUpload: () => UploadProgressDialog.show(context, provider),
+      onUploadComplete: _playCompletionAnimation,
       onShowError: (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(t.google_drive.error(error: error))),
         );
       },
-      capturePaper: () => _capturePaperIndependent(provider),
       captureStrip: () => _captureStripIndependent(provider),
       capturePrintContent: () => _capturePrintContentIndependent(provider),
     );
@@ -93,7 +98,6 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
 
     try {
       final files = await provider.generateAllFiles(
-        capturePaper: () => _capturePaperIndependent(provider),
         captureStrip: () => _captureStripIndependent(provider),
         capturePrintContent: () => _capturePrintContentIndependent(provider),
       );
@@ -185,15 +189,14 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
 
     try {
       final files = await provider.generateAllFiles(
-        capturePaper: () => _capturePaperIndependent(provider),
         captureStrip: () => _captureStripIndependent(provider),
         capturePrintContent: () => _capturePrintContentIndependent(provider),
       );
 
       if (files != null && files.isNotEmpty) {
         final printBytes =
+            _findFileBytes(files, 'anh_dem_di_in.png') ??
             _findFileBytes(files, 'anh_dem_di_in.jpg') ??
-            _findFileBytes(files, 'anh_gia_lap_ban_in.jpg') ??
             _findFileBytes(files, 'anh_da_ghep_khung.jpg');
 
         if (context.mounted && Navigator.canPop(context)) {
@@ -290,6 +293,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         selectedFilter: provider.selectedFilter,
         filterIntensity: provider.filterIntensity,
         isMirrored: provider.photoIsMirrored,
+        galleryUrl: provider.galleryUrl,
       );
 
       return await _stripController.captureFromWidget(
@@ -299,73 +303,6 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       );
     } catch (e) {
       debugPrint('Error capturing strip independently: $e');
-      return null;
-    }
-  }
-
-  Future<Uint8List?> _capturePaperIndependent(
-    EditPhotoProvider provider,
-  ) async {
-    try {
-      final double frameAspectRatio =
-          provider.selectedFrame.size.width /
-          provider.selectedFrame.size.height;
-      final bool isLandscape = frameAspectRatio > 0.5;
-      final bool paperIsLandscape = isLandscape && !provider.printTwoCopies;
-
-      final strip = PhotoStrip(
-        photos: provider.capturedPhotos,
-        frame: provider.selectedFrame,
-        selectedFilter: provider.selectedFilter,
-        filterIntensity: provider.filterIntensity,
-        isMirrored: provider.photoIsMirrored,
-      );
-
-      final Widget content;
-      if (provider.printTwoCopies) {
-        if (isLandscape) {
-          content = Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(height: 4),
-              Flexible(fit: FlexFit.loose, child: strip),
-            ],
-          );
-        } else {
-          content = Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(width: 4),
-              Flexible(fit: FlexFit.loose, child: strip),
-            ],
-          );
-        }
-      } else {
-        content = strip;
-      }
-
-      final widget = VirtualPaper(
-        isLandscape: paperIsLandscape,
-        child: content,
-      );
-
-      // Render ở độ phân giải cao cho giấy in 4x6 (khoảng 1200x1800px)
-      final double targetWidth = paperIsLandscape ? 1800 : 1200;
-      final double targetHeight = paperIsLandscape ? 1200 : 1800;
-
-      return await _paperController.captureFromWidget(
-        Material(color: Colors.white, child: widget),
-        targetSize: Size(targetWidth, targetHeight),
-        pixelRatio: 1.0,
-      );
-    } catch (e) {
-      debugPrint('Error capturing paper independently: $e');
       return null;
     }
   }
@@ -381,60 +318,19 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     EditPhotoProvider provider,
   ) async {
     try {
-      final double frameAspectRatio =
-          provider.selectedFrame.size.width /
-          provider.selectedFrame.size.height;
-      final bool isLandscape = frameAspectRatio > 0.5;
-
-      final strip = PhotoStrip(
+      final widget = PhotoPrintPreview(
         photos: provider.capturedPhotos,
-        frame: provider.selectedFrame,
+        selectedFrame: provider.selectedFrame,
         selectedFilter: provider.selectedFilter,
         filterIntensity: provider.filterIntensity,
-        isMirrored: provider.photoIsMirrored,
-      );
-
-      final Widget content;
-      if (provider.printTwoCopies) {
-        if (isLandscape) {
-          content = Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(height: 4),
-              Flexible(fit: FlexFit.loose, child: strip),
-            ],
-          );
-        } else {
-          content = Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(width: 4),
-              Flexible(fit: FlexFit.loose, child: strip),
-            ],
-          );
-        }
-      } else {
-        content = strip;
-      }
-
-      final bool paperIsLandscape = isLandscape && !provider.printTwoCopies;
-      final double targetWidth = paperIsLandscape ? 1800 : 1200;
-      final double targetHeight = paperIsLandscape ? 1200 : 1800;
-
-      final widget = Container(
-        color: Colors.white,
-        child: Center(child: content),
+        photoIsMirrored: provider.photoIsMirrored,
+        galleryUrl: provider.galleryUrl,
+        showQrPlaceholder: StorageConfig.activeStorage != StorageType.none,
       );
 
       return await _paperController.captureFromWidget(
         Material(color: Colors.white, child: widget),
-        targetSize: Size(targetWidth, targetHeight),
+        targetSize: AppConfig.printPixelSize,
         pixelRatio: 1.0,
       );
     } catch (e) {
@@ -448,15 +344,10 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     required bool isMobile,
   }) {
     return PreviewPanel(
-      stripController: _stripController,
       paperController: _paperController,
       photos: provider.capturedPhotos,
       selectedFrame: provider.selectedFrame,
       availableFrames: provider.filteredFrames,
-      printTwoCopies: provider.printTwoCopies,
-      showPaperPreview: provider.showPaperPreview,
-      onTogglePrintTwoCopies: provider.togglePrintTwoCopies,
-      onTogglePaperPreview: provider.togglePaperPreview,
       videoRecapFile: provider.videoRecapFile,
       photoTimestamps: provider.photoTimestamps,
       selectedFilter: provider.selectedFilter,
@@ -464,33 +355,76 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       photoIsMirrored: provider.photoIsMirrored,
       videoIsMirrored: provider.videoIsMirrored,
       isMobile: isMobile,
+      galleryUrl: provider.galleryUrl,
+      showQrPlaceholder: StorageConfig.activeStorage != StorageType.none,
     );
   }
 
-  Widget _buildEditorPanel({
+  Widget _buildRightPanel({
     required BuildContext context,
     required EditPhotoProvider provider,
     required bool isMobile,
   }) {
-    return EditorPanel(
-      availableFrames: provider.filteredFrames,
-      selectedFrame: provider.selectedFrame.path,
-      onFrameSelected: provider.setSelectedFrame,
-      photos: provider.capturedPhotos,
-      videoRecapFile: provider.videoRecapFile,
-      photoTimestamps: provider.photoTimestamps,
-      isProcessing: provider.isProcessing,
-      filters: provider.filters,
-      selectedFilter: provider.selectedFilter,
-      filterIntensity: provider.filterIntensity,
-      onFilterSelected: provider.setFilter,
-      onFilterIntensityChanged: provider.setFilterIntensity,
-      onQRRequested: StorageConfig.activeStorage == StorageType.none
-          ? null
-          : () => _handleQRRequest(context),
-      onSaveRequested: () => _handleSaveRequest(context),
-      onPrintRequested: () => _handlePrintRequest(context),
-      isMobile: isMobile,
+    final requiresQr =
+        kIsWeb && StorageConfig.activeStorage != StorageType.none;
+    final isReady = provider.isSectionReady && provider.galleryUrl != null;
+    final panel = _showCompletionAnimation
+        ? const CompletionCheckAnimation(
+            key: ValueKey('completion-check-animation'),
+          )
+        : isReady
+        ? QrSharePanel(
+            key: const ValueKey('qr-share-panel'),
+            url: provider.galleryUrl!,
+            onDownload: () => _handleSaveRequest(context),
+            isMobile: isMobile,
+          )
+        : EditorPanel(
+            key: const ValueKey('editor-panel'),
+            availableFrames: provider.filteredFrames,
+            selectedFrame: provider.selectedFrame.path,
+            onFrameSelected: provider.setSelectedFrame,
+            photos: provider.capturedPhotos,
+            videoRecapFile: provider.videoRecapFile,
+            photoTimestamps: provider.photoTimestamps,
+            isProcessing: provider.isProcessing,
+            filters: provider.filters,
+            selectedFilter: provider.selectedFilter,
+            filterIntensity: provider.filterIntensity,
+            onFilterSelected: provider.setFilter,
+            onFilterIntensityChanged: provider.setFilterIntensity,
+            onSaveRequested: !requiresQr || provider.isSectionReady
+                ? () => _handleSaveRequest(context)
+                : null,
+            onCompleteRequested: requiresQr
+                ? () => _handleQRRequest(context)
+                : () => _handlePrintRequest(context),
+            requiresQr: requiresQr,
+            isMobile: isMobile,
+          );
+
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 550);
+    return AnimatedSwitcher(
+      duration: duration,
+      reverseDuration: duration,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      layoutBuilder: (currentChild, previousChildren) => ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [...previousChildren, ?currentChild],
+        ),
+      ),
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.96, end: 1).animate(animation),
+          child: child,
+        ),
+      ),
+      child: panel,
     );
   }
 
@@ -518,6 +452,19 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
 
           return Consumer<EditPhotoProvider>(
             builder: (context, editPhotoProvider, child) {
+              final requiresQr =
+                  kIsWeb && StorageConfig.activeStorage != StorageType.none;
+              final backButton = IconButton.filledTonal(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: () => Navigator.pop(context),
+                style: IconButton.styleFrom(
+                  backgroundColor: colorScheme.secondary.withValues(
+                    alpha: 0.08,
+                  ),
+                  foregroundColor: colorScheme.secondary,
+                ),
+              );
+
               return Scaffold(
                 backgroundColor: colorScheme.surface,
                 appBar: (isMobile && isLandscape)
@@ -526,69 +473,66 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                         elevation: 0,
                         scrolledUnderElevation: 0,
                         backgroundColor: Colors.transparent,
-                        leading: Center(
-                          child: IconButton.filledTonal(
-                            icon: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              size: 20,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                            style: IconButton.styleFrom(
-                              backgroundColor: colorScheme.secondary.withValues(
-                                alpha: 0.08,
-                              ),
-                              foregroundColor: colorScheme.secondary,
-                            ),
-                          ),
-                        ),
+                        leadingWidth: isMobile ? null : 64,
+                        leading: isMobile
+                            ? Center(child: backButton)
+                            : Row(children: [const Gap(16), backButton]),
+                        actions: [
+                          const LanguageSwitcher(isMobile: true),
+                          const Gap(16),
+                        ],
                       ),
-                bottomNavigationBar: (isMobile && !isLandscape)
+                bottomNavigationBar:
+                    (isMobile &&
+                        !isLandscape &&
+                        !editPhotoProvider.isSectionReady)
                     ? SafeArea(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           child: Row(
                             children: [
                               if (kIsWeb) ...[
-                                if (StorageConfig.activeStorage !=
-                                    StorageType.none) ...[
-                                  Expanded(
-                                    flex: 1,
-                                    child: SecondaryButton(
-                                      onTap: () => _handleQRRequest(context),
-                                      icon: Icons.qr_code_2_rounded,
-                                      height: 56,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                ],
                                 Expanded(
                                   flex: 1,
-                                  child: SecondaryButton(
-                                    onTap: () => _handleSaveRequest(context),
-                                    icon: Icons.save_alt_rounded,
-                                    height: 56,
+                                  child: Tooltip(
+                                    message: editPhotoProvider.isSectionReady
+                                        ? t.editor.saveToDevice
+                                        : t.editor.completeBeforeDownload,
+                                    child: SecondaryButton(
+                                      onTap: editPhotoProvider.isSectionReady
+                                          ? () => _handleSaveRequest(context)
+                                          : null,
+                                      icon: Icons.save_alt_rounded,
+                                      height: 56,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                               ] else ...[
                                 Expanded(
                                   flex: 1,
-                                  child: SecondaryButton(
-                                    onTap: () => _handleSaveRequest(context),
-                                    icon: Icons.save_alt_rounded,
-                                    height: 56,
+                                  child: Tooltip(
+                                    message: t.editor.saveToDevice,
+                                    child: SecondaryButton(
+                                      onTap: () => _handleSaveRequest(context),
+                                      icon: Icons.save_alt_rounded,
+                                      height: 56,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                               ],
-                              // Print Button
                               Expanded(
                                 flex: 3,
-                                child: PrimaryButton(
-                                  onTap: () => _handlePrintRequest(context),
-                                  label: t.editor.printPhoto,
-                                  icon: Icons.local_printshop_rounded,
-                                  height: 56,
+                                child: Tooltip(
+                                  message: t.editor.completeEditing,
+                                  child: PrimaryButton(
+                                    onTap: requiresQr
+                                        ? () => _handleQRRequest(context)
+                                        : () => _handlePrintRequest(context),
+                                    label: t.editor.completeEditing,
+                                    height: 56,
+                                  ),
                                 ),
                               ),
                             ],
@@ -658,7 +602,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                                           // Right: Editor
                                           Expanded(
                                             flex: 3,
-                                            child: _buildEditorPanel(
+                                            child: _buildRightPanel(
                                               context: context,
                                               provider: editPhotoProvider,
                                               isMobile: true,
@@ -679,7 +623,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                                           const Gap(12),
                                           Expanded(
                                             flex: 3,
-                                            child: _buildEditorPanel(
+                                            child: _buildRightPanel(
                                               context: context,
                                               provider: editPhotoProvider,
                                               isMobile: true,
@@ -699,7 +643,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                                     const Gap(24),
                                     Expanded(
                                       flex: 3,
-                                      child: _buildEditorPanel(
+                                      child: _buildRightPanel(
                                         context: context,
                                         provider: editPhotoProvider,
                                         isMobile: false,

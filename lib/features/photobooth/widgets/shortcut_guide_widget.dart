@@ -94,7 +94,7 @@ class _ShortcutGuideWidgetState extends State<ShortcutGuideWidget> {
                 ),
                 child: Icon(
                   Icons.keyboard_alt_outlined,
-                  color: _isExpanded ? Colors.white : colorScheme.primary,
+                  color: _isExpanded ? Colors.white : colorScheme.secondary,
                   size: 24,
                 ),
               ),

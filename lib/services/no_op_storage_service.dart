@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'storage_service_interface.dart';
+import 'storage_section.dart';
 import 'storage_user.dart';
 
 /// StorageService không thực hiện bất kỳ thao tác lưu trữ nào.
@@ -22,17 +23,17 @@ class NoOpStorageService implements StorageService {
   Future<String?> uploadImage(Uint8List bytes, String fileName) async => null;
 
   @override
-  Future<String?> uploadCollection({
+  Future<StorageSection?> prepareSection(String folderName) async => null;
+
+  @override
+  Future<void> uploadCollection({
     required Map<String, Uint8List> files,
-    required String folderName,
+    required String sectionId,
     void Function(int current, int total)? onProgress,
-  }) async => null;
+  }) async {}
 
   @override
   StorageUser? get currentUser => null;
-
-  @override
-  Future<String?> getFolderLink(String folderName) async => null;
 
   @override
   Stream<StorageUser?> get onCurrentUserChanged => const Stream.empty();

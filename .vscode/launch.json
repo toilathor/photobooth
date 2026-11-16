@@ -5,7 +5,12 @@
       "name": "Web - Personal",
       "request": "launch",
       "type": "dart",
-      "args": ["--web-port", "5050", "--web-define=FLAVOR=personal"]
+      "args": [
+        "--web-port",
+        "5050",
+        "--web-define=FLAVOR=personal",
+        "--dart-define-from-file=.env"
+      ]
     },
     {
       "name": "Web - Commercial",

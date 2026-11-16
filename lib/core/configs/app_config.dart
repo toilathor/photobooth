@@ -44,8 +44,14 @@ class AppConfig {
   static const List<int> photoCounts = [1, 4];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
+  static const Size printPixelSize = Size(2400, 3600);
   static const String githubFramesBaseUrl =
       'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/collected/';
+  static const String galleryBaseUrl =
+      'https://toilathor.github.io/photobooth/';
+
+  static String galleryUrl(String sectionId) =>
+      '$galleryBaseUrl#/gallery/${Uri.encodeComponent(sectionId)}';
 
   // Filter settings
   static List<String> get filters => FilterConfig.availableFilters;
