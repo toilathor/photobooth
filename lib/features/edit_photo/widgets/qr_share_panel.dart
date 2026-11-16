@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,9 +24,8 @@ class QrSharePanel extends StatelessWidget {
   Future<void> _copyLink(BuildContext context) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t.editor.linkCopied)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.editor.linkCopied)));
     }
   }
 

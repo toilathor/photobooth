@@ -79,9 +79,8 @@ class VideoRecapService {
         for (final log in mediaLogs) {
           final message = log.getMessage();
           if (message.contains('rotation of')) {
-            final match = RegExp(
-              r'rotation of (-?\d+(?:\.\d+)?)',
-            ).firstMatch(message);
+            final match = RegExp(r'rotation of (-?\d+(?:\.\d+)?)')
+                .firstMatch(message);
             if (match != null) {
               final val = double.tryParse(match.group(1) ?? '');
               if (val != null) {
@@ -92,9 +91,8 @@ class VideoRecapService {
           }
           if (rotation == 0 &&
               (message.contains('rotate') || message.contains('rotation'))) {
-            final match = RegExp(
-              r'(?:rotate|rotation)[^0-9-]*(-?\d+)',
-            ).firstMatch(message);
+            final match = RegExp(r'(?:rotate|rotation)[^0-9-]*(-?\d+)')
+                .firstMatch(message);
             if (match != null) {
               rotation = (int.tryParse(match.group(1) ?? '') ?? 0).abs();
               break;

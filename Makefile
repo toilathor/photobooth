@@ -1,4 +1,4 @@
-.PHONY: analyze test format format-check verify test-web-mobile deploy-web
+.PHONY: analyze test format format-check verify build-web-wasm test-web-mobile deploy-web
 
 FLUTTER ?= fvm flutter
 DART ?= fvm dart
@@ -16,6 +16,9 @@ format-check:
 	@$(DART) format --output=none --set-exit-if-changed lib test
 
 verify: format-check analyze test
+
+build-web-wasm:
+	@$(FLUTTER) build web --wasm --web-define=FLAVOR=personal
 
 test-web-mobile:
 	@bash scripts/test_mobile_web.sh

@@ -81,17 +81,27 @@ kiểm tra:
 - `test/integration`: kiểm tra app boot và luồng kết nối nhiều layer.
 - `test/support`: test shell trung lập, không tự khởi tạo provider của feature.
 
+## 🛠️ Yêu cầu môi trường & Cài đặt
+
+- **Flutter SDK**: `3.50.0` (Dart `3.14.0`), quản lý qua [FVM (Flutter Version Management)](https://fvm.app/).
+- **Quản lý phiên bản**: Luôn sử dụng tiền tố `fvm flutter` hoặc `fvm dart` để đảm bảo đồng nhất môi trường.
+- **Hệ thống Design**: Đã migrate sang `package:material_ui` và `package:cupertino_ui` chuẩn Flutter 3.50.
+
+---
+
 ## 🚀 Hướng dẫn Build & Deploy
 
 ### 🌐 1. Build cho môi trường Web (WASM)
+
+Ứng dụng hỗ trợ biên dịch sang **WebAssembly (WASM)** với fallback JavaScript tự động, giúp tối ưu tối đa hiệu năng render và xử lý ảnh trên trình duyệt.
 
 Tạo Google Drive API key, giới hạn key cho Google Drive API và HTTP referrer
 `https://toilathor.github.io/*`. Sau đó export key trước khi build:
 
 ```bash
 export GOOGLE_DRIVE_API_KEY="your-restricted-api-key"
-flutter clean
-flutter build web --base-href "/photobooth/" --wasm \
+fvm flutter clean
+fvm flutter build web --base-href "/photobooth/" --wasm \
   --web-define=FLAVOR=personal \
   --dart-define=GOOGLE_DRIVE_API_KEY="$GOOGLE_DRIVE_API_KEY"
 ```
@@ -108,10 +118,16 @@ cp .env.example .env
 ```
 
 Cho phép thêm HTTP referrer `http://localhost:5050/*` trên API key dùng để
-phát triển. Sau đó chạy cấu hình `Web - Personal` trong VS Code hoặc dùng:
+phát triển. Sau đó chạy cấu hình `Web - Personal` hoặc `Web - Personal (WASM)` trong VS Code hoặc dùng:
 
 ```bash
+# Chạy Web tiêu chuẩn
 fvm flutter run -d chrome --web-port 5050 \
+  --web-define=FLAVOR=personal \
+  --dart-define-from-file=.env
+
+# Hoặc chạy thử nghiệm với WebAssembly (WASM)
+fvm flutter run -d chrome --wasm --web-port 5050 \
   --web-define=FLAVOR=personal \
   --dart-define-from-file=.env
 ```

@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 import 'package:video_player/video_player.dart';
+
 import 'video_recap_components.dart';
 
 enum RecapViewMode { full, frame }
@@ -672,9 +673,8 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(
-                                context,
-                              ).colorScheme.secondary.withValues(alpha: 0.5),
+                              Theme.of(context).colorScheme.secondary
+                                  .withValues(alpha: 0.5),
                             ),
                           ),
                         ),

@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/core/configs/flavor_detector.dart';

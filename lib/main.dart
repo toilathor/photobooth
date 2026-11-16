@@ -1,8 +1,7 @@
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/copyright_watermark.dart';

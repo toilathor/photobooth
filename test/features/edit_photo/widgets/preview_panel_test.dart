@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:th_photobooth/components/branded_qr_code.dart';
@@ -26,8 +26,7 @@ void main() {
             filterIntensity: 0.5,
             photoIsMirrored: false,
             videoIsMirrored: false,
-            galleryUrl:
-                'https://toilathor.github.io/photobooth/#/gallery/section_123456',
+            galleryUrl: 'https://toilathor.github.io/photobooth/#/gallery/section_123456',
           ),
         ),
       ),

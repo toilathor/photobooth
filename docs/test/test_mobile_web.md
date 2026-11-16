@@ -26,9 +26,9 @@ make test-web-mobile
 
 Quá trình tự động diễn ra:
 
-1. Gõ lệnh build: `flutter build web --web-define=FLAVOR=commercial` (Build phiên bản commercial).
+1. Gõ lệnh build WebAssembly: `fvm flutter build web --wasm --web-define=FLAVOR=commercial` (Build phiên bản commercial với hỗ trợ Wasm và JS fallback tự động).
 2. Tự động khởi chạy local server trên port `5050` tại thư mục `build/web/`.
-3. Khởi chạy `ngrok` để expose port `5050` ra internet, cho phép các máy khác truy cập.
+3. Khởi chạy `ngrok` để expose port `5050` ra internet, cho phép các máy khác truy cập qua kết nối HTTPS (yêu cầu đối với một số Web API hiện đại và Camera).
 
 ## 3. Xem kết quả
 

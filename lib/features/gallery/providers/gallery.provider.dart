@@ -23,9 +23,9 @@ class GalleryProvider extends ChangeNotifier {
 
     try {
       if (sectionId.isEmpty) throw ArgumentError('Invalid gallery section');
-      files = (await _service.listFiles(
-        sectionId,
-      )).where((file) => file.isMedia).toList(growable: false);
+      files = (await _service.listFiles(sectionId))
+          .where((file) => file.isMedia)
+          .toList(growable: false);
       selectedIndex = 0;
     } catch (exception) {
       error = exception;

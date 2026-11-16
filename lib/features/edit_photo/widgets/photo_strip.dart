@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/components/branded_qr_code.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
@@ -92,9 +92,8 @@ class PhotoStrip extends StatelessWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(
-                                  context,
-                                ).colorScheme.secondary.withValues(alpha: 0.5),
+                                Theme.of(context).colorScheme.secondary
+                                    .withValues(alpha: 0.5),
                               ),
                             ),
                           ),
