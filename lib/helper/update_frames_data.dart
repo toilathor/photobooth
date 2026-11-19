@@ -3,12 +3,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-void main() async {
+// Usage: dart run lib/helper/FILE.dart [personal|commercial] (default: commercial)
+void main(List<String> args) async {
+  final flavor = args.isNotEmpty ? args.first : 'commercial';
+  final root = 'assets/frames/$flavor';
   print('Starting frames data update...');
 
-  final dataFile = File('assets/frames/data.json');
+  final dataFile = File('$root/data.json');
   if (!dataFile.existsSync()) {
-    print('Error: assets/frames/data.json does not exist.');
+    print('Error: $root/data.json does not exist.');
     return;
   }
 
@@ -46,8 +49,8 @@ void main() async {
 
   int currentMaxId = getMaxId();
 
-  // Scan assets/frames/custom/standard
-  final standardDir = Directory('assets/frames/custom/standard');
+  // Scan $root/custom/standard
+  final standardDir = Directory('$root/custom/standard');
   if (standardDir.existsSync()) {
     final files = standardDir.listSync().whereType<File>().toList();
     for (final file in files) {
@@ -80,8 +83,8 @@ void main() async {
     }
   }
 
-  // Scan assets/frames/custom/group
-  final groupDir = Directory('assets/frames/custom/group');
+  // Scan $root/custom/group
+  final groupDir = Directory('$root/custom/group');
   if (groupDir.existsSync()) {
     final files = groupDir.listSync().whereType<File>().toList();
     for (final file in files) {
@@ -121,5 +124,5 @@ void main() async {
     "images": images,
   });
   await dataFile.writeAsString(prettyJson);
-  print('assets/frames/data.json successfully updated.');
+  print('$root/data.json successfully updated.');
 }

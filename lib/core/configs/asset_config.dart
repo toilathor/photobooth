@@ -1,9 +1,10 @@
+import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/gen/assets.gen.dart';
 
 class AssetConfig {
   // Base paths
   static const String soundPath = 'sounds/';
-  static const String framePath = 'assets/frames/';
+  static String get framePath => 'assets/frames/${AppConfig.framesFolder}/';
 
   // Specific sounds (extract relative filename from type-safe Assets path)
   static final String soundCamera = Assets.sounds.camera.replaceFirst(

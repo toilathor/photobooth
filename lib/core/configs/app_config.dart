@@ -45,8 +45,17 @@ class AppConfig {
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
   static const Size printPixelSize = Size(2400, 3600);
-  static const String githubFramesBaseUrl =
-      'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/collected/';
+
+  /// Frame folder under `assets/frames/`, one per flavor so that frames of
+  /// different builds never mix.
+  static String get framesFolder => flavor.name;
+
+  /// Root URL of this flavor's frames (contains `data.json`, `collected/`,
+  /// `custom/`).
+  static String get framesRootUrl =>
+      'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/$framesFolder/';
+
+  static String get githubFramesBaseUrl => '${framesRootUrl}collected/';
   static const String galleryBaseUrl =
       'https://toilathor.github.io/photobooth/';
 

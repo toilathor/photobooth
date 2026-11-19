@@ -4,12 +4,15 @@ import 'dart:io';
 
 import 'package:image/image.dart' as img;
 
-void main() async {
+// Usage: dart run lib/helper/FILE.dart [personal|commercial] (default: commercial)
+void main(List<String> args) async {
+  final flavor = args.isNotEmpty ? args.first : 'commercial';
+  final root = 'assets/frames/$flavor';
   print('Starting thumbnail generation...');
-  final collectedDir = Directory('assets/frames/collected');
-  final customStandardDir = Directory('assets/frames/custom/standard');
-  final customGroupDir = Directory('assets/frames/custom/group');
-  final thumbnailsDir = Directory('assets/frames/thumbnails');
+  final collectedDir = Directory('$root/collected');
+  final customStandardDir = Directory('$root/custom/standard');
+  final customGroupDir = Directory('$root/custom/group');
+  final thumbnailsDir = Directory('$root/thumbnails');
 
   if (!thumbnailsDir.existsSync()) {
     thumbnailsDir.createSync(recursive: true);
@@ -21,14 +24,16 @@ void main() async {
       print('$label directory does not exist, skipping.');
       return;
     }
-    final files = dir.listSync().whereType<File>().toList();
+    final files = dir.listSync(recursive: true).whereType<File>().toList();
     int count = 0;
     for (final file in files) {
-      final filename = file.uri.pathSegments.last;
+      // Keep the sub-folder (e.g. category) so thumbnails mirror the source.
+      final filename = file.path.substring(dir.path.length + 1);
       if (!filename.toLowerCase().endsWith('.png')) continue;
 
       final destFile = File('${thumbnailsDir.path}/$filename');
       if (!destFile.existsSync()) {
+        destFile.parent.createSync(recursive: true);
         print(
           'Processing $filename in $label (${count + 1}/${files.length})...',
         );
