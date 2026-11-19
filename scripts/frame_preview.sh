@@ -15,11 +15,18 @@ DIR="build/frame_preview"
 rm -rf "$DIR"
 mkdir -p "$DIR"
 ln -s "$(pwd)/assets/frames" "$DIR/frames"
+# Concept group frames (python3 scripts/generate_group_concepts.py), if generated.
+[ -d build/frame_concepts ] && ln -s "$(pwd)/build/frame_concepts" "$DIR/concepts"
 cp scripts/frame_preview/index.html "$DIR/index.html"
+
+# Small thumbnails so the page stays light (full frames load only when tapped).
+python3 scripts/frame_preview/thumbs.py "$DIR" assets/frames
+python3 scripts/frame_preview/thumbs.py "$DIR" assets/frames --watch >/dev/null 2>&1 &
+THUMBS_PID=$!
 
 python3 -m http.server "$PORT" --directory "$DIR" >/dev/null 2>&1 &
 SERVER_PID=$!
-trap 'kill $SERVER_PID 2>/dev/null' EXIT
+trap 'kill $SERVER_PID $THUMBS_PID 2>/dev/null' EXIT
 
 echo "Local:   http://localhost:$PORT"
 LAN_IP="$(ipconfig getifaddr en0 2>/dev/null || true)"
