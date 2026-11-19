@@ -445,6 +445,13 @@ class PhotoboothProvider extends ChangeNotifier {
     }
   }
 
+  /// Puts back a photo removed with [removePhoto] (undo).
+  void restorePhoto(int index, XFile photo) {
+    if (capturedPhotos.length >= selectedPhotoCount) return;
+    capturedPhotos.insert(index.clamp(0, capturedPhotos.length), photo);
+    notifyListeners();
+  }
+
   void resetCapture() {
     capturedPhotos.clear();
     _videoService.reset();

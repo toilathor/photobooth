@@ -33,6 +33,7 @@ void main() {
               onFilterIntensityChanged: (_) {},
               onSaveRequested: () {},
               onCompleteRequested: () => qrRequests++,
+              completeLabel: t.editor.createQr,
               requiresQr: true,
             ),
           ),
@@ -43,10 +44,10 @@ void main() {
     expect(find.byIcon(Icons.qr_code_2_rounded), findsNothing);
     expect(find.byIcon(Icons.local_printshop_rounded), findsNothing);
     expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
-    expect(find.text(t.editor.completeEditing), findsOneWidget);
+    expect(find.text(t.editor.createQr), findsOneWidget);
     expect(find.byTooltip(t.editor.saveToDevice), findsOneWidget);
 
-    await tester.tap(find.text(t.editor.completeEditing));
+    await tester.tap(find.text(t.editor.createQr));
 
     expect(qrRequests, 1);
   });
@@ -73,6 +74,7 @@ void main() {
               onFilterSelected: (_) {},
               onFilterIntensityChanged: (_) {},
               onCompleteRequested: () {},
+              completeLabel: t.editor.createQr,
               onQrCornerChanged: (corner) => picked = corner,
             ),
           ),

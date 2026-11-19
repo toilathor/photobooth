@@ -29,7 +29,11 @@ class EditorPanel extends StatefulWidget {
   final void Function(double) onFilterIntensityChanged;
   final VoidCallback? onSaveRequested;
   final VoidCallback onCompleteRequested;
+
+  /// Names what "complete" actually does here: create a QR or print.
+  final String completeLabel;
   final bool requiresQr;
+  final bool photoIsMirrored;
 
   /// Where the gallery QR sits on the print. The picker is hidden when
   /// [onQrCornerChanged] is null (no QR is printed).
@@ -52,7 +56,9 @@ class EditorPanel extends StatefulWidget {
     required this.onFilterIntensityChanged,
     this.onSaveRequested,
     required this.onCompleteRequested,
+    required this.completeLabel,
     this.requiresQr = false,
+    this.photoIsMirrored = false,
     this.qrCorner = QrCorner.fallback,
     this.onQrCornerChanged,
     this.isMobile = false,
@@ -125,7 +131,7 @@ class _EditorPanelState extends State<EditorPanel> {
                   Expanded(
                     child: Text(
                       t.editor.completeEditingHint,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onSurface.withValues(alpha: 0.65),
@@ -158,6 +164,7 @@ class _EditorPanelState extends State<EditorPanel> {
                                 : t.editor.saveToDevice,
                             child: SecondaryButton(
                               onTap: widget.onSaveRequested,
+                              semanticLabel: t.editor.saveToDevice,
                               icon: Icons.save_alt_rounded,
                               height: btnHeight,
                             ),
@@ -173,6 +180,7 @@ class _EditorPanelState extends State<EditorPanel> {
                             message: t.editor.saveToDevice,
                             child: SecondaryButton(
                               onTap: widget.onSaveRequested!,
+                              semanticLabel: t.editor.saveToDevice,
                               icon: Icons.save_alt_rounded,
                               height: btnHeight,
                             ),
@@ -183,13 +191,10 @@ class _EditorPanelState extends State<EditorPanel> {
                     ],
                     Expanded(
                       flex: 3,
-                      child: Tooltip(
-                        message: t.editor.completeEditing,
-                        child: PrimaryButton(
-                          onTap: widget.onCompleteRequested,
-                          label: t.editor.completeEditing,
-                          height: btnHeight,
-                        ),
+                      child: PrimaryButton(
+                        onTap: widget.onCompleteRequested,
+                        label: widget.completeLabel,
+                        height: btnHeight,
                       ),
                     ),
                   ],
@@ -224,6 +229,10 @@ class _EditorPanelState extends State<EditorPanel> {
                 selectedFilter: widget.selectedFilter,
                 onFilterSelected: widget.onFilterSelected,
                 colorScheme: colorScheme,
+                previewImagePath: widget.photos.isNotEmpty
+                    ? widget.photos.first.path
+                    : null,
+                previewIsMirrored: widget.photoIsMirrored,
                 isMobile: widget.isMobile,
               ),
             ),
@@ -246,6 +255,9 @@ class _EditorPanelState extends State<EditorPanel> {
                     Expanded(
                       child: Slider(
                         value: widget.filterIntensity,
+                        label: '${(widget.filterIntensity * 100).toInt()}%',
+                        semanticFormatterCallback: (v) =>
+                            '${t.filters.title} ${(v * 100).toInt()}%',
                         onChanged: widget.onFilterIntensityChanged,
                         activeColor: colorScheme.secondary,
                         inactiveColor: colorScheme.onSurface.withValues(
@@ -258,7 +270,7 @@ class _EditorPanelState extends State<EditorPanel> {
                       width: 40,
                       child: Text(
                         '${(widget.filterIntensity * 100).toInt()}%',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: colorScheme.secondary,

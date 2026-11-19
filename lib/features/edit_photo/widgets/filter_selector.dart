@@ -1,3 +1,6 @@
+import 'dart:io' show File;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gap/gap.dart';
@@ -12,7 +15,10 @@ class FilterSelector extends StatefulWidget {
   final String selectedFilter;
   final void Function(String) onFilterSelected;
   final ColorScheme colorScheme;
+
+  /// The guest's own photo, so each swatch previews the real result.
   final String? previewImagePath;
+  final bool previewIsMirrored;
   final bool isDisabled;
   final bool isMobile;
 
@@ -23,6 +29,7 @@ class FilterSelector extends StatefulWidget {
     required this.onFilterSelected,
     required this.colorScheme,
     this.previewImagePath,
+    this.previewIsMirrored = false,
     this.isDisabled = false,
     this.isMobile = false,
   });
@@ -62,6 +69,8 @@ class _FilterSelectorState extends State<FilterSelector> {
                     ? null
                     : () => widget.onFilterSelected(filterKey),
                 colorScheme: widget.colorScheme,
+                previewImagePath: widget.previewImagePath,
+                previewIsMirrored: widget.previewIsMirrored,
               ),
             );
           },
@@ -88,6 +97,8 @@ class _FilterSelectorState extends State<FilterSelector> {
                 ? null
                 : () => widget.onFilterSelected(filterKey),
             colorScheme: widget.colorScheme,
+            previewImagePath: widget.previewImagePath,
+            previewIsMirrored: widget.previewIsMirrored,
           );
         },
       ),
@@ -100,16 +111,39 @@ class _FilterThumbnail extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
   final ColorScheme colorScheme;
+  final String? previewImagePath;
+  final bool previewIsMirrored;
 
   const _FilterThumbnail({
     required this.filterKey,
     required this.isSelected,
     this.onTap,
     required this.colorScheme,
+    this.previewImagePath,
+    this.previewIsMirrored = false,
   });
 
   Widget _buildPreviewImage() {
-    return Assets.images.sampleFilter.image(fit: BoxFit.cover);
+    final path = previewImagePath;
+    if (path == null || path.isEmpty) {
+      return Assets.images.sampleFilter.image(fit: BoxFit.cover);
+    }
+    Widget fallback(BuildContext _, Object _, StackTrace? _) =>
+        Assets.images.sampleFilter.image(fit: BoxFit.cover);
+    final image = kIsWeb
+        ? Image.network(
+            path,
+            fit: BoxFit.cover,
+            cacheWidth: 160,
+            errorBuilder: fallback,
+          )
+        : Image.file(
+            File(path),
+            fit: BoxFit.cover,
+            cacheWidth: 160,
+            errorBuilder: fallback,
+          );
+    return Transform.scale(scaleX: previewIsMirrored ? -1 : 1, child: image);
   }
 
   @override
@@ -121,76 +155,85 @@ class _FilterThumbnail extends StatelessWidget {
       label = FilterConfig.getFilter(filterKey).name;
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedScale(
-            scale: isSelected ? 1.05 : 0.95,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutBack,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Glow ring
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected
-                        ? colorScheme.secondary.withValues(alpha: 0.12)
-                        : Colors.transparent,
-                    border: Border.all(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.0 : 0.94,
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Glow ring
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 68,
+                    height: 68,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: isSelected
-                          ? colorScheme.secondary
+                          ? colorScheme.secondary.withValues(alpha: 0.12)
                           : Colors.transparent,
-                      width: 2.5,
+                      border: Border.all(
+                        color: isSelected
+                            ? colorScheme.secondary
+                            : Colors.transparent,
+                        width: 2.5,
+                      ),
                     ),
                   ),
-                ),
-                // Inner image thumbnail
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+                  // Inner image thumbnail
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.matrix(
+                          FilterConfig.getFilterMatrix(filterKey, 1.0),
+                        ),
+                        child: _buildPreviewImage(),
                       ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.matrix(
-                        FilterConfig.getFilterMatrix(filterKey, 1.0),
-                      ),
-                      child: _buildPreviewImage(),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const Gap(2),
-          AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 200),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-              color: isSelected
-                  ? colorScheme.secondary
-                  : colorScheme.onSurface.withValues(alpha: 0.6),
+            const Gap(2),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected
+                    ? colorScheme.secondary
+                    : colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

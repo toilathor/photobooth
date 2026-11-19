@@ -17,6 +17,7 @@ import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.d
 import 'package:th_photobooth/features/photobooth/widgets/previews_footer.dart';
 import 'package:th_photobooth/features/photobooth/widgets/settings_panel.dart';
 import 'package:th_photobooth/features/photobooth/widgets/shortcut_guide_widget.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 
 class PhotoboothScreen extends StatefulWidget {
   const PhotoboothScreen({super.key});
@@ -80,7 +81,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
     } else if (logicalKey == LogicalKeyboardKey.keyV) {
       provider.toggleVideoRecap(!provider.isVideoRecap);
     } else if (logicalKey == LogicalKeyboardKey.keyR) {
-      provider.resetCapture();
+      confirmResetSession(context);
     } else if (logicalKey == LogicalKeyboardKey.keyF) {
       provider.enterFullscreen();
     }
@@ -188,8 +189,12 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
             // Hide header in landscape mobile to save vertical space
             if (!(isMobile && isLandscape))
               PhotoboothHeader(
+                // Desktop: the language toggle sits in the header instead of
+                // floating over it.
+                leading: isMobile ? null : const LanguageSwitcher(),
                 trailing: isMobile
                     ? IconButton(
+                        tooltip: t.settings.open,
                         icon: Icon(
                           Icons.settings_rounded,
                           color: colorScheme.secondary,
@@ -254,15 +259,6 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
         child: Stack(
           children: [
             screenContent,
-            if (!isMobile)
-              const Positioned(
-                top: 0,
-                left: 0,
-                child: Material(
-                  color: Colors.transparent,
-                  child: LanguageSwitcher(),
-                ),
-              ),
             if (kIsWeb && !isMobile) const ShortcutGuideWidget(),
           ],
         ),
@@ -350,14 +346,16 @@ class _MobileLandscapePanel extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
+                  tooltip: t.settings.open,
                   icon: Icon(
                     Icons.settings_rounded,
                     color: colorScheme.secondary,
                     size: 24,
                   ),
                   onPressed: onSettingsTap,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size.square(44),
+                  ),
                 ),
               ),
               Expanded(child: const PhotoPreviewsPanel(isMobile: true)),

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/core/configs/google_drive_config.dart';
+import 'package:th_photobooth/helper/open_external_url.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/gallery_file.dart';
 import 'package:video_player/video_player.dart';
@@ -99,7 +100,22 @@ class _GalleryLightboxState extends State<GalleryLightbox> {
                           '${widget.selectedIndex + 1}/${widget.files.length}',
                           style: const TextStyle(
                             color: Colors.white70,
+                            fontFeatures: [FontFeature.tabularFigures()],
                             shadows: [Shadow(blurRadius: 8)],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Guests open this page to keep their photos, so
+                        // saving one is a single tap away.
+                        IconButton.filled(
+                          tooltip: t.gallery.download,
+                          onPressed: () =>
+                              openExternalUrl(selectedFile.downloadUrl),
+                          icon: const Icon(Icons.download_rounded),
+                          style: IconButton.styleFrom(
+                            minimumSize: const Size.square(44),
+                            backgroundColor: Colors.black45,
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ],
@@ -249,9 +265,23 @@ class _GalleryMedia extends StatelessWidget {
         child: Image.network(
           file.contentUrl(GoogleDriveConfig.apiKey),
           fit: BoxFit.contain,
-          loadingBuilder: (context, child, progress) => progress == null
-              ? child
-              : const Center(child: CircularProgressIndicator()),
+          // Show the already-loaded thumbnail while the full image arrives.
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            final thumb = file.thumbnailLink;
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                if (thumb != null)
+                  Image.network(
+                    thumb,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                const CircularProgressIndicator(color: Colors.white70),
+              ],
+            );
+          },
           errorBuilder: (_, _, _) => const Center(
             child: Icon(
               Icons.broken_image_outlined,

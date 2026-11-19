@@ -37,4 +37,10 @@ class GalleryFile {
     '/drive/v3/files/$id',
     {'alt': 'media', 'key': apiKey},
   ).toString();
+
+  /// Direct download link for a publicly shared Drive file.
+  String get downloadUrl => Uri.https('drive.google.com', '/uc', {
+    'export': 'download',
+    'id': id,
+  }).toString();
 }

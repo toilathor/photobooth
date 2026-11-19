@@ -73,11 +73,11 @@ class QrSharePanel extends StatelessWidget {
                       child: Text(
                         t.google_drive.qr_title,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           color: colorScheme.secondary,
                           fontSize: isMobile ? 16 : 20,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ),
@@ -87,7 +87,7 @@ class QrSharePanel extends StatelessWidget {
                 Text(
                   t.google_drive.qr_description,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: colorScheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,

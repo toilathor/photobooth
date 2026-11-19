@@ -37,9 +37,9 @@ class _GalleryView extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(
           t.gallery.title,
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2,
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
         ),
         centerTitle: true,

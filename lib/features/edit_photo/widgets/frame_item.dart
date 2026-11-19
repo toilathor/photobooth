@@ -1,6 +1,4 @@
-import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:th_photobooth/i18n/strings.g.dart';
 
 class FrameItem extends StatelessWidget {
   final String framePath;
@@ -18,16 +16,9 @@ class FrameItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return CupertinoContextMenu(
-      actions: [
-        CupertinoContextMenuAction(
-          child: Text(t.editor.chooseFrame),
-          onPressed: () {
-            onTap();
-            Navigator.pop(context);
-          },
-        ),
-      ],
+    return Semantics(
+      button: true,
+      selected: isSelected,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -80,13 +71,13 @@ class FrameItem extends StatelessWidget {
                     right: 4,
                     child: Container(
                       padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
+                      child: Icon(
+                        Icons.check_rounded,
+                        color: colorScheme.onSecondary,
                         size: 14,
                       ),
                     ),

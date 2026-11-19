@@ -4,50 +4,58 @@
     "titleCommercial": "PhotoBooth"
   },
   "settings": {
-    "title": "CÀI ĐẶT",
+    "title": "Cài đặt",
     "photoCount": "Chế độ",
-    "modeGroup": "Chụp Nhóm",
-    "modeStandard": "Tiêu Chuẩn",
-    "countdown": "Đếm Ngược",
+    "modeGroup": "Chụp nhóm",
+    "modeStandard": "Tiêu chuẩn",
+    "countdown": "Đếm ngược",
     "seconds": "giây",
     "language": "Ngôn ngữ",
     "mirror": "Gương",
     "veryHighResolution": "FullHD",
-    "saveVideo": "Lưu video recap"
+    "saveVideo": "Lưu video recap",
+    "photos": "$count ảnh",
+    "open": "Cài đặt"
   },
   "actions": {
     "manual": "Chụp tay",
-    "auto": "AUTO",
-    "retake": "Chụp Lại",
-    "videoRecap": "VIDEO RECAP",
+    "auto": "Tự động",
+    "retake": "Chụp lại",
+    "videoRecap": "Video recap",
     "prepare": "Chuẩn bị",
-    "cancel": "HỦY"
+    "cancel": "Hủy",
+    "switchCamera": "Đổi camera",
+    "mirror": "Lật gương"
   },
   "preview": {
-    "captured": "ĐÃ CHỤP $current/$total",
-    "continue_btn": "TIẾP TỤC",
-    "not_enough_photos": "CHƯA ĐỦ ẢNH",
-    "title": "XEM TRƯỚC",
+    "captured": "Đã chụp $current/$total",
+    "continue_btn": "Tiếp tục",
+    "not_enough_photos": "Chưa đủ ảnh",
+    "title": "Xem trước",
     "edit_mode": "Sửa",
     "print_mode": "In",
     "copy": "bản",
-    "landscape": "NẰM NGANG",
-    "portrait": "DỌC"
+    "landscape": "Nằm ngang",
+    "portrait": "Dọc",
+    "remaining": "Còn $count ảnh nữa",
+    "photoRemoved": "Đã xoá ảnh",
+    "undo": "Hoàn tác",
+    "removePhoto": "Xoá ảnh"
   },
   "editor": {
     "title": "Chỉnh sửa ảnh",
-    "watchVideoRecap": "XEM VIDEO RECAP",
-    "completeEditing": "HOÀN TẤT CHỈNH SỬA",
-    "completeEditingHint": "Hoàn tất chỉnh sửa để tạo QR và mở khóa Lưu",
-    "frame_mode": "GẮN KHUNG",
-    "full_mode": "TOÀN BỘ",
+    "watchVideoRecap": "Xem video recap",
+    "completeEditing": "Hoàn tất",
+    "completeEditingHint": "Tạo mã QR để mở khoá nút Tải xuống",
+    "frame_mode": "Gắn khung",
+    "full_mode": "Toàn bộ",
     "frames": "Khung hình",
     "filters": "Bộ lọc",
-    "savePhoto": "LƯU ẢNH",
+    "savePhoto": "Lưu ảnh",
     "saveSuccess": "Đã lưu ảnh vào thư viện!",
     "saveError": "Lỗi khi lưu ảnh: $error",
-    "viewNow": "XEM NGAY",
-    "saveToDevice": "TẢI XUỐNG",
+    "viewNow": "Xem ngay",
+    "saveToDevice": "Tải xuống",
     "completeBeforeDownload": "Hoàn tất chỉnh sửa trước để tải xuống",
     "copyLink": "Sao chép liên kết",
     "linkCopied": "Đã sao chép liên kết",
@@ -58,6 +66,12 @@
     "printing": "Đang chuẩn bị in...",
     "printSuccess": "Đã gửi lệnh in thành công!",
     "printError": "Lỗi khi in: $error",
+    "createQr": "Tạo mã QR",
+    "printPhoto": "In ảnh",
+    "processing": "Đang xử lý ảnh…",
+    "genericError": "Chưa lưu được ảnh. Vui lòng thử lại.",
+    "printFailed": "Chưa in được ảnh. Kiểm tra máy in và thử lại.",
+    "retry": "Thử lại",
     "qrPosition": "Vị trí mã QR",
     "qrCorners": {
       "topLeft": "Góc trên trái",
@@ -70,22 +84,22 @@
     "photoSelection": {
       "title": "Chọn ảnh muốn giữ lại",
       "subtitle": "Vui lòng chọn đúng $count ảnh để tiếp tục.",
-      "cancel": "HỦY",
-      "confirm": "XÁC NHẬN"
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
     },
     "resetSession": {
       "title": "Bắt đầu lại?",
       "content": "Toàn bộ ảnh hiện tại sẽ bị xóa. Bạn có chắc chắn muốn bắt đầu phiên mới?",
-      "cancel": "HỦY",
-      "confirm": "BẮT ĐẦU LẠI"
+      "cancel": "Hủy",
+      "confirm": "Bắt đầu lại"
     }
   },
   "filters": {
     "title": "Bộ lọc màu",
-    "normal": "Bình Thường"
+    "normal": "Bình thường"
   },
   "video_recap": {
-    "title": "VIDEO RECAP",
+    "title": "Video recap",
     "controls": {
       "play": "Phát",
       "pause": "Tạm dừng",
@@ -97,46 +111,48 @@
     "creating_recap": "Đang tạo video recap gắn khung...",
     "preparing_data": "Đang chuẩn bị dữ liệu...",
     "uploading_files": "Đang tải tệp $current/$total...",
-    "preparing": "ĐANG CHUẨN BỊ",
+    "preparing": "Đang chuẩn bị",
     "success": "Tải lên thành công!",
     "error": "Lỗi khi tải lên: $error",
-    "qr_title": "QUÉT MÃ ĐỂ TẢI ẢNH",
+    "qr_title": "Quét mã để tải ảnh",
     "qr_description": "Lưu giữ khoảnh khắc đẹp nhất chỉ với một lần quét",
     "folder_print": "Ảnh in",
     "folder_framed": "Ảnh frame",
     "folder_video_framed": "Video frame",
-    "folder_video_full": "Video gốc"
+    "folder_video_full": "Video gốc",
+    "failed": "Chưa tải lên được. Kiểm tra kết nối mạng và thử lại."
   },
   "gallery": {
-    "title": "KHOẢNH KHẮC CỦA BẠN",
+    "title": "Khoảnh khắc của bạn",
     "errorTitle": "Chưa thể mở thư viện",
     "errorMessage": "Không thể tải ảnh và video lúc này. Vui lòng thử lại.",
-    "retry": "THỬ LẠI",
+    "retry": "Thử lại",
     "emptyTitle": "Thư viện đang trống",
     "emptyMessage": "Ảnh và video sẽ xuất hiện tại đây sau khi tải lên.",
     "openFile": "Mở $name",
     "previous": "Tệp trước",
     "next": "Tệp sau",
     "play": "Phát",
-    "pause": "Tạm dừng"
+    "pause": "Tạm dừng",
+    "download": "Tải về"
   },
   "auth": {
-    "title": "XÁC THỰC TÀI KHOẢN",
+    "title": "Xác thực tài khoản",
     "description": "Để đảm bảo ảnh được lưu trữ riêng tư và an toàn trên Google Drive của bạn.",
-    "back": "QUAY LẠI",
-    "grant_title": "CẤP QUYỀN TRUY CẬP",
+    "back": "Quay lại",
+    "grant_title": "Cấp quyền truy cập",
     "grant_description": "Vui lòng cấp quyền truy cập Google Drive để ứng dụng có thể tạo thư mục và lưu trữ ảnh/video của bạn.",
-    "grant_btn": "CẤP QUYỀN & TIẾP TỤC",
+    "grant_btn": "Cấp quyền và tiếp tục",
     "grant_failed": "Cấp quyền truy cập thất bại. Vui lòng thử lại."
   },
   "shortcuts": {
-    "title": "Phím Tắt Bàn Phím",
+    "title": "Phím tắt bàn phím",
     "description": "Sử dụng phím tắt để thao tác nhanh hơn",
     "space": "Bắt đầu / Hủy chụp ảnh",
-    "key_s": "Chuyển đổi Camera",
-    "key_m": "Bật / Tắt Gương",
-    "key_v": "Bật / Tắt Video Recap",
-    "key_r": "Bắt đầu lại (Reset)",
+    "key_s": "Đổi camera",
+    "key_m": "Bật / tắt gương",
+    "key_v": "Bật / tắt video recap",
+    "key_r": "Bắt đầu lại",
     "key_f": "Toàn màn hình"
   }
 }

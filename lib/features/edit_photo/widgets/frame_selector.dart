@@ -101,7 +101,7 @@ class _FrameSelectorState extends State<FrameSelector> {
                 child: Center(
                   child: Text(
                     displayLabel,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: isSelected
                           ? FontWeight.bold

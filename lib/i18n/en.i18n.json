@@ -4,7 +4,7 @@
     "titleCommercial": "PhotoBooth"
   },
   "settings": {
-    "title": "SETTINGS",
+    "title": "Settings",
     "photoCount": "Mode",
     "modeGroup": "Group Shot",
     "modeStandard": "Standard",
@@ -13,51 +13,65 @@
     "language": "Language",
     "mirror": "Mirror",
     "veryHighResolution": "FullHD",
-    "saveVideo": "SAVE VIDEO RECAP"
+    "saveVideo": "Save video recap",
+    "photos": "$count photos",
+    "open": "Settings"
   },
   "actions": {
     "manual": "Manual",
-    "auto": "AUTO",
+    "auto": "Auto",
     "retake": "Retake",
-    "videoRecap": "VIDEO RECAP",
+    "videoRecap": "Video recap",
     "prepare": "Prepare",
-    "cancel": "CANCEL"
+    "cancel": "Cancel",
+    "switchCamera": "Switch camera",
+    "mirror": "Mirror"
   },
   "preview": {
-    "captured": "CAPTURED $current/$total",
-    "continue_btn": "CONTINUE",
-    "not_enough_photos": "NEED MORE PHOTOS",
-    "title": "PREVIEW",
+    "captured": "Captured $current/$total",
+    "continue_btn": "Continue",
+    "not_enough_photos": "Need more photos",
+    "title": "Preview",
     "edit_mode": "Edit",
     "print_mode": "Print",
     "copy": "copy",
-    "landscape": "LANDSCAPE",
-    "portrait": "PORTRAIT"
+    "landscape": "Landscape",
+    "portrait": "Portrait",
+    "remaining": "$count more to go",
+    "photoRemoved": "Photo removed",
+    "undo": "Undo",
+    "removePhoto": "Remove photo"
   },
   "editor": {
     "title": "Edit",
-    "watchVideoRecap": "WATCH VIDEO RECAP",
-    "completeEditing": "COMPLETE EDITING",
-    "completeEditingHint": "Complete editing to create the QR code and unlock Save",
-    "frame_mode": "WITH FRAME",
-    "full_mode": "FULL VIEW",
+    "watchVideoRecap": "Watch video recap",
+    "completeEditing": "Done",
+    "completeEditingHint": "Create the QR code to unlock Download",
+    "frame_mode": "With frame",
+    "full_mode": "Full view",
     "frames": "Frames",
     "filters": "Filters",
-    "savePhoto": "SAVE PHOTO",
+    "savePhoto": "Save photo",
     "saveSuccess": "Saved to gallery successfully!",
     "saveError": "Failed to save: $error",
-    "viewNow": "VIEW NOW",
-    "saveToDevice": "DOWNLOAD",
+    "viewNow": "View now",
+    "saveToDevice": "Download",
     "completeBeforeDownload": "Complete editing before downloading",
     "copyLink": "Copy link",
     "linkCopied": "Link copied",
     "saveToDeviceSuccess": "Saved all photos and videos to device!",
     "saveToDeviceCancel": "Save cancelled.",
-    "chooseFrame": "Choose Frame",
+    "chooseFrame": "Choose frame",
     "all": "All",
     "printing": "Preparing to print...",
     "printSuccess": "Print job sent successfully!",
     "printError": "Print error: $error",
+    "createQr": "Create QR code",
+    "printPhoto": "Print",
+    "processing": "Processing your photos…",
+    "genericError": "Couldn't save your photos. Please try again.",
+    "printFailed": "Couldn't print. Check the printer and try again.",
+    "retry": "Try again",
     "qrPosition": "QR position",
     "qrCorners": {
       "topLeft": "Top left",
@@ -70,14 +84,14 @@
     "photoSelection": {
       "title": "Select photos to keep",
       "subtitle": "Please select exactly $count photos to continue.",
-      "cancel": "CANCEL",
-      "confirm": "CONFIRM"
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     },
     "resetSession": {
-      "title": "Start Over?",
+      "title": "Start over?",
       "content": "All current photos will be deleted. Are you sure you want to start a new session?",
-      "cancel": "CANCEL",
-      "confirm": "START OVER"
+      "cancel": "Cancel",
+      "confirm": "Start over"
     }
   },
   "filters": {
@@ -85,7 +99,7 @@
     "normal": "Normal"
   },
   "video_recap": {
-    "title": "VIDEO RECAP",
+    "title": "Video recap",
     "controls": {
       "play": "Play",
       "pause": "Pause",
@@ -97,46 +111,48 @@
     "creating_recap": "Creating framed video recap...",
     "preparing_data": "Preparing data...",
     "uploading_files": "Uploading file $current/$total...",
-    "preparing": "PREPARING",
+    "preparing": "Preparing",
     "success": "Uploaded successfully!",
     "error": "Upload error: $error",
-    "qr_title": "SCAN TO DOWNLOAD",
+    "qr_title": "Scan to download",
     "qr_description": "Save your favorite moments with a single scan",
     "folder_print": "Print Photos",
     "folder_framed": "Framed Photos",
     "folder_video_framed": "Framed Videos",
-    "folder_video_full": "Raw Videos"
+    "folder_video_full": "Raw Videos",
+    "failed": "Upload didn't finish. Check the connection and try again."
   },
   "gallery": {
-    "title": "YOUR MOMENTS",
+    "title": "Your moments",
     "errorTitle": "Unable to open gallery",
     "errorMessage": "Photos and videos cannot be loaded right now. Please try again.",
-    "retry": "TRY AGAIN",
+    "retry": "Try again",
     "emptyTitle": "Gallery is empty",
     "emptyMessage": "Photos and videos will appear here after upload.",
     "openFile": "Open $name",
     "previous": "Previous file",
     "next": "Next file",
     "play": "Play",
-    "pause": "Pause"
+    "pause": "Pause",
+    "download": "Download"
   },
   "auth": {
-    "title": "ACCOUNT AUTHENTICATION",
+    "title": "Account authentication",
     "description": "To ensure your photos are stored privately and securely on your Google Drive.",
-    "back": "BACK",
-    "grant_title": "GRANT ACCESS PERMISSION",
+    "back": "Back",
+    "grant_title": "Grant access",
     "grant_description": "Please grant Google Drive access so the app can create folders and store your photos/videos.",
-    "grant_btn": "GRANT ACCESS & CONTINUE",
+    "grant_btn": "Grant access and continue",
     "grant_failed": "Failed to grant access. Please try again."
   },
   "shortcuts": {
     "title": "Keyboard Shortcuts",
     "description": "Use keyboard shortcuts to navigate quickly",
     "space": "Start / Cancel capturing",
-    "key_s": "Switch Camera",
-    "key_m": "Toggle Mirror Mode",
+    "key_s": "Switch camera",
+    "key_m": "Toggle mirror",
     "key_v": "Toggle Video Recap",
-    "key_r": "Start Over (Reset)",
+    "key_r": "Start over",
     "key_f": "Toggle Fullscreen"
   }
 }

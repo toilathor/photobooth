@@ -7,7 +7,7 @@ import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 
-import 'dropdown_setting.dart';
+import 'segmented_setting.dart';
 import 'photo_selection_dialog.dart';
 
 class SettingsPanel extends StatelessWidget {
@@ -26,27 +26,28 @@ class SettingsPanel extends StatelessWidget {
       children: [
         if (!isBottomSheet) ...[
           Text(
-            t.settings.title.toUpperCase(),
+            t.settings.title,
             style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
               color: colorScheme.secondary,
-              letterSpacing: 2,
+              letterSpacing: -0.3,
             ),
           ),
           const Gap(16),
         ],
-        DropdownSetting<int>(
+        SegmentedSetting<int>(
           label: t.settings.photoCount,
           value: provider.selectedPhotoCount,
           items: provider.photoCounts,
-          itemLabelBuilder: (val) {
-            return val == 1 ? t.settings.modeGroup : t.settings.modeStandard;
-          },
+          // Say how many shots each mode takes, not just its name.
+          itemLabelBuilder: (val) =>
+              '${val == 1 ? t.settings.modeGroup : t.settings.modeStandard}'
+              ' · ${t.settings.photos(count: val)}',
           onChanged: provider.isAutoCapturing
               ? null
               : (val) {
-                  final newCount = val as int;
+                  final newCount = val;
                   if (provider.capturedPhotos.length > newCount) {
                     // Show selection dialog
                     showDialog<List<XFile>>(
@@ -54,7 +55,7 @@ class SettingsPanel extends StatelessWidget {
                       builder: (context) => PhotoSelectionDialog(
                         photos: provider.capturedPhotos,
                         targetCount: newCount,
-                        isMirrored: provider.isMirrored,
+                        isMirrored: provider.photoRequiresFlip,
                       ),
                     ).then((selectedPhotos) {
                       if (selectedPhotos != null) {
@@ -70,14 +71,14 @@ class SettingsPanel extends StatelessWidget {
                 },
         ),
         const Gap(20),
-        DropdownSetting<int>(
+        SegmentedSetting<int>(
           label: t.settings.countdown,
           value: provider.countdown,
           items: provider.countdowns,
+          itemLabelBuilder: (val) => '$val ${t.settings.seconds}',
           onChanged: provider.isAutoCapturing
               ? null
-              : (val) => provider.setCountdown(val as int),
-          suffix: ' ${t.settings.seconds}',
+              : (val) => provider.setCountdown(val),
         ),
         const Gap(20),
         LayoutBuilder(

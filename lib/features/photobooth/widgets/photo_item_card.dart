@@ -4,6 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 
+import 'package:th_photobooth/i18n/strings.g.dart';
+
 import 'skeleton_loader.dart';
 
 class PhotoItemCard extends StatelessWidget {
@@ -74,25 +76,37 @@ class PhotoItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    // 44pt hit target around a small visual badge.
                     Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: isCapturing ? null : onDelete,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(
-                              alpha: isCapturing ? 0.2 : 0.5,
+                      top: 0,
+                      right: 0,
+                      child: Semantics(
+                        button: true,
+                        enabled: !isCapturing,
+                        label: t.preview.removePhoto,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: isCapturing ? null : onDelete,
+                          child: SizedBox.square(
+                            dimension: 44,
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(
+                                    alpha: isCapturing ? 0.2 : 0.55,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: isCapturing
+                                      ? Colors.white.withValues(alpha: 0.5)
+                                      : Colors.white,
+                                  size: 16,
+                                ),
+                              ),
                             ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            color: isCapturing
-                                ? Colors.white.withValues(alpha: 0.5)
-                                : Colors.white,
-                            size: 16,
                           ),
                         ),
                       ),

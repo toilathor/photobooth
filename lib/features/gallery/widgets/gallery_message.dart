@@ -33,9 +33,10 @@ class GalleryMessage extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 22,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 10),

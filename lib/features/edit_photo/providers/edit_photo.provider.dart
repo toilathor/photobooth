@@ -52,6 +52,8 @@ class EditPhotoProvider with ChangeNotifier {
   late FrameData selectedFrame;
   StorageSection? storageSection;
   String? galleryUrl;
+  static const Duration _uploadTimeout = Duration(minutes: 3);
+
   bool isSectionReady = false;
   bool get isEditorLocked => isSectionReady;
 
@@ -186,10 +188,12 @@ class EditPhotoProvider with ChangeNotifier {
       }
       notifyListeners();
 
+      // A stalled network must never leave the guest stuck behind the
+      // non-dismissible progress dialog: give up and offer a retry.
       await uploadCollection(
         captureStrip: captureStrip,
         capturePrintContent: capturePrintContent,
-      );
+      ).timeout(_uploadTimeout);
       isSectionReady = true;
       notifyListeners();
       onHideLoading();
