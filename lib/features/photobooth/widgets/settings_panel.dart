@@ -41,9 +41,7 @@ class SettingsPanel extends StatelessWidget {
           value: provider.selectedPhotoCount,
           items: provider.photoCounts,
           itemLabelBuilder: (val) {
-            if (val == 1) return t.settings.modeGroup;
-            if (val == 4) return t.settings.modeStandard;
-            return val.toString();
+            return val == 1 ? t.settings.modeGroup : t.settings.modeStandard;
           },
           onChanged: provider.isAutoCapturing
               ? null

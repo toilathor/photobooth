@@ -1,7 +1,6 @@
 import 'dart:io' show File;
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
@@ -85,19 +84,10 @@ class PhotoStrip extends StatelessWidget {
                   if (frame.path.isNotEmpty)
                     Positioned.fill(
                       child: IgnorePointer(
-                        child: CachedNetworkImage(
-                          imageUrl: frame.path,
+                        child: Image.asset(
+                          frame.path,
                           fit: BoxFit.fill,
-                          placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.secondary
-                                    .withValues(alpha: 0.5),
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) =>
+                          errorBuilder: (context, error, stackTrace) =>
                               const Icon(Icons.error_outline),
                         ),
                       ),

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
@@ -10,13 +10,9 @@ class FrameService {
     final List<FrameData> frames = [];
 
     try {
-      final response = await http.get(
-        Uri.parse('${AppConfig.framesRootUrl}data.json'),
+      final String jsonString = await rootBundle.loadString(
+        '${AppConfig.framesAssetRoot}data.json',
       );
-      if (response.statusCode != 200) {
-        throw Exception('HTTP status: ${response.statusCode}');
-      }
-      final String jsonString = utf8.decode(response.bodyBytes);
 
       final Map<String, dynamic> data =
           jsonDecode(jsonString) as Map<String, dynamic>;
@@ -58,15 +54,6 @@ class FrameService {
     return frames;
   }
 
-  /// Loads the byte data of a frame from a network URL.
-  static Future<ByteData> loadFrameBytes(String path) async {
-    final response = await http.get(Uri.parse(path));
-    if (response.statusCode == 200) {
-      return ByteData.sublistView(response.bodyBytes);
-    } else {
-      throw Exception(
-        'Failed to load frame from network: $path (Status: ${response.statusCode})',
-      );
-    }
-  }
+  /// Loads the byte data of a bundled frame image from its asset [path].
+  static Future<ByteData> loadFrameBytes(String path) => rootBundle.load(path);
 }

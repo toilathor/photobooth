@@ -1,4 +1,125 @@
 {
-    "categories": [],
-    "images": []
+    "categories": [
+        {
+            "id": 101,
+            "name": "Tone Xanh Rêu",
+            "created_at": "2026-11-19T12:30:00.000000",
+            "updated_at": "2026-11-19T12:30:00.000000"
+        },
+        {
+            "id": 102,
+            "name": "Tone Đỏ Rượu",
+            "created_at": "2026-11-19T12:30:00.000000",
+            "updated_at": "2026-11-19T12:30:00.000000"
+        },
+        {
+            "id": 103,
+            "name": "Tone Vườn Cưới",
+            "created_at": "2026-11-19T13:30:00.000000",
+            "updated_at": "2026-11-19T13:30:00.000000"
+        },
+        {
+            "id": 99,
+            "name": "Frame Custom",
+            "created_at": "2026-11-19T13:13:00.916789",
+            "updated_at": "2026-11-19T13:13:00.917286"
+        }
+    ],
+    "images": [
+        {
+            "id": 1,
+            "filename": "standard_custom_1.png",
+            "name": "standard_custom_1",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T12:28:25.410389",
+            "updated_at": "2026-11-19T12:28:25.410403",
+            "category_id": "101",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 101,
+                "name": "Tone Xanh Rêu",
+                "created_at": "2026-11-19T12:30:00.000000",
+                "updated_at": "2026-11-19T12:30:00.000000"
+            }
+        },
+        {
+            "id": 2,
+            "filename": "standard_custom_2.png",
+            "name": "standard_custom_2",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T12:28:25.410492",
+            "updated_at": "2026-11-19T12:28:25.410511",
+            "category_id": "102",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 102,
+                "name": "Tone Đỏ Rượu",
+                "created_at": "2026-11-19T12:30:00.000000",
+                "updated_at": "2026-11-19T12:30:00.000000"
+            }
+        },
+        {
+            "id": 3,
+            "filename": "group_custom_2.png",
+            "name": "group_custom_2",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T13:00:41.820992",
+            "updated_at": "2026-11-19T13:00:41.821010",
+            "category_id": "102",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 102,
+                "name": "Tone Đỏ Rượu",
+                "created_at": "2026-11-19T12:30:00.000000",
+                "updated_at": "2026-11-19T12:30:00.000000"
+            }
+        },
+        {
+            "id": 4,
+            "filename": "group_custom_1.png",
+            "name": "group_custom_1",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T13:00:41.821097",
+            "updated_at": "2026-11-19T13:00:41.821102",
+            "category_id": "101",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 101,
+                "name": "Tone Xanh Rêu",
+                "created_at": "2026-11-19T12:30:00.000000",
+                "updated_at": "2026-11-19T12:30:00.000000"
+            }
+        },
+        {
+            "id": 5,
+            "filename": "group_custom_3.png",
+            "name": "group_custom_3",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T13:11:32.887186",
+            "updated_at": "2026-11-19T13:11:32.887197",
+            "category_id": "103",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 103,
+                "name": "Tone Vườn Cưới",
+                "created_at": "2026-11-19T13:30:00.000000",
+                "updated_at": "2026-11-19T13:30:00.000000"
+            }
+        }
+    ]
 }

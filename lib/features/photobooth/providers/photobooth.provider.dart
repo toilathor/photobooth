@@ -32,7 +32,7 @@ class PhotoboothProvider extends ChangeNotifier {
   bool _isCameraOperationInProgress = false;
   CameraLensDirection? _lastLensDirection;
 
-  int selectedPhotoCount = 4;
+  int selectedPhotoCount = AppConfig.defaultPhotoCount;
   int countdown = 3;
   List<XFile> capturedPhotos = [];
   bool isVideoRecap = true;

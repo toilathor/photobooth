@@ -10,8 +10,8 @@ void main(List<String> args) async {
   final root = 'assets/frames/$flavor';
   print('Starting thumbnail generation...');
   final collectedDir = Directory('$root/collected');
-  final customStandardDir = Directory('$root/custom/standard');
-  final customGroupDir = Directory('$root/custom/group');
+  final customStandardDir = Directory('$root/standard');
+  final customGroupDir = Directory('$root/group');
   final thumbnailsDir = Directory('$root/thumbnails');
 
   if (!thumbnailsDir.existsSync()) {
@@ -56,10 +56,10 @@ void main(List<String> args) async {
   processDirectory(collectedDir, 'collected');
 
   // 3. Process custom standard frames
-  processDirectory(customStandardDir, 'custom/standard');
+  processDirectory(customStandardDir, 'standard');
 
   // 4. Process custom group frames
-  processDirectory(customGroupDir, 'custom/group');
+  processDirectory(customGroupDir, 'group');
 
   print('Thumbnail generation completed.');
 }

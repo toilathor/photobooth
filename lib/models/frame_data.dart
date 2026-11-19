@@ -18,22 +18,25 @@ class FrameData {
     this.categoryName = '',
   });
 
-  /// Factory for standard frames (4 slots)
+  /// Factory for standard frames. The slot count follows the flavor
+  /// ([AppConfig.standardPhotoCount]): 2 for personal, 4 for commercial.
   factory FrameData.standard({
     String filename = '',
     String categoryId = '',
     String categoryName = '',
   }) {
+    const allSlots = [
+      Rect.fromLTWH(40, 40, 800, 600),
+      Rect.fromLTWH(40, 660, 800, 600),
+      Rect.fromLTWH(40, 1280, 800, 600),
+      Rect.fromLTWH(40, 1900, 800, 600),
+    ];
+    final int count = AppConfig.standardPhotoCount;
     return FrameData(
       filename: filename,
-      photoSlots: 4,
+      photoSlots: count,
       size: const Size(880, 2650),
-      slots: const [
-        Rect.fromLTWH(40, 40, 800, 600),
-        Rect.fromLTWH(40, 660, 800, 600),
-        Rect.fromLTWH(40, 1280, 800, 600),
-        Rect.fromLTWH(40, 1900, 800, 600),
-      ],
+      slots: allSlots.sublist(0, count),
       categoryId: categoryId,
       categoryName: categoryName,
     );
@@ -49,7 +52,11 @@ class FrameData {
       filename: filename,
       photoSlots: 1,
       size: const Size(2800, 2000),
-      slots: const [Rect.fromLTWH(350, 212, 2100, 1575)],
+      // The personal group frames have the two people standing beside a smaller
+      // photo area (see scripts/generate_personal_frames.py).
+      slots: AppConfig.flavor == AppFlavor.personal
+          ? const [Rect.fromLTWH(498, 323.5, 1804, 1353)]
+          : const [Rect.fromLTWH(350, 212, 2100, 1575)],
       categoryId: categoryId,
       categoryName: categoryName,
     );
@@ -63,16 +70,16 @@ class FrameData {
       filename.startsWith('standard_custom_') ||
       filename.startsWith('group_custom_');
 
-  /// Dynamic getter to resolve the local or network asset path
+  /// Asset path of the frame image (bundled with the app)
   String get path {
     if (filename.isEmpty) return '';
 
     if (filename.startsWith('standard_custom_')) {
-      return '${AppConfig.framesRootUrl}custom/standard/$filename';
+      return '${AppConfig.framesAssetRoot}standard/$filename';
     } else if (filename.startsWith('group_custom_')) {
-      return '${AppConfig.framesRootUrl}custom/group/$filename';
+      return '${AppConfig.framesAssetRoot}group/$filename';
     } else {
-      return '${AppConfig.githubFramesBaseUrl}$filename';
+      return '${AppConfig.framesAssetRoot}collected/$filename';
     }
   }
 }

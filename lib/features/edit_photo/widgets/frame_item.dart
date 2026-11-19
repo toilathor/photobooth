@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -62,27 +61,11 @@ class FrameItem extends StatelessWidget {
                     ),
                   )
                 else
-                  CachedNetworkImage(
-                    imageUrl: framePath,
+                  Image.asset(
+                    framePath,
                     fit: BoxFit.cover,
-                    maxWidthDiskCache: 150,
-                    memCacheWidth: 150,
-                    placeholder: (context, url) => Container(
-                      padding: const EdgeInsets.all(24),
-                      color: colorScheme.onSurface.withValues(alpha: 0.05),
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colorScheme.secondary.withValues(alpha: 0.5),
-                          ),
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
+                    cacheWidth: 150,
+                    errorBuilder: (context, error, stackTrace) => Container(
                       color: colorScheme.errorContainer,
                       child: Icon(
                         Icons.error_outline,
