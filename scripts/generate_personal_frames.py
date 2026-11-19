@@ -35,7 +35,9 @@ PANEL_BOTTOM = 1300
 CREAM = (244, 238, 224)
 
 DATE = "28.11.26"
-NAMES = "Quang Thọ & Thuý Hền"
+GROOM_NAME = "Quang Thọ"
+BRIDE_NAME = "Thúy Hiền"
+NAMES = f"{GROOM_NAME} & {BRIDE_NAME}"
 
 GROUP_SIZE = (2800, 2000)
 GROUP_RADIUS = 90
@@ -49,15 +51,15 @@ GROOM_LEFT = 20  # canvas x of the groom's left-most edge
 BRIDE_RIGHT = GROUP_SIZE[0] + 100  # bride's veil may be cropped by the edge
 FIG_OVERLAP = 140
 GROUP_OUT_DIR = ROOT / "assets" / "frames" / "personal" / "group"
-GROUP_PHOTO_BG_NAME = "group_custom_3.png"
+GROUP_PHOTO_BG_NAME = "group_3.png"
 GROUP_VARIANTS = {
-    "group_custom_1.png": (54, 69, 47),
-    "group_custom_2.png": (110, 36, 39),
+    "group_1.png": (54, 69, 47),
+    "group_2.png": (110, 36, 39),
 }
 
 VARIANTS = {
-    "standard_custom_1.png": (54, 69, 47),  # moss green
-    "standard_custom_2.png": (110, 36, 39),  # wine red
+    "standard_1.png": (54, 69, 47),  # moss green
+    "standard_2.png": (110, 36, 39),  # wine red
 }
 
 

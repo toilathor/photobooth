@@ -19,17 +19,29 @@
             "updated_at": "2026-11-19T13:30:00.000000"
         },
         {
-            "id": 99,
-            "name": "Frame Custom",
-            "created_at": "2026-11-19T13:13:00.916789",
-            "updated_at": "2026-11-19T13:13:00.917286"
+            "id": 104,
+            "name": "Bưu Thiếp",
+            "created_at": "2026-11-19T14:40:00.000000",
+            "updated_at": "2026-11-19T14:40:00.000000"
+        },
+        {
+            "id": 105,
+            "name": "Poster Chéo",
+            "created_at": "2026-11-19T14:28:05.842092",
+            "updated_at": "2026-11-19T14:28:05.842092"
+        },
+        {
+            "id": 106,
+            "name": "Dải Phim",
+            "created_at": "2026-11-19T14:36:26.007839",
+            "updated_at": "2026-11-19T14:36:26.007839"
         }
     ],
     "images": [
         {
             "id": 1,
-            "filename": "standard_custom_1.png",
-            "name": "standard_custom_1",
+            "filename": "standard/standard_1.png",
+            "name": "standard_1",
             "frame": "square",
             "layout_type": "standard",
             "created_at": "2026-11-19T12:28:25.410389",
@@ -47,8 +59,8 @@
         },
         {
             "id": 2,
-            "filename": "standard_custom_2.png",
-            "name": "standard_custom_2",
+            "filename": "standard/standard_2.png",
+            "name": "standard_2",
             "frame": "square",
             "layout_type": "standard",
             "created_at": "2026-11-19T12:28:25.410492",
@@ -66,8 +78,8 @@
         },
         {
             "id": 3,
-            "filename": "group_custom_2.png",
-            "name": "group_custom_2",
+            "filename": "group/group_2.png",
+            "name": "group_2",
             "frame": "group",
             "layout_type": "group",
             "created_at": "2026-11-19T13:00:41.820992",
@@ -85,8 +97,8 @@
         },
         {
             "id": 4,
-            "filename": "group_custom_1.png",
-            "name": "group_custom_1",
+            "filename": "group/group_1.png",
+            "name": "group_1",
             "frame": "group",
             "layout_type": "group",
             "created_at": "2026-11-19T13:00:41.821097",
@@ -104,8 +116,8 @@
         },
         {
             "id": 5,
-            "filename": "group_custom_3.png",
-            "name": "group_custom_3",
+            "filename": "group/group_3.png",
+            "name": "group_3",
             "frame": "group",
             "layout_type": "group",
             "created_at": "2026-11-19T13:11:32.887186",
@@ -119,6 +131,591 @@
                 "name": "Tone Vườn Cưới",
                 "created_at": "2026-11-19T13:30:00.000000",
                 "updated_at": "2026-11-19T13:30:00.000000"
+            }
+        },
+        {
+            "id": 6,
+            "filename": "group/group_4.png",
+            "name": "group_4",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:22:14.964552",
+            "updated_at": "2026-11-19T14:59:52.725409",
+            "category_id": "104",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T14:59:52.725409",
+                "updated_at": "2026-11-19T14:59:52.725409"
+            },
+            "slot": [
+                570,
+                277.5,
+                1560,
+                1170
+            ]
+        },
+        {
+            "id": 7,
+            "filename": "group/group_5.png",
+            "name": "group_5",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:28:05.842092",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:54.159827",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T14:59:54.159827",
+                "updated_at": "2026-11-19T14:59:54.159827"
+            },
+            "slot": [
+                1178,
+                386,
+                1504,
+                1128
+            ]
+        },
+        {
+            "id": 8,
+            "filename": "group/group_6.png",
+            "name": "group_6",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:28:06.218949",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:54.457153",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T14:59:54.457153",
+                "updated_at": "2026-11-19T14:59:54.457153"
+            },
+            "slot": [
+                160,
+                247.5,
+                1620,
+                1215
+            ]
+        },
+        {
+            "id": 9,
+            "filename": "standard/standard_3.png",
+            "name": "standard_3",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:36:25.684938",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.144751",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:02.144751",
+                "updated_at": "2026-11-19T15:00:02.144751"
+            }
+        },
+        {
+            "id": 10,
+            "filename": "standard/standard_4.png",
+            "name": "standard_4",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:36:25.858912",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.326362",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:02.326362",
+                "updated_at": "2026-11-19T15:00:02.326362"
+            }
+        },
+        {
+            "id": 11,
+            "filename": "standard/standard_5.png",
+            "name": "standard_5",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:36:26.007839",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.479319",
+            "category_id": "106",
+            "category": {
+                "id": 106,
+                "name": "Dải Phim",
+                "created_at": "2026-11-19T15:00:02.479319",
+                "updated_at": "2026-11-19T15:00:02.479319"
+            }
+        },
+        {
+            "id": 12,
+            "filename": "group/group_7.png",
+            "name": "group_7",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:37.403092",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:55.793185",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T14:59:55.793185",
+                "updated_at": "2026-11-19T14:59:55.793185"
+            },
+            "slot": [
+                1178,
+                386,
+                1504,
+                1128
+            ]
+        },
+        {
+            "id": 13,
+            "filename": "group/group_8.png",
+            "name": "group_8",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:38.629041",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:57.035500",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T14:59:57.035500",
+                "updated_at": "2026-11-19T14:59:57.035500"
+            },
+            "slot": [
+                1178,
+                386,
+                1504,
+                1128
+            ]
+        },
+        {
+            "id": 14,
+            "filename": "group/group_9.png",
+            "name": "group_9",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:38.878872",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:57.289516",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T14:59:57.289516",
+                "updated_at": "2026-11-19T14:59:57.289516"
+            },
+            "slot": [
+                160,
+                247.5,
+                1620,
+                1215
+            ]
+        },
+        {
+            "id": 15,
+            "filename": "group/group_10.png",
+            "name": "group_10",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:39.130470",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:57.544581",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T14:59:57.544581",
+                "updated_at": "2026-11-19T14:59:57.544581"
+            },
+            "slot": [
+                160,
+                247.5,
+                1620,
+                1215
+            ]
+        },
+        {
+            "id": 16,
+            "filename": "group/group_11.png",
+            "name": "group_11",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:40.460722",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T14:59:58.890804",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T14:59:58.890804",
+                "updated_at": "2026-11-19T14:59:58.890804"
+            },
+            "slot": [
+                1178,
+                386,
+                1504,
+                1128
+            ]
+        },
+        {
+            "id": 17,
+            "filename": "group/group_12.png",
+            "name": "group_12",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:41.701366",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:00.148295",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:00.148295",
+                "updated_at": "2026-11-19T15:00:00.148295"
+            },
+            "slot": [
+                1178,
+                386,
+                1504,
+                1128
+            ]
+        },
+        {
+            "id": 18,
+            "filename": "group/group_13.png",
+            "name": "group_13",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:42.943124",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:01.407073",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:01.407073",
+                "updated_at": "2026-11-19T15:00:01.407073"
+            },
+            "slot": [
+                1178,
+                386,
+                1504,
+                1128
+            ]
+        },
+        {
+            "id": 19,
+            "filename": "group/group_14.png",
+            "name": "group_14",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:43.274735",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:01.745864",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:01.745864",
+                "updated_at": "2026-11-19T15:00:01.745864"
+            },
+            "slot": [
+                160,
+                247.5,
+                1620,
+                1215
+            ]
+        },
+        {
+            "id": 20,
+            "filename": "group/group_15.png",
+            "name": "group_15",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-11-19T14:55:43.523824",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.005653",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:02.005653",
+                "updated_at": "2026-11-19T15:00:02.005653"
+            },
+            "slot": [
+                160,
+                247.5,
+                1620,
+                1215
+            ]
+        },
+        {
+            "id": 21,
+            "filename": "standard/standard_6.png",
+            "name": "standard_6",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:44.165346",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.617985",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:02.617985",
+                "updated_at": "2026-11-19T15:00:02.617985"
+            }
+        },
+        {
+            "id": 22,
+            "filename": "standard/standard_7.png",
+            "name": "standard_7",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:44.301825",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.755692",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:02.755692",
+                "updated_at": "2026-11-19T15:00:02.755692"
+            }
+        },
+        {
+            "id": 23,
+            "filename": "standard/standard_8.png",
+            "name": "standard_8",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:44.479122",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:02.939895",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:02.939895",
+                "updated_at": "2026-11-19T15:00:02.939895"
+            }
+        },
+        {
+            "id": 24,
+            "filename": "standard/standard_9.png",
+            "name": "standard_9",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:44.656000",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:03.124952",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:03.124952",
+                "updated_at": "2026-11-19T15:00:03.124952"
+            }
+        },
+        {
+            "id": 25,
+            "filename": "standard/standard_10.png",
+            "name": "standard_10",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:44.809584",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:03.277085",
+            "category_id": "106",
+            "category": {
+                "id": 106,
+                "name": "Dải Phim",
+                "created_at": "2026-11-19T15:00:03.277085",
+                "updated_at": "2026-11-19T15:00:03.277085"
+            }
+        },
+        {
+            "id": 26,
+            "filename": "standard/standard_11.png",
+            "name": "standard_11",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:44.964435",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:03.433647",
+            "category_id": "106",
+            "category": {
+                "id": 106,
+                "name": "Dải Phim",
+                "created_at": "2026-11-19T15:00:03.433647",
+                "updated_at": "2026-11-19T15:00:03.433647"
+            }
+        },
+        {
+            "id": 27,
+            "filename": "standard/standard_12.png",
+            "name": "standard_12",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:45.136846",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:03.612139",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:03.612139",
+                "updated_at": "2026-11-19T15:00:03.612139"
+            }
+        },
+        {
+            "id": 28,
+            "filename": "standard/standard_13.png",
+            "name": "standard_13",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:45.296729",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:03.776391",
+            "category_id": "104",
+            "category": {
+                "id": 104,
+                "name": "Bưu Thiếp",
+                "created_at": "2026-11-19T15:00:03.776391",
+                "updated_at": "2026-11-19T15:00:03.776391"
+            }
+        },
+        {
+            "id": 29,
+            "filename": "standard/standard_14.png",
+            "name": "standard_14",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:45.479450",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:03.959550",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:03.959550",
+                "updated_at": "2026-11-19T15:00:03.959550"
+            }
+        },
+        {
+            "id": 30,
+            "filename": "standard/standard_15.png",
+            "name": "standard_15",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:45.659623",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:04.175812",
+            "category_id": "105",
+            "category": {
+                "id": 105,
+                "name": "Poster Chéo",
+                "created_at": "2026-11-19T15:00:04.175812",
+                "updated_at": "2026-11-19T15:00:04.175812"
+            }
+        },
+        {
+            "id": 31,
+            "filename": "standard/standard_16.png",
+            "name": "standard_16",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:45.849947",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:04.368502",
+            "category_id": "106",
+            "category": {
+                "id": 106,
+                "name": "Dải Phim",
+                "created_at": "2026-11-19T15:00:04.368502",
+                "updated_at": "2026-11-19T15:00:04.368502"
+            }
+        },
+        {
+            "id": 32,
+            "filename": "standard/standard_17.png",
+            "name": "standard_17",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-11-19T14:55:46.000702",
+            "visible_locales": [
+                "vn"
+            ],
+            "updated_at": "2026-11-19T15:00:04.518109",
+            "category_id": "106",
+            "category": {
+                "id": 106,
+                "name": "Dải Phim",
+                "created_at": "2026-11-19T15:00:04.518109",
+                "updated_at": "2026-11-19T15:00:04.518109"
             }
         }
     ]

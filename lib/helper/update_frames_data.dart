@@ -20,21 +20,6 @@ void main(List<String> args) async {
   final categories = data['categories'] as List<dynamic>? ?? [];
   final images = data['images'] as List<dynamic>? ?? [];
 
-  // Ensure "Frame Custom" category exists
-  const customCategoryId = '99';
-  bool hasCustomCategory = categories.any(
-    (cat) => cat['id'].toString() == customCategoryId,
-  );
-  if (!hasCustomCategory) {
-    print('Adding category "Frame Custom" (ID $customCategoryId)...');
-    categories.add({
-      "id": 99,
-      "name": "Frame Custom",
-      "created_at": DateTime.now().toIso8601String(),
-      "updated_at": DateTime.now().toIso8601String(),
-    });
-  }
-
   // Helper to find max ID in images list
   int getMaxId() {
     int maxId = 0;
@@ -49,44 +34,40 @@ void main(List<String> args) async {
 
   int currentMaxId = getMaxId();
 
-  // Scan custom frame folders: <folder under the flavor root>, data.json "frame" value
-  // and "layout_type" value.
-  const customLayouts = [
+  // Scan the frame folders of the flavor: <folder under the flavor root>,
+  // data.json "frame" value and "layout_type" value. "filename" is relative to
+  // the flavor root (e.g. standard/standard_1.png). New frames have no
+  // category; set "category_id" and "category" in data.json to group them.
+  const layouts = [
     ('standard', 'square', 'standard'),
     ('group', 'group', 'group'),
   ];
 
-  for (final (folder, frameType, layoutType) in customLayouts) {
+  for (final (folder, frameType, layoutType) in layouts) {
     final dir = Directory('$root/$folder');
     if (!dir.existsSync()) continue;
 
     final files = dir.listSync().whereType<File>().toList();
     for (final file in files) {
-      final filename = file.uri.pathSegments.last;
-      if (!filename.toLowerCase().endsWith('.png')) continue;
+      final name = file.uri.pathSegments.last;
+      if (!name.toLowerCase().endsWith('.png')) continue;
 
-      // Check if already in data.json
+      final filename = '$folder/$name';
       final exists = images.any((img) => img['filename'] == filename);
       if (exists) continue;
 
       currentMaxId++;
-      print('Adding custom $folder frame: $filename with ID $currentMaxId');
+      print('Adding $layoutType frame: $filename with ID $currentMaxId');
       images.add({
         "id": currentMaxId,
         "filename": filename,
-        "name": filename.replaceAll('.png', ''),
+        "name": name.replaceAll('.png', ''),
         "frame": frameType,
         "layout_type": layoutType,
         "created_at": DateTime.now().toIso8601String(),
         "updated_at": DateTime.now().toIso8601String(),
-        "category_id": customCategoryId,
+        "category_id": '',
         "visible_locales": ["vn"],
-        "category": {
-          "id": 99,
-          "name": "Frame Custom",
-          "created_at": DateTime.now().toIso8601String(),
-          "updated_at": DateTime.now().toIso8601String(),
-        },
       });
     }
   }

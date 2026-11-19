@@ -17,18 +17,12 @@
             "name": "Frame IDOL Hoạt Họa",
             "created_at": "2025-06-18T13:54:38.000000Z",
             "updated_at": "2025-09-25T09:52:05.000000Z"
-        },
-        {
-            "id": 99,
-            "name": "Frame Custom",
-            "created_at": "2026-06-02T10:52:09.347294",
-            "updated_at": "2026-06-02T10:52:09.348206"
         }
     ],
     "images": [
         {
             "id": 118,
-            "filename": "amazing/6854e5408664d.png",
+            "filename": "collected/amazing/6854e5408664d.png",
             "name": "Giấy Kết Hôn",
             "frame": "square",
             "layout_type": "standard",
@@ -47,7 +41,7 @@
         },
         {
             "id": 129,
-            "filename": "basic/6857dd9fcbe9d.png",
+            "filename": "collected/basic/6857dd9fcbe9d.png",
             "name": "Basic-5",
             "frame": "square",
             "layout_type": "standard",
@@ -64,7 +58,7 @@
         },
         {
             "id": 133,
-            "filename": "basic/685a41b84c9e3.png",
+            "filename": "collected/basic/685a41b84c9e3.png",
             "name": "Basic-6",
             "frame": "square",
             "layout_type": "standard",
@@ -81,7 +75,7 @@
         },
         {
             "id": 175,
-            "filename": "basic/6873abf8e3917.png",
+            "filename": "collected/basic/6873abf8e3917.png",
             "name": "Vintage1",
             "frame": "square",
             "layout_type": "standard",
@@ -98,7 +92,7 @@
         },
         {
             "id": 176,
-            "filename": "basic/6873ac02ab5a1.png",
+            "filename": "collected/basic/6873ac02ab5a1.png",
             "name": "Vintage2",
             "frame": "square",
             "layout_type": "standard",
@@ -115,7 +109,7 @@
         },
         {
             "id": 237,
-            "filename": "amazing/689da03a3127c.png",
+            "filename": "collected/amazing/689da03a3127c.png",
             "name": "Thư",
             "frame": "square",
             "layout_type": "standard",
@@ -132,7 +126,7 @@
         },
         {
             "id": 327,
-            "filename": "amazing/68dcc67d7e7ab.png",
+            "filename": "collected/amazing/68dcc67d7e7ab.png",
             "name": "XinhhAirlines",
             "frame": "square",
             "layout_type": "standard",
@@ -151,7 +145,7 @@
         },
         {
             "id": 341,
-            "filename": "basic/68df41b70eb0e.png",
+            "filename": "collected/basic/68df41b70eb0e.png",
             "name": "Basic-2",
             "frame": "square",
             "layout_type": "standard",
@@ -168,7 +162,7 @@
         },
         {
             "id": 342,
-            "filename": "basic/68df41df4934f.png",
+            "filename": "collected/basic/68df41df4934f.png",
             "name": "Basic-7",
             "frame": "square",
             "layout_type": "standard",
@@ -185,7 +179,7 @@
         },
         {
             "id": 343,
-            "filename": "basic/68df420421b73.png",
+            "filename": "collected/basic/68df420421b73.png",
             "name": "Basic-8",
             "frame": "square",
             "layout_type": "standard",
@@ -202,7 +196,7 @@
         },
         {
             "id": 345,
-            "filename": "basic/68df4242dfa05.png",
+            "filename": "collected/basic/68df4242dfa05.png",
             "name": "Basic-11",
             "frame": "square",
             "layout_type": "standard",
@@ -219,7 +213,7 @@
         },
         {
             "id": 346,
-            "filename": "basic/68df42a174a8d.png",
+            "filename": "collected/basic/68df42a174a8d.png",
             "name": "Basic-10",
             "frame": "square",
             "layout_type": "standard",
@@ -236,7 +230,7 @@
         },
         {
             "id": 379,
-            "filename": "amazing/68e8e901bae50.png",
+            "filename": "collected/amazing/68e8e901bae50.png",
             "name": "Girly",
             "frame": "square",
             "layout_type": "standard",
@@ -253,7 +247,7 @@
         },
         {
             "id": 474,
-            "filename": "idol-hoat-hoa/6929d01fd3d8c.png",
+            "filename": "collected/idol-hoat-hoa/6929d01fd3d8c.png",
             "name": "glorious.blue.eyed.king",
             "frame": "square",
             "layout_type": "standard",
@@ -270,7 +264,7 @@
         },
         {
             "id": 482,
-            "filename": "basic/692d7d65603ca.png",
+            "filename": "collected/basic/692d7d65603ca.png",
             "name": "Basic-5",
             "frame": "square",
             "layout_type": "standard",
@@ -287,7 +281,7 @@
         },
         {
             "id": 483,
-            "filename": "amazing/692d81cfb1e9f.png",
+            "filename": "collected/amazing/692d81cfb1e9f.png",
             "name": "Theater Ticket",
             "frame": "square",
             "layout_type": "standard",
@@ -304,7 +298,7 @@
         },
         {
             "id": 506,
-            "filename": "amazing/69567d1275bf7.png",
+            "filename": "collected/amazing/69567d1275bf7.png",
             "name": "Magazine",
             "frame": "square",
             "layout_type": "standard",
@@ -321,40 +315,40 @@
         },
         {
             "id": 558,
-            "filename": "standard_custom_1.png",
-            "name": "standard_custom_1",
+            "filename": "standard/standard_1.png",
+            "name": "standard_1",
             "frame": "square",
             "layout_type": "standard",
             "created_at": "2026-06-02T10:52:09.351158",
             "updated_at": "2026-06-02T10:52:09.351172",
-            "category_id": "99",
+            "category_id": "11",
             "visible_locales": [
                 "vn"
             ],
             "category": {
-                "id": 99,
-                "name": "Frame Custom",
-                "created_at": "2026-06-02T10:52:09.351178",
-                "updated_at": "2026-06-02T10:52:09.351182"
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
             }
         },
         {
             "id": 559,
-            "filename": "group_custom_1.png",
-            "name": "group_custom_1",
+            "filename": "group/group_1.png",
+            "name": "group_1",
             "frame": "group",
             "layout_type": "group",
             "created_at": "2026-06-02T10:52:09.351387",
             "updated_at": "2026-06-02T10:52:09.351394",
-            "category_id": "99",
+            "category_id": "11",
             "visible_locales": [
                 "vn"
             ],
             "category": {
-                "id": 99,
-                "name": "Frame Custom",
-                "created_at": "2026-06-02T10:52:09.351399",
-                "updated_at": "2026-06-02T10:52:09.351403"
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
             }
         }
     ]

@@ -26,6 +26,18 @@ class FrameService {
         final String layoutType = imgData['layout_type']?.toString() ?? '';
         final String categoryId = imgData['category_id']?.toString() ?? '';
 
+        // Optional [x, y, width, height] photo area, for group frames whose
+        // layout differs from the default.
+        final List<dynamic>? slotData = imgData['slot'] as List<dynamic>?;
+        final Rect? slot = slotData != null && slotData.length == 4
+            ? Rect.fromLTWH(
+                (slotData[0] as num).toDouble(),
+                (slotData[1] as num).toDouble(),
+                (slotData[2] as num).toDouble(),
+                (slotData[3] as num).toDouble(),
+              )
+            : null;
+
         final categoryMap = imgData['category'] as Map<String, dynamic>?;
         final String categoryName = categoryMap?['name']?.toString() ?? '';
 
@@ -43,6 +55,7 @@ class FrameService {
               filename: filename,
               categoryId: categoryId,
               categoryName: categoryName,
+              slot: slot,
             ),
           );
         }
