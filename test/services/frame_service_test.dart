@@ -1,8 +1,30 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('reads the photo areas a frame declares in data.json', () {
+    final standard = FrameService.frameFromJson({
+      'filename': 'standard/custom.png',
+      'layout_type': 'standard',
+      'slots': [
+        for (var i = 0; i < AppConfig.standardPhotoCount; i++)
+          [60, 800 + i * 620, 760, 570],
+      ],
+    })!;
+    final group = FrameService.frameFromJson({
+      'filename': 'group/custom.png',
+      'layout_type': 'group',
+      'slot': [66.67, 0, 2666.67, 2000],
+    })!;
+
+    expect(standard.slots.first, const Rect.fromLTWH(60, 800, 760, 570));
+    expect(standard.slots, hasLength(AppConfig.standardPhotoCount));
+    expect(group.slots.single, const Rect.fromLTWH(66.67, 0, 2666.67, 2000));
+  });
 
   test('loads the bundled frames of the active flavor', () async {
     final frames = await FrameService.loadFrames();

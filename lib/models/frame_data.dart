@@ -20,10 +20,14 @@ class FrameData {
 
   /// Factory for standard frames. The slot count follows the flavor
   /// ([AppConfig.standardPhotoCount]): 2 for personal, 4 for commercial.
+  /// [slots] (from `slots` in data.json) replaces the default photo areas for
+  /// frames laid out differently; it is ignored unless it holds exactly one
+  /// rect per photo.
   factory FrameData.standard({
     String filename = '',
     String categoryId = '',
     String categoryName = '',
+    List<Rect>? slots,
   }) {
     const allSlots = [
       Rect.fromLTWH(40, 40, 800, 600),
@@ -36,7 +40,9 @@ class FrameData {
       filename: filename,
       photoSlots: count,
       size: const Size(880, 2650),
-      slots: allSlots.sublist(0, count),
+      slots: slots != null && slots.length == count
+          ? slots
+          : allSlots.sublist(0, count),
       categoryId: categoryId,
       categoryName: categoryName,
     );

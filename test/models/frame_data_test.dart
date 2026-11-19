@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
@@ -19,6 +20,25 @@ void main() {
       final frame = FrameData.standard(filename: 'standard/standard_1.png');
 
       expect(frame.path, '${AppConfig.framesAssetRoot}standard/standard_1.png');
+    });
+
+    test('uses the photo areas a frame declares, one per photo', () {
+      final custom = [
+        for (var i = 0; i < AppConfig.standardPhotoCount; i++)
+          Rect.fromLTWH(60, 800 + i * 620.0, 760, 570),
+      ];
+      final frame = FrameData.standard(slots: custom);
+
+      expect(frame.slots, custom);
+      expect(frame.photoSlots, AppConfig.standardPhotoCount);
+    });
+
+    test('keeps the default photo areas when the declared count differs', () {
+      final frame = FrameData.standard(
+        slots: const [Rect.fromLTWH(60, 800, 760, 570)],
+      );
+
+      expect(frame.slots, FrameData.standard().slots);
     });
   });
 

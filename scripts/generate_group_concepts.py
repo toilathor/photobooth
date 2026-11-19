@@ -20,7 +20,7 @@ import sys
 from functools import partial
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_personal_frames as g  # noqa: E402
@@ -303,6 +303,151 @@ def c_postcard_stamp(groom, bride, photo="couple/banner_left.webp"):
     return cv, hole, 0
 
 
+# ------------------------------------------------------ bản tin trực tiếp HỶ TV
+PHUDU_B = FONTS / "Phudu" / "Phudu-Bold.ttf"
+BE_VN = FONTS / "Be_Vietnam_Pro" / "BeVietnamPro-Regular.ttf"
+SONGTI = Path("/System/Library/Fonts/Supplemental/Songti.ttc")  # chữ 囍 (font hệ thống macOS)
+# Ảnh khách 4:3 phủ kín chiều cao khung; hai dải đen mỏng hai bên như TV phát hình 4:3.
+TV_SLOT = [66.67, 0, 2666.67, 2000]
+TV_LEFT, TV_RIGHT = TV_SLOT[0] + 20, TV_SLOT[0] + TV_SLOT[2] - 20  # vùng trong suốt
+TV_WINE, TV_MOSS, TV_DEEP = (150, 30, 42, 255), (54, 69, 47, 238), (28, 37, 26, 245)
+TV_GOLD, TV_PAPER, TV_INK, TV_WHITE = (214, 190, 140, 255), (250, 247, 240, 246), (30, 32, 28, 255), (255, 255, 255, 255)
+TV_HEADLINE = "THỌ – HIỀN CHÍNH THỨC VỀ CHUNG MỘT NHÀ"
+TV_SUBLINE = "Trực tiếp từ Thiết Trụ, Mễ Sở · Khách mời có mặt đông đủ"
+TV_TICKER = ("Chú rể xác nhận: từ nay trong nhà có sếp", "Dự báo: độ ẩm hạnh phúc 100%",
+             "Ban tổ chức khuyến cáo: không về sớm")
+TV_PIP = ("couple/bank_cover.webp", (0.06, 0.17, 0.94, 0.64))  # kính râm, sâm panh, chiếc nơ
+TICKER_Y, TICKER_H = 1872, 128
+# Bản in khung nhóm chỉ rộng 10 cm (27.6 px/mm): chữ nhỏ nhất ~54 px (≈2 mm).
+
+
+def _over(cv, paint):
+    """Paint on a transparent layer, then blend it over the frame (keeps see-through parts)."""
+    layer = Image.new("RGBA", cv.size, (0, 0, 0, 0))
+    paint(ImageDraw.Draw(layer))
+    cv.alpha_composite(layer)
+
+
+def _bar(cv, box, fill):
+    x, y, w, h = box
+    _over(cv, lambda d: d.rectangle((S(x), S(y), S(x + w), S(y + h)), fill=fill))
+
+
+def _label(cv, x, cy, text, path, size, fill, align="left", shadow=0):
+    """Text with its capitals centred on cy; optional soft shadow for text over the photo.
+    Returns the text width."""
+    fnt = g.font(path, size)
+    probe = ImageDraw.Draw(cv)
+    cap = -probe.textbbox((0, 0), "H", font=fnt, anchor="ls")[1] / SS
+    width = probe.textlength(text, font=fnt) / SS
+    left = {"left": x, "center": x - width / 2, "right": x - width}[align]
+    layer = Image.new("RGBA", cv.size, (0, 0, 0, 0))
+    ImageDraw.Draw(layer).text((S(left), S(cy + cap / 2)), text, font=fnt, fill=fill, anchor="ls")
+    if shadow:
+        sh = Image.new("RGBA", cv.size, (0, 0, 0, 0))
+        sh.putalpha(layer.getchannel("A").point(lambda a: a * shadow // 255).filter(ImageFilter.GaussianBlur(S(5))))
+        cv.alpha_composite(sh, (S(2), S(4)))
+    cv.alpha_composite(layer)
+    return width
+
+
+def _text_width(text, path, size):
+    return ImageDraw.Draw(Image.new("L", (1, 1))).textlength(text, font=g.font(path, size)) / SS
+
+
+def _hy_glyph(cv, cx, cy, r, ring=5):
+    """囍 in a wine circle with a gold ring (skipped glyph if the macOS font is missing)."""
+    m = Image.new("L", cv.size, 0)
+    ImageDraw.Draw(m).ellipse((S(cx - r), S(cy - r), S(cx + r), S(cy + r)), fill=255)
+    shadow(cv, m, 8, (0, 5), 120)
+    try:
+        hy = ImageFont.truetype(str(SONGTI), S(r * 1.3), index=1)  # Songti SC Bold có chữ 囍
+    except OSError:
+        hy = None
+
+    def paint(d):
+        d.ellipse((S(cx - r), S(cy - r), S(cx + r), S(cy + r)), fill=TV_WINE, outline=TV_GOLD, width=S(ring))
+        if hy:
+            d.text((S(cx), S(cy + r * 0.06)), "囍", font=hy, fill=TV_GOLD, anchor="mm")
+    _over(cv, paint)
+
+
+def _live_badge(cv, x, cy, h=108):
+    text_w = _text_width("TRỰC TIẾP", PHUDU_B, 60)
+    badge_w = 78 + text_w + 40
+    _bar(cv, (x, cy - h / 2, badge_w, h), TV_WINE)
+    _over(cv, lambda d: d.ellipse((S(x + 30), S(cy - 15), S(x + 60), S(cy + 15)), fill=TV_WHITE))
+    _label(cv, x + 78, cy, "TRỰC TIẾP", PHUDU_B, 60, TV_WHITE)
+    date_w = _text_width("28.11.2026", PHUDU_B, 54)
+    _bar(cv, (x + badge_w, cy - h / 2, date_w + 72, h), (14, 16, 14, 200))
+    _label(cv, x + badge_w + 36, cy, "28.11.2026", PHUDU_B, 54, TV_WHITE)
+
+
+def _pip(cv, box, photo, crop, label="NHÂN VẬT CHÍNH", label_h=74):
+    """Picture-in-picture of the couple, gold frame, wine caption strip."""
+    x, y, w, h = box
+    m = Image.new("L", cv.size, 0)
+    ImageDraw.Draw(m).rectangle((S(x - 6), S(y - 6), S(x + w + 6), S(y + h + label_h + 6)), fill=255)
+    shadow(cv, m, 16, (0, 10), 140)
+    _bar(cv, (x - 6, y - 6, w + 12, h + label_h + 12), TV_GOLD)
+    src = Image.open(IMAGES / photo).convert("RGB")
+    l, t, r, b = crop
+    src = src.crop((round(l * src.width), round(t * src.height), round(r * src.width), round(b * src.height)))
+    cv.paste(g.cover(src, S(w), S(h)).convert("RGBA"), (S(x), S(y)))
+    _bar(cv, (x, y + h, w, label_h), TV_WINE)
+    _label(cv, x + w / 2, y + h + label_h / 2, label, PHUDU_B, 50, TV_WHITE, align="center")
+
+
+def _lower_third(cv, left, right=2440):
+    """TIN NÓNG tag, headline bar and subline, ending on top of the ticker."""
+    sub_h, head_h, tag_h = 78, 126, 78
+    sub_y = TICKER_Y - sub_h
+    head_y = sub_y - head_h
+    tag_w = _text_width("TIN NÓNG", PHUDU_B, 56) + 64
+    _bar(cv, (left, head_y - tag_h, tag_w, tag_h), TV_WINE)
+    _label(cv, left + 32, head_y - tag_h / 2, "TIN NÓNG", PHUDU_B, 56, TV_WHITE)
+    _bar(cv, (left, head_y, right - left, head_h), TV_PAPER)
+    _bar(cv, (left, head_y, right - left, 6), TV_GOLD)
+    size = min(86, math.floor(86 * (right - left - 80) / _text_width(TV_HEADLINE, PHUDU_B, 86)))
+    _label(cv, left + 40, head_y + 3 + head_h / 2, TV_HEADLINE, PHUDU_B, size, TV_INK)
+    sub_size = min(54, math.floor(54 * (right - left - 80) / _text_width(TV_SUBLINE, BE_VN, 54)))
+    sub_w = _text_width(TV_SUBLINE, BE_VN, sub_size) + 80
+    _bar(cv, (left, sub_y, sub_w, sub_h), TV_MOSS)
+    _label(cv, left + 40, sub_y + sub_h / 2, TV_SUBLINE, BE_VN, sub_size, TV_WHITE)
+
+
+def _ticker(cv, label):
+    _bar(cv, (0, TICKER_Y, W, TICKER_H), TV_DEEP)
+    label_w = _text_width(label, PHUDU_B, 58) + 80
+    _bar(cv, (TV_LEFT, TICKER_Y, label_w, TICKER_H), TV_GOLD)
+    _label(cv, TV_LEFT + 40, TICKER_Y + TICKER_H / 2, label, PHUDU_B, 58, TV_INK)
+    text = "   •   ".join(TV_TICKER + TV_TICKER[:1])  # chữ chạy tràn qua mép phải như đang chạy
+    # 56 px: câu thứ hai ("... 100%") kết thúc trước chỗ app in mã QR ở góc phải dưới.
+    _label(cv, TV_LEFT + label_w + 44, TICKER_Y + TICKER_H / 2, text, BE_VN, 56, TV_WHITE)
+
+
+def c_hy_tv(groom, bride, pip_top=False, pip=TV_PIP, pip_label="NHÂN VẬT CHÍNH"):
+    """Bản tin trực tiếp HỶ TV: ảnh khách phủ kín khung như một cảnh đang lên sóng."""
+    cv = Image.new("RGBA", (S(W), S(H)), (0, 0, 0, 0))
+    d = ImageDraw.Draw(cv)
+    d.rectangle((0, 0, S(TV_LEFT), S(H)), fill=(10, 12, 10, 255))
+    d.rectangle((S(TV_RIGHT), 0, S(W), S(H)), fill=(10, 12, 10, 255))
+    _live_badge(cv, TV_LEFT + 64, 150)
+    if pip_top:
+        # Biến thể: ô nhân vật chính lớn ở góc phải trên, logo kênh ở nhãn chữ chạy.
+        _pip(cv, (TV_RIGHT - 64 - 600, 96, 600, 450), *pip, label=pip_label)
+        _lower_third(cv, TV_LEFT + 64)
+        _ticker(cv, "HỶ TV")
+    else:
+        _hy_glyph(cv, TV_RIGHT - 64 - 66, 150, 66)
+        _label(cv, TV_RIGHT - 64 - 132 - 24, 150, "HỶ TV", PHUDU_B, 84, (255, 255, 255, 240), "right", shadow=170)
+        pip_w, pip_h = 480, 390
+        _pip(cv, (TV_LEFT + 50, TICKER_Y - 74 - pip_h - 6, pip_w, pip_h), *pip, label=pip_label)
+        _lower_third(cv, TV_LEFT + 50 + pip_w + 46)
+        _ticker(cv, "TIN VUI")
+    return cv, (TV_LEFT, 0, TV_RIGHT - TV_LEFT, H), 0
+
+
 CONCEPTS = [
     ("05_buu_thiep", "Bưu thiếp", "Viền tem răng cưa, dấu bưu điện ngày cưới, lời 'Gửi bạn'.", c_postcard,
      {"file": "group_4.png", "category": (104, "Bưu Thiếp"), "slot": [570, 277.5, 1560, 1170]}),
@@ -330,6 +475,16 @@ CONCEPTS = [
      c_stamp_column, {"file": "group_14.png", "category": (104, "Bưu Thiếp"), "slot": [160, 247.5, 1620, 1215]}),
     ("V21_tem_ben_phun_nuoc", "Bưu thiếp tem · ảnh bên đài phun nước", "Tem cặp đôi dùng ảnh cô dâu bên đài phun nước.",
      partial(c_postcard_stamp, photo="gallery/album_2.webp"), {"file": "group_15.png", "category": (104, "Bưu Thiếp"), "slot": [160, 247.5, 1620, 1215]}),
+    # --- Bản tin trực tiếp HỶ TV (chờ duyệt): ảnh khách phủ kín khung, publish kèm "slot": TV_SLOT.
+    ("T1_hy_tv", "Bản tin trực tiếp HỶ TV", "Ảnh khách phủ kín khung như cảnh đang lên sóng: nhãn TRỰC TIẾP, logo HỶ TV, thanh TIN NÓNG, chữ chạy, ô 'Nhân vật chính' ở góc dưới.",
+     c_hy_tv, {"file": "group_16.png", "category": (108, "Bản Tin"), "slot": TV_SLOT}),
+    ("T2_hy_tv_pip_tren", "HỶ TV · nhân vật chính góc trên", "Biến thể: ô 'Nhân vật chính' to ở góc phải trên kiểu màn hình chia đôi, logo kênh ở nhãn chữ chạy.",
+     partial(c_hy_tv, pip_top=True), {"file": "group_17.png", "category": (108, "Bản Tin"), "slot": TV_SLOT}),
+    # --- Biến thể HỶ TV dùng ảnh khác trong wedding-invitation (chờ duyệt).
+    ("Y1_tv_doc_loi_the", "HỶ TV · ảnh đọc lời thề", "Ô 'Nhân vật chính' dùng ảnh hai người đọc lời thề bên chiếc nơ.",
+     partial(c_hy_tv, pip=("gallery/album_14.webp", (0.06, 0.17, 0.94, 0.64))), {"file": "group_18.png", "category": (108, "Bản Tin"), "slot": TV_SLOT}),
+    ("Y2_tv_nu_hon", "HỶ TV góc trên · ảnh nụ hôn dưới voan", "Ô lớn góc trên dùng ảnh chú rể hôn má cô dâu dưới tấm voan.",
+     partial(c_hy_tv, pip_top=True, pip=("gallery/album_15.webp", (0.05, 0.15, 0.95, 0.62))), {"file": "group_19.png", "category": (108, "Bản Tin"), "slot": TV_SLOT}),
 ]
 
 
@@ -378,6 +533,8 @@ def publish(frame, meta):
     entry.update({"updated_at": now, "category_id": str(cat_id), "category": category})
     if "slot" in meta:
         entry["slot"] = meta["slot"]
+    if "slots" in meta:
+        entry["slots"] = meta["slots"]
     data_path.write_text(json.dumps(data, indent=4, ensure_ascii=False) + "\n", encoding="utf-8")
     print("published", filename)
 
@@ -416,14 +573,17 @@ def main():
         cards.append((name, title, desc, "group"))
         print("wrote", name)
     for name, title, desc, fn, approved in st.STANDARD_CONCEPTS:
-        cv = fn()
+        res = fn()
+        # A concept may move the photos: it then returns (canvas, slots).
+        cv, slots = res if isinstance(res, tuple) else (res, st.SLOTS)
         frame = cv.resize((st.W, st.H), Image.LANCZOS)
         if approved:
             if publish_flag:
-                publish(frame, {**approved, "layout": "standard"})
+                moved = {} if slots == st.SLOTS else {"slots": [list(s) for s in slots]}
+                publish(frame, {**approved, "layout": "standard", **moved})
             continue
         frame.save(out / f"{name}_frame.png")
-        st.preview(frame).resize((600, round(600 * st.H / st.W)), Image.LANCZOS).save(out / f"{name}_preview.jpg", quality=88)
+        st.preview(frame, slots).resize((600, round(600 * st.H / st.W)), Image.LANCZOS).save(out / f"{name}_preview.jpg", quality=88)
         cards.append((name, title, desc, "standard"))
         print("wrote", name)
     html = "".join(

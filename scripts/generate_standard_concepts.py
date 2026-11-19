@@ -2,10 +2,13 @@
 """Concept frames for the personal "standard" layout (880x2650, 2 photo slots).
 
 Used by generate_group_concepts.py (same ideas tab, same --publish workflow).
-Photo slots are fixed by FrameData.standard: (40,40,800,600) and (40,660,800,600)
-in the app, so every transparent hole stays inside those rectangles.
+The default photo slots of FrameData.standard are (40,40,800,600) and
+(40,660,800,600). A concept may return (canvas, slots) to place the photos
+elsewhere: the slots (4:3, bleed included) are then written to data.json as
+`slots` on publish, and the transparent holes must stay inside them.
 """
 import math
+import random
 import sys
 from functools import partial
 from pathlib import Path
@@ -206,6 +209,198 @@ def s_film_frames(frames):
     return cv
 
 
+# ------------------------------------------------------ tờ lịch bloc ngày cưới
+# Lịch bloc in bằng Times: font hệ thống của macOS, có đủ dấu tiếng Việt.
+SYS_FONTS = Path("/System/Library/Fonts/Supplemental")
+TIMES = SYS_FONTS / "Times New Roman.ttf"
+TIMES_B = SYS_FONTS / "Times New Roman Bold.ttf"
+TIMES_I = SYS_FONTS / "Times New Roman Italic.ttf"
+TIMES_BI = SYS_FONTS / "Times New Roman Bold Italic.ttf"
+RED, BLACK = (196, 30, 42, 255), (34, 31, 29, 255)
+NEWSPRINT, BINDING = (247, 243, 233, 255), (122, 22, 30, 255)
+# Âm lịch 28/11/2026, đối chiếu xemlicham.com và ngaydep.com. Các trang không
+# thống nhất ngày này tốt hay xấu, nên tờ lịch không ghi gì về chuyện đó.
+LUNAR = ["Ngày Bính Ngọ", "Tháng Kỷ Hợi", "Năm Bính Ngọ", "Tiết Tiểu tuyết"]
+GIO_HOANG_DAO = "Tý · Sửu · Mão · Ngọ · Thân · Dậu"
+# Ảnh khách nằm giữa tờ lịch (render 4:3, lỗ trong suốt lùi vào 20px).
+CAL_SLOTS = [(50, 830, 780, 585), (50, 1440, 780, 585)]
+
+
+def _spaced(d, text, x, y, path, size, fill, spacing=0, align="center"):
+    """Letter-spaced text on baseline y, aligned left/center/right on x."""
+    fnt = g.font(path, size)
+    widths = [d.textlength(c, font=fnt) for c in text]
+    total = sum(widths) + S(spacing) * (len(text) - 1)
+    left = {"left": S(x), "center": S(x) - total / 2, "right": S(x) - total}[align]
+    for c, w in zip(text, widths):
+        d.text((left, S(y)), c, font=fnt, fill=fill, anchor="ls")
+        left += w + S(spacing)
+
+
+def _rule(d, y, x0=50, x1=W - 50, double=True):
+    d.line((S(x0), S(y), S(x1), S(y)), fill=RED, width=S(4))
+    if double:
+        d.line((S(x0), S(y + 9), S(x1), S(y + 9)), fill=RED, width=S(1.5))
+
+
+def _calendar_page(top=56):
+    """A page just torn from the pad: red binding above a ragged edge, grainy newsprint."""
+    cv = canvas(BINDING[:3])
+    rng = random.Random(2811)
+    pts, x = [(0, S(top + 12))], 0.0
+    while x < W:
+        x = min(W, x + rng.uniform(4, 13))
+        pts.append((S(x), S(top + 7 + rng.uniform(-6, 9) + 5 * math.sin(x / 41))))
+    pts += [(S(W), S(H)), (0, S(H))]
+    page = Image.new("L", cv.size, 0)
+    ImageDraw.Draw(page).polygon(pts, fill=255)
+    gc.shadow(cv, page, 5, (0, 3), 150)
+    sheet = Image.new("RGBA", cv.size, NEWSPRINT)
+    speck = Image.effect_noise(cv.size, 40).point(lambda v: min(255, max(0, v - 182) * 4))
+    ink = Image.new("RGBA", cv.size, (118, 100, 76, 0))
+    ink.putalpha(speck.point(lambda a: a * 34 // 255))
+    sheet.alpha_composite(ink)
+    cv.paste(sheet, (0, 0), page)
+    d = ImageDraw.Draw(cv)
+    for cx in (W * 0.28, W * 0.72):  # staples of the pad
+        d.rounded_rectangle((S(cx - 44), S(top / 2 - 6), S(cx + 44), S(top / 2 + 6)), S(6), fill=(206, 202, 194, 255))
+    return cv
+
+
+def _photo_wells(cv, slots, inset=20, border=3):
+    """Transparent holes inside the slots, with a thin printed frame line."""
+    d = ImageDraw.Draw(cv)
+    mask = Image.new("L", cv.size, 0)
+    md = ImageDraw.Draw(mask)
+    for x, y, w, h in slots:
+        hx, hy, hw, hh = x + inset, y + inset, w - 2 * inset, h - 2 * inset
+        d.rectangle((S(hx - border), S(hy - border), S(hx + hw + border), S(hy + hh + border)), fill=BLACK)
+        md.rectangle((S(hx), S(hy), S(hx + hw), S(hy + hh)), fill=255)
+    punch(cv, mask)
+
+
+def _round_photo(cv, photo, cx, cy, r, crop):
+    """Round couple photo; [crop] is the (left, top, right, bottom) part of the
+    photo to show, as fractions of its size (a small circle needs the faces close)."""
+    src = Image.open(g.INVITATION / "images" / photo).convert("RGB")
+    l, t, rr_, b = crop
+    src = src.crop((round(l * src.width), round(t * src.height), round(rr_ * src.width), round(b * src.height)))
+    pic = g.cover(src, S(2 * r), S(2 * r)).convert("RGBA")
+    mask = Image.new("L", pic.size, 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, pic.width - 1, pic.height - 1), fill=255)
+    cv.paste(pic, (S(cx - r), S(cy - r)), mask)
+    d = ImageDraw.Draw(cv)
+    d.ellipse((S(cx - r - 9), S(cy - r - 9), S(cx + r + 9), S(cy + r + 9)), outline=RED, width=S(3))
+
+
+COUPLE_ROUND = ("gallery/album_10.webp", (0.335, 0.25, 0.695, 0.75))  # hai bạn cùng cười
+
+
+def _lunar_footer(cv, y0, photo, crop):
+    """Âm lịch, giờ hoàng đạo, nên/kỵ và câu ca dao; góc phải dưới chừa cho mã QR."""
+    d = ImageDraw.Draw(cv)
+    _rule(d, y0)
+    top = y0 + 22
+    d.rectangle((S(50), S(top), S(300), S(top + 210)), outline=BLACK, width=S(3))
+    _spaced(d, "ÂM LỊCH", 175, top + 42, TIMES_B, 28, BLACK, 5)
+    d.text((S(175), S(top + 168)), "20", font=g.font(TIMES_B, 142), fill=BLACK, anchor="ms")
+    _spaced(d, "THÁNG MƯỜI", 175, top + 198, TIMES_B, 26, BLACK, 3)
+    for i, line in enumerate(LUNAR):
+        d.text((S(326), S(top + 46 + i * 52)), line, font=g.font(TIMES, 36), fill=BLACK, anchor="ls")
+    _round_photo(cv, photo, 728, top + 105, 92, crop)
+    d = ImageDraw.Draw(cv)
+    y = top + 260
+    small, small_b = g.font(TIMES, 33), g.font(TIMES_B, 33)
+    d.text((S(50), S(y)), "Giờ hoàng đạo: ", font=small_b, fill=BLACK, anchor="ls")
+    lead = d.textlength("Giờ hoàng đạo: ", font=small_b)
+    d.text((S(50) + lead, S(y)), GIO_HOANG_DAO, font=small, fill=BLACK, anchor="ls")
+    d.text((S(50), S(y + 44)), "Giờ Thân (15–17h): giờ khai tiệc", font=g.font(TIMES_BI, 36), fill=RED, anchor="ls")
+    for k, (label, text) in enumerate((("Nên: ", "cưới hỏi · chụp ảnh · nâng ly"), ("Kỵ: ", "về sớm"))):
+        yy = y + 94 + k * 42
+        d.text((S(50), S(yy)), label, font=small_b, fill=RED, anchor="ls")
+        d.text((S(50) + d.textlength(label, font=small_b), S(yy)), text, font=small, fill=BLACK, anchor="ls")
+    _rule(d, y + 160, x1=690, double=False)
+    for k, line in enumerate(("Thuận vợ thuận chồng,", "tát biển Đông cũng cạn.")):
+        d.text((S(370), S(y + 216 + k * 46)), line, font=g.font(TIMES_I, 40), fill=BLACK, anchor="ms")
+
+
+def _calendar_header(d):
+    _spaced(d, "THÁNG 11", 52, 140, TIMES_B, 46, RED, 5, "left")
+    _spaced(d, "NĂM 2026", W - 52, 140, TIMES_B, 46, RED, 5, "right")
+    _rule(d, 160)
+
+
+def s_lich_bloc(couple=COUPLE_ROUND):
+    """Tờ lịch bloc ngày cưới: số 28 đỏ, hai ảnh khách giữa tờ, âm lịch và ca dao ở dưới."""
+    cv = _calendar_page()
+    d = ImageDraw.Draw(cv)
+    _calendar_header(d)
+    d.text((S(W / 2), S(602)), "28", font=g.font(TIMES_B, 615), fill=RED, anchor="ms")
+    _spaced(d, "THỨ BẢY", W / 2, 690, TIMES_B, 64, RED, 16)
+    d.text((S(W / 2), S(762)), "Ngày cưới Quang Thọ – Thúy Hiền", font=g.font(TIMES_BI, 44), fill=BLACK, anchor="ms")
+    _photo_wells(cv, CAL_SLOTS)
+    _lunar_footer(cv, 2040, *couple)
+    return cv, CAL_SLOTS
+
+
+# Biến thể: số 28 khổng lồ làm nền, hai ảnh như ảnh in dán băng keo lên tờ lịch.
+TAPED_SLOTS = [(170, 520, 680, 510), (30, 1480, 680, 510)]
+
+
+def _tape(d, cx, cy, angle, length=124, width=44):
+    """A strip of paper tape (semi-transparent) centred on (cx, cy)."""
+    a = math.radians(angle)
+    ux, uy, vx, vy = math.cos(a), math.sin(a), -math.sin(a), math.cos(a)
+    rng = random.Random(round(cx * 7 + cy))
+    pts = []
+    for s in (-1, 1):  # torn, slightly ragged ends
+        for k in range(7):
+            t = -width / 2 + k * width / 6
+            jag = rng.uniform(-4, 4)
+            px = cx + s * (length / 2 + jag) * ux + t * vx * s
+            py = cy + s * (length / 2 + jag) * uy + t * vy * s
+            pts.append((S(px), S(py)))
+    d.polygon(pts, fill=(233, 222, 194, 205))
+
+
+def s_lich_bloc_nen(couple=COUPLE_ROUND):
+    """Biến thể: số 28 đỏ khổng lồ xếp dọc làm nền, hai ảnh dán băng keo đè lên."""
+    cv = _calendar_page()
+    d = ImageDraw.Draw(cv)
+    _calendar_header(d)
+    big = g.font(TIMES_B, 1480)
+    d.text((S(W / 2), S(1185)), "2", font=big, fill=RED, anchor="ms")
+    d.text((S(W / 2), S(2235)), "8", font=big, fill=RED, anchor="ms")
+    holes = Image.new("L", cv.size, 0)
+    hd = ImageDraw.Draw(holes)
+    for x, y, w, h in TAPED_SLOTS:
+        mat = Image.new("L", cv.size, 0)
+        ImageDraw.Draw(mat).rectangle((S(x - 6), S(y - 6), S(x + w + 6), S(y + h + 6)), fill=255)
+        gc.shadow(cv, mat, 14, (6, 14), 120)
+        ImageDraw.Draw(cv).rectangle((S(x - 6), S(y - 6), S(x + w + 6), S(y + h + 6)), fill=(253, 252, 248, 255))
+        hd.rectangle((S(x + 20), S(y + 20), S(x + w - 20), S(y + h - 20)), fill=255)
+    punch(cv, holes)
+    # Tape on its own layer so it blends over the mat and stays see-through over the photo.
+    tape = Image.new("RGBA", cv.size, (0, 0, 0, 0))
+    td = ImageDraw.Draw(tape)
+    for (x, y, w, h), tilt in zip(TAPED_SLOTS, (1, -1)):
+        _tape(td, x + 42, y + 18, -38 * tilt)
+        _tape(td, x + w - 42, y + 18, 38 * tilt)
+    cv.alpha_composite(tape)
+    d = ImageDraw.Draw(cv)
+    # Chân trang: thứ, tên, âm lịch; góc phải dưới chừa cho mã QR.
+    _rule(d, 2268)
+    _round_photo(cv, couple[0], 148, 2420, 92, couple[1])
+    d = ImageDraw.Draw(cv)
+    _spaced(d, "THỨ BẢY", 268, 2352, TIMES_B, 56, RED, 10, "left")
+    d.text((S(268), S(2408)), "Ngày cưới Quang Thọ – Thúy Hiền", font=g.font(TIMES_BI, 34), fill=BLACK, anchor="ls")
+    d.text((S(268), S(2458)), "Âm lịch: 20 tháng Mười · Bính Ngọ", font=g.font(TIMES, 32), fill=BLACK, anchor="ls")
+    d.text((S(268), S(2504)), "Giờ Thân (15–17h): giờ khai tiệc", font=g.font(TIMES_BI, 32), fill=RED, anchor="ls")
+    for k, line in enumerate(("Thuận vợ thuận chồng,", "tát biển Đông cũng cạn.")):
+        d.text((S(360), S(2568 + k * 40)), line, font=g.font(TIMES_I, 34), fill=BLACK, anchor="ms")
+    return cv, TAPED_SLOTS
+
+
 STANDARD_CONCEPTS = [
     ("S1_buu_thiep", "Bưu thiếp dọc", "Hai ảnh viền tem răng cưa, tem cặp đôi lớn ở dưới, dấu bưu điện, lời 'Gửi bạn'.", s_postcard,
      {"file": "standard_3.png", "category": (104, "Bưu Thiếp")}),
@@ -249,14 +444,24 @@ STANDARD_CONCEPTS = [
      ]), {"file": "standard_16.png", "category": (106, "Dải Phim")}),
     ("V16_phim_chan_dung", "Dải phim · ảnh cô dâu bên đài phun nước", "Khung phim cuối dùng ảnh cô dâu bên đài phun nước.",
      partial(s_film, photo="gallery/album_2.webp", focus=(0.5, 0.3)), {"file": "standard_17.png", "category": (106, "Dải Phim")}),
+    # --- Tờ lịch bloc ngày cưới (chờ duyệt): ảnh khách nằm giữa tờ, publish kèm `slots`.
+    ("W1_lich_bloc", "Tờ lịch bloc 28", "Tờ lịch xé đúng ngày cưới: số 28 đỏ, thứ Bảy, âm lịch 20 tháng Mười, giờ Thân khai tiệc, nên/kỵ và câu ca dao.",
+     s_lich_bloc, {"file": "standard_18.png", "category": (107, "Lịch Bloc")}),
+    ("W2_lich_bloc_nen", "Tờ lịch bloc · 28 làm nền", "Biến thể: số 28 khổng lồ xếp dọc làm nền, hai ảnh như ảnh in dán băng keo lên tờ lịch.",
+     s_lich_bloc_nen, {"file": "standard_19.png", "category": (107, "Lịch Bloc")}),
+    # --- Biến thể tờ lịch dùng ảnh khác trong wedding-invitation (chờ duyệt).
+    ("X1_lich_nu_hon", "Tờ lịch bloc · ảnh nụ hôn dưới voan", "Ảnh tròn là khoảnh khắc chú rể hôn má cô dâu dưới tấm voan.",
+     partial(s_lich_bloc, couple=("gallery/album_15.webp", (0.2, 0.18, 0.8, 0.56))), {"file": "standard_20.png", "category": (107, "Lịch Bloc")}),
+    ("X3_lich_nen_voan", "Tờ lịch · 28 làm nền · ảnh cô dâu che voan", "Bản số 28 làm nền, ảnh tròn dùng ảnh cô dâu cười dưới voan bên chú rể.",
+     partial(s_lich_bloc_nen, couple=("couple/banner_right.webp", (0.15, 0.16, 0.85, 0.54))), {"file": "standard_21.png", "category": (107, "Lịch Bloc")}),
 ]
 
 
-def preview(frame):
-    """Two sample photos in the two slots (straight, as in the app), frame on top."""
+def preview(frame, slots=SLOTS):
+    """Two sample photos in the slots (straight, as in the app), frame on top."""
     base = Image.new("RGBA", (W, H), (30, 30, 30, 255))
-    for (x, y, w, h), name in zip(SLOTS, SAMPLE_PHOTOS):
-        photo = g.cover(Image.open(g.INVITATION / "images" / "gallery" / name).convert("RGB"), w, h)
-        base.paste(photo, (x, y))
+    for (x, y, w, h), name in zip(slots, SAMPLE_PHOTOS):
+        photo = g.cover(Image.open(g.INVITATION / "images" / "gallery" / name).convert("RGB"), round(w), round(h))
+        base.paste(photo, (round(x), round(y)))
     base.alpha_composite(frame)
     return base.convert("RGB")
