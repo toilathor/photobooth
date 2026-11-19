@@ -58,3 +58,11 @@ gen/*
 # Graphify Output
 graphify-out/
 
+# Codegraph / Graphify
+.codegraph/
+
+# Generated frame thumbnails
+assets/frames/*/thumbnails/
+
+# Claude Code local settings
+.claude/settings.local.json
