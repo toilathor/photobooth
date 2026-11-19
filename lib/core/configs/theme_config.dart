@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ThemeConfig {
   static const Color lightPrimary = Color(0xFFCC3333);

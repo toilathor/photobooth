@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+
+import 'storage_section.dart';
 import 'storage_user.dart';
 
 abstract class StorageService {
@@ -14,18 +16,18 @@ abstract class StorageService {
   /// Tải ảnh lên và trả về URL
   Future<String?> uploadImage(Uint8List bytes, String fileName);
 
-  /// Tải bộ sưu tập tệp lên một thư mục và trả về URL của thư mục đó
-  Future<String?> uploadCollection({
+  /// Tìm hoặc tạo section Drive trước khi render QR vào ảnh.
+  Future<StorageSection?> prepareSection(String folderName);
+
+  /// Tải bộ sưu tập tệp vào section đã được tạo.
+  Future<void> uploadCollection({
     required Map<String, Uint8List> files,
-    required String folderName,
+    required String sectionId,
     void Function(int current, int total)? onProgress,
   });
 
   /// Kiểm tra trạng thái người dùng hiện tại
   StorageUser? get currentUser;
-
-  /// Kiểm tra xem thư mục đã tồn tại chưa và trả về URL
-  Future<String?> getFolderLink(String folderName);
 
   /// Luồng sự kiện thay đổi người dùng
   Stream<StorageUser?> get onCurrentUserChanged;

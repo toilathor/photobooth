@@ -58,17 +58,81 @@ Tuy nhiên, tham vọng của mình không dừng lại ở đó! Trong tương 
 
 ---
 
+## 🧱 Kiến trúc Gallery
+
+Gallery tuân thủ Clean Architecture theo feature-first:
+
+- `features/gallery/screens`: màn hình và liên kết UI.
+- `features/gallery/providers`: tải dữ liệu, trạng thái và ảnh đang chọn.
+- `features/gallery/widgets`: lightbox cùng danh sách thumbnail.
+- `models/gallery_file.dart`: model tệp dùng chung.
+- `services/gallery_service.dart`: giao tiếp Google Drive API.
+- `core/routes/gallery_route.dart`: phân tích hash route của Gallery.
+
+## 🧪 Kiến trúc Test
+
+Thư mục `test` phản chiếu layer của production để mỗi test chỉ đi qua seam cần
+kiểm tra:
+
+- `test/features/<feature>/{providers,screens,widgets}`: test từng layer của
+  feature.
+- `test/core`, `test/components`, `test/services`: test module dùng chung đúng
+  theo vị trí production.
+- `test/integration`: kiểm tra app boot và luồng kết nối nhiều layer.
+- `test/support`: test shell trung lập, không tự khởi tạo provider của feature.
+
+## 🛠️ Yêu cầu môi trường & Cài đặt
+
+- **Flutter SDK**: `3.50.0` (Dart `3.14.0`), quản lý qua [FVM (Flutter Version Management)](https://fvm.app/).
+- **Quản lý phiên bản**: Luôn sử dụng tiền tố `fvm flutter` hoặc `fvm dart` để đảm bảo đồng nhất môi trường.
+- **Hệ thống Design**: Đã migrate sang `package:material_ui` và `package:cupertino_ui` chuẩn Flutter 3.50.
+
+---
+
 ## 🚀 Hướng dẫn Build & Deploy
 
 ### 🌐 1. Build cho môi trường Web (WASM)
 
-Chạy lệnh sau để dọn dẹp và đóng gói bản Web với base-href chuẩn:
+Ứng dụng hỗ trợ biên dịch sang **WebAssembly (WASM)** với fallback JavaScript tự động, giúp tối ưu tối đa hiệu năng render và xử lý ảnh trên trình duyệt.
+
+Tạo Google Drive API key, giới hạn key cho Google Drive API và HTTP referrer
+`https://toilathor.github.io/*`. Sau đó export key trước khi build:
 
 ```bash
-flutter clean && flutter build web --base-href "/photobooth/" --wasm --web-define=FLAVOR=personal
+export GOOGLE_DRIVE_API_KEY="your-restricted-api-key"
+fvm flutter clean
+fvm flutter build web --base-href "/photobooth/" --wasm \
+  --web-define=FLAVOR=personal \
+  --dart-define=GOOGLE_DRIVE_API_KEY="$GOOGLE_DRIVE_API_KEY"
 ```
 
+API key được đóng gói trong ứng dụng web nên không phải secret. Việc giới hạn
+API và referrer là bắt buộc để tránh lạm dụng quota.
+
 #### 🧪 Chạy thử Web ở Local
+
+Tạo file cấu hình local rồi thay giá trị mẫu bằng API key:
+
+```bash
+cp .env.example .env
+```
+
+Cho phép thêm HTTP referrer `http://localhost:5050/*` trên API key dùng để
+phát triển. Sau đó chạy cấu hình `Web - Personal` hoặc `Web - Personal (WASM)` trong VS Code hoặc dùng:
+
+```bash
+# Chạy Web tiêu chuẩn
+fvm flutter run -d chrome --web-port 5050 \
+  --web-define=FLAVOR=personal \
+  --dart-define-from-file=.env
+
+# Hoặc chạy thử nghiệm với WebAssembly (WASM)
+fvm flutter run -d chrome --wasm --web-port 5050 \
+  --web-define=FLAVOR=personal \
+  --dart-define-from-file=.env
+```
+
+Để kiểm tra bản build production ở local:
 
 ```bash
 # Di chuyển vào thư mục build

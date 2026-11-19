@@ -1,4 +1,6 @@
 class GoogleDriveConfig {
+  static const String apiKey = String.fromEnvironment('GOOGLE_DRIVE_API_KEY');
+
   static const String clientId =
       '846567411119-ohav9pgij858i92jou6v5ujsdg9jdvu9.apps.googleusercontent.com';
 

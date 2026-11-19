@@ -6,6 +6,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 
 import '../core/configs/google_drive_config.dart';
+import 'storage_section.dart';
 import 'storage_service_interface.dart';
 import 'storage_user.dart';
 
@@ -139,11 +140,7 @@ class GoogleDriveService implements StorageService {
   }
 
   @override
-  Future<String?> uploadCollection({
-    required Map<String, Uint8List> files,
-    required String folderName,
-    void Function(int current, int total)? onProgress,
-  }) async {
+  Future<StorageSection?> prepareSection(String folderName) async {
     _AuthenticatedClient? httpClient;
     try {
       final account = await _signInAccount();
@@ -152,25 +149,52 @@ class GoogleDriveService implements StorageService {
       final authorization = await account.authorizationClient.authorizeScopes(
         GoogleDriveConfig.scopes,
       );
+      httpClient = _AuthenticatedClient(authorization.accessToken);
+      final driveApi = drive.DriveApi(httpClient);
+      final rootId = await _getOrCreateFolder(driveApi);
+      if (rootId == null) return null;
+
+      final escapedName = _escapeQuery(folderName);
+      final folders = await driveApi.files.list(
+        q:
+            "name = '$escapedName' and '$rootId' in parents and "
+            "mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        $fields: 'files(id, webViewLink)',
+      );
+      final existing = folders.files?.firstOrNull;
+      if (existing?.id != null) return _toSection(existing!);
+
+      final created = await driveApi.files.create(
+        drive.File()
+          ..name = folderName
+          ..mimeType = 'application/vnd.google-apps.folder'
+          ..parents = [rootId],
+        $fields: 'id, webViewLink',
+      );
+      return created.id == null ? null : _toSection(created);
+    } finally {
+      httpClient?.close();
+    }
+  }
+
+  @override
+  Future<void> uploadCollection({
+    required Map<String, Uint8List> files,
+    required String sectionId,
+    void Function(int current, int total)? onProgress,
+  }) async {
+    _AuthenticatedClient? httpClient;
+    try {
+      final account = await _signInAccount();
+      if (account == null) throw StateError('Google Drive sign-in required');
+
+      final authorization = await account.authorizationClient.authorizeScopes(
+        GoogleDriveConfig.scopes,
+      );
 
       httpClient = _AuthenticatedClient(authorization.accessToken);
       final driveApi = drive.DriveApi(httpClient);
 
-      // 1. Lấy/Tạo thư mục gốc (Photobooth)
-      String? rootId = await _getOrCreateFolder(driveApi);
-      if (rootId == null) return null;
-
-      // 2. Tạo thư mục con cho phiên (Session Folder)
-      final sessionFolder = drive.File()
-        ..name = folderName
-        ..mimeType = 'application/vnd.google-apps.folder'
-        ..parents = [rootId];
-
-      final createdFolder = await driveApi.files.create(sessionFolder);
-      final sessionId = createdFolder.id;
-      if (sessionId == null) return null;
-
-      // 3. Tải lên tất cả các tệp trong Map vào thư mục sessionId
       final Map<String, String> subFolderIds = {};
       int currentCount = 0;
       final int totalCount = files.length;
@@ -183,7 +207,7 @@ class GoogleDriveService implements StorageService {
         if (fileBytes == null) continue;
 
         String actualFileName = fileName;
-        String parentId = sessionId;
+        String parentId = sectionId;
 
         // Xử lý thư mục con (chỉ hỗ trợ 1 cấp)
         if (actualFileName.contains('/')) {
@@ -194,23 +218,19 @@ class GoogleDriveService implements StorageService {
           if (subFolderIds.containsKey(subFolderName)) {
             parentId = subFolderIds[subFolderName]!;
           } else {
-            final subFolder = drive.File()
-              ..name = subFolderName
-              ..mimeType = 'application/vnd.google-apps.folder'
-              ..parents = [sessionId];
-            final createdSubFolder = await driveApi.files.create(subFolder);
-            if (createdSubFolder.id != null) {
-              subFolderIds[subFolderName] = createdSubFolder.id!;
-              parentId = createdSubFolder.id!;
-            }
+            parentId = await _getOrCreateSubFolder(
+              driveApi,
+              sectionId,
+              subFolderName,
+            );
+            subFolderIds[subFolderName] = parentId;
           }
         }
 
         final mimeType = _getMimeType(actualFileName);
-        final driveFile = drive.File()
+        final metadata = drive.File()
           ..name = actualFileName
-          ..mimeType = mimeType
-          ..parents = [parentId];
+          ..mimeType = mimeType;
 
         // Đảm bảo Stream được tạo từ một bản sao sạch của tệp
         final media = drive.Media(
@@ -219,74 +239,53 @@ class GoogleDriveService implements StorageService {
           contentType: mimeType,
         );
 
-        await driveApi.files.create(
-          driveFile,
-          uploadMedia: media,
-          uploadOptions: drive.UploadOptions.resumable,
+        final escapedName = _escapeQuery(actualFileName);
+        final existing = await driveApi.files.list(
+          q: "name = '$escapedName' and '$parentId' in parents and trashed = false",
+          $fields: 'files(id)',
         );
-
-        // Giải phóng bộ nhớ bằng cách loại bỏ byte array khỏi map ngay lập tức
-        files.remove(fileName);
+        final existingId = existing.files?.firstOrNull?.id;
+        if (existingId == null) {
+          metadata.parents = [parentId];
+          await driveApi.files.create(
+            metadata,
+            uploadMedia: media,
+            uploadOptions: drive.UploadOptions.resumable,
+          );
+        } else {
+          await driveApi.files.update(
+            metadata,
+            existingId,
+            uploadMedia: media,
+            uploadOptions: drive.UploadOptions.resumable,
+          );
+        }
 
         currentCount++;
         onProgress?.call(currentCount, totalCount);
       }
 
-      // 4. Cấp quyền xem cho bất kỳ ai có link (Public reader)
-      await driveApi.permissions.create(
-        drive.Permission()
-          ..role = 'reader'
-          ..type = 'anyone',
-        sessionId,
+      final permissions = await driveApi.permissions.list(
+        sectionId,
+        $fields: 'permissions(id, role, type)',
       );
-
-      // 5. Lấy link chia sẻ của thư mục
-      final folderMetadata =
-          await driveApi.files.get(sessionId, $fields: 'webViewLink')
-              as drive.File;
-
-      return folderMetadata.webViewLink;
+      final isPublic =
+          permissions.permissions?.any(
+            (permission) =>
+                permission.type == 'anyone' && permission.role == 'reader',
+          ) ??
+          false;
+      if (!isPublic) {
+        await driveApi.permissions.create(
+          drive.Permission()
+            ..role = 'reader'
+            ..type = 'anyone',
+          sectionId,
+        );
+      }
     } catch (e) {
       if (kDebugMode) print('Error uploading collection: $e');
       rethrow;
-    } finally {
-      httpClient?.close();
-    }
-  }
-
-  @override
-  Future<String?> getFolderLink(String folderName) async {
-    _AuthenticatedClient? httpClient;
-    try {
-      final account = await _signInAccount();
-      if (account == null) return null;
-
-      final authorization = await account.authorizationClient.authorizeScopes(
-        GoogleDriveConfig.scopes,
-      );
-
-      httpClient = _AuthenticatedClient(authorization.accessToken);
-      final driveApi = drive.DriveApi(httpClient);
-
-      // 1. Lấy thư mục gốc (Photobooth)
-      String? rootId = await _getOrCreateFolder(driveApi);
-      if (rootId == null) return null;
-
-      // 2. Tìm thư mục con với tên folderName
-      final query =
-          "name = '$folderName' and '$rootId' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-      final folderList = await driveApi.files.list(
-        q: query,
-        $fields: 'files(id, webViewLink)',
-      );
-
-      if (folderList.files != null && folderList.files?.isNotEmpty == true) {
-        return folderList.files?.first.webViewLink;
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) print('Error checking folder: $e');
-      return null;
     } finally {
       httpClient?.close();
     }
@@ -313,6 +312,43 @@ class GoogleDriveService implements StorageService {
       return null;
     }
   }
+
+  Future<String> _getOrCreateSubFolder(
+    drive.DriveApi driveApi,
+    String parentId,
+    String name,
+  ) async {
+    final escapedName = _escapeQuery(name);
+    final folders = await driveApi.files.list(
+      q:
+          "name = '$escapedName' and '$parentId' in parents and "
+          "mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      $fields: 'files(id)',
+    );
+    final existingId = folders.files?.firstOrNull?.id;
+    if (existingId != null) return existingId;
+
+    final created = await driveApi.files.create(
+      drive.File()
+        ..name = name
+        ..mimeType = 'application/vnd.google-apps.folder'
+        ..parents = [parentId],
+      $fields: 'id',
+    );
+    if (created.id == null) throw StateError('Unable to create Drive folder');
+    return created.id!;
+  }
+
+  StorageSection _toSection(drive.File folder) {
+    final id = folder.id!;
+    return StorageSection(
+      id: id,
+      webViewUrl:
+          folder.webViewLink ?? 'https://drive.google.com/drive/folders/$id',
+    );
+  }
+
+  String _escapeQuery(String value) => value.replaceAll("'", r"\'");
 
   String _getMimeType(String fileName) {
     final lower = fileName.toLowerCase();

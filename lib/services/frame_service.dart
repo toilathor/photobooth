@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
 class FrameService {
@@ -10,9 +11,7 @@ class FrameService {
 
     try {
       final response = await http.get(
-        Uri.parse(
-          'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/data.json',
-        ),
+        Uri.parse('${AppConfig.framesRootUrl}data.json'),
       );
       if (response.statusCode != 200) {
         throw Exception('HTTP status: ${response.statusCode}');

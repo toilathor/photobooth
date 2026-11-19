@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/core/configs/flavor_detector.dart';
@@ -44,8 +44,23 @@ class AppConfig {
   static const List<int> photoCounts = [1, 4];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
-  static const String githubFramesBaseUrl =
-      'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/collected/';
+  static const Size printPixelSize = Size(2400, 3600);
+
+  /// Frame folder under `assets/frames/`, one per flavor so that frames of
+  /// different builds never mix.
+  static String get framesFolder => flavor.name;
+
+  /// Root URL of this flavor's frames (contains `data.json`, `collected/`,
+  /// `custom/`).
+  static String get framesRootUrl =>
+      'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/$framesFolder/';
+
+  static String get githubFramesBaseUrl => '${framesRootUrl}collected/';
+  static const String galleryBaseUrl =
+      'https://toilathor.github.io/photobooth/';
+
+  static String galleryUrl(String sectionId) =>
+      '$galleryBaseUrl#/gallery/${Uri.encodeComponent(sectionId)}';
 
   // Filter settings
   static List<String> get filters => FilterConfig.availableFilters;

@@ -6,15 +6,31 @@ echo "==========================================="
 echo "   Build & Deploy Flutter Web to gh-pages  "
 echo "==========================================="
 
+if [ -z "${GOOGLE_DRIVE_API_KEY:-}" ]; then
+    echo "Lỗi: GOOGLE_DRIVE_API_KEY chưa được cấu hình."
+    echo "Hãy export API key đã giới hạn domain trước khi deploy."
+    exit 1
+fi
+
+FLUTTER_CMD="fvm flutter"
+DART_CMD="fvm dart"
+
+# Fallback nếu fvm chưa được cài đặt
+if ! command -v fvm &> /dev/null; then
+    FLUTTER_CMD="flutter"
+    DART_CMD="dart"
+fi
+
 echo "1. Cleaning project..."
-flutter clean
+$FLUTTER_CMD clean
 
 echo "2. Lấy dependencies và generate code..."
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+$FLUTTER_CMD pub get
+$DART_CMD run build_runner build --delete-conflicting-outputs
 
 echo "3. Building for Web (WASM + flavor=personal)..."
-flutter build web --base-href "/photobooth/" --wasm --web-define=FLAVOR=personal
+$FLUTTER_CMD build web --base-href "/photobooth/" --wasm --web-define=FLAVOR=personal \
+    --dart-define=GOOGLE_DRIVE_API_KEY="$GOOGLE_DRIVE_API_KEY"
 
 # Yêu cầu working directory phải sạch trước khi chuyển nhánh
 if [ -n "$(git status --porcelain)" ]; then

@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class PrimaryButton extends StatelessWidget {
   final VoidCallback? onTap;
   final String label;
-  final IconData icon;
+  final IconData? icon;
   final double height;
 
   const PrimaryButton({
     super.key,
     required this.onTap,
     required this.label,
-    required this.icon,
+    this.icon,
     this.height = 72,
   });
 
@@ -45,8 +45,14 @@ class PrimaryButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, color: Colors.white, size: height > 60 ? 28 : 20),
-                  const SizedBox(width: 12),
+                  if (icon != null) ...[
+                    Icon(
+                      icon,
+                      color: Colors.white,
+                      size: height > 60 ? 28 : 20,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Flexible(
                     child: Text(
                       label,

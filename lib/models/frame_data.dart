@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 
 class FrameData {
@@ -68,9 +68,9 @@ class FrameData {
     if (filename.isEmpty) return '';
 
     if (filename.startsWith('standard_custom_')) {
-      return 'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/custom/standard/$filename';
+      return '${AppConfig.framesRootUrl}custom/standard/$filename';
     } else if (filename.startsWith('group_custom_')) {
-      return 'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/custom/group/$filename';
+      return '${AppConfig.framesRootUrl}custom/group/$filename';
     } else {
       return '${AppConfig.githubFramesBaseUrl}$filename';
     }
