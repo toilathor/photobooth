@@ -41,12 +41,26 @@ class AppConfig {
       : ThemeConfig.commercialDarkTheme;
 
   // Photo settings
-  static const List<int> photoCounts = [1, 4];
+  /// Photo count of the "standard" mode: the 2-photo layout for personal and
+  /// the 4-photo strip for commercial. It is also the default selection.
+  static int get standardPhotoCount => flavor == AppFlavor.personal ? 2 : 4;
+
+  static int get defaultPhotoCount => standardPhotoCount;
+
+  /// Photo counts the flavor can offer (group shot and standard).
+  static List<int> get photoCounts => [1, standardPhotoCount];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
   static const Size printPixelSize = Size(2400, 3600);
-  static const String githubFramesBaseUrl =
-      'https://raw.githubusercontent.com/toilathor/photobooth/master/assets/frames/collected/';
+
+  /// Frame folder under `assets/frames/`, one per flavor so that frames of
+  /// different builds never mix.
+  static String get framesFolder => flavor.name;
+
+  /// Asset root of this flavor's frames (contains `data.json`, `collected/`,
+  /// `standard/`, `group/`). Frames are bundled with the app, see the `frames` block in
+  /// pubspec.yaml (maintained by `lib/helper/update_frames_data.dart`).
+  static String get framesAssetRoot => 'assets/frames/$framesFolder/';
   static const String galleryBaseUrl =
       'https://toilathor.github.io/photobooth/';
 

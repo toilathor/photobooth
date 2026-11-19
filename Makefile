@@ -1,4 +1,4 @@
-.PHONY: analyze test format format-check verify build-web-wasm test-web-mobile deploy-web
+.PHONY: frame-preview analyze test format format-check verify build-web-wasm test-web-mobile deploy-web
 
 FLUTTER ?= fvm flutter
 DART ?= fvm dart
@@ -25,3 +25,6 @@ test-web-mobile:
 
 deploy-web:
 	@bash scripts/deploy_web.sh
+
+frame-preview:
+	@bash scripts/frame_preview.sh
