@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:th_photobooth/core/configs/print_layout.dart';
 import 'package:th_photobooth/gen/assets.gen.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
@@ -18,7 +19,6 @@ class BrandedQrCode extends StatelessWidget {
   );
   static const _errorCorrectionLevel = QrErrorCorrectLevel.M;
   static const double _physicalSizeMm = 7;
-  static const double _physicalInsetMm = 2;
 
   final String data;
   final double size;
@@ -36,8 +36,9 @@ class BrandedQrCode extends StatelessWidget {
   static double printSize(FrameData frame) =>
       frame.size.width * _physicalSizeMm / _printedFrameWidthMm(frame);
 
-  static double printInset(FrameData frame) =>
-      frame.size.width * _physicalInsetMm / _printedFrameWidthMm(frame);
+  /// Distance from the frame's left/right (dx) and top/bottom (dy) edges
+  /// that keeps the QR on the paper after the printer trims the print.
+  static Offset printInset(FrameData frame) => PrintLayout.safeInset(frame);
 
   static double _printedFrameWidthMm(FrameData frame) =>
       frame.isGroup ? 101.6 : 50.8;

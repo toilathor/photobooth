@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:camera/camera.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:th_photobooth/core/configs/print_layout.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 import 'package:th_photobooth/models/qr_corner.dart';
@@ -291,8 +292,7 @@ class PhotoPrintPreview extends StatelessWidget {
       showQrPlaceholder: showQrPlaceholder,
       qrCorner: qrCorner,
     );
-    final isLandscape =
-        selectedFrame.size.width / selectedFrame.size.height > 0.5;
+    final isLandscape = PrintLayout.stacksCopies(selectedFrame);
     final content = isLandscape
         ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -300,7 +300,7 @@ class PhotoPrintPreview extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(height: 4),
+              const SizedBox(height: PrintLayout.copyGap),
               Flexible(fit: FlexFit.loose, child: strip),
             ],
           )
@@ -310,7 +310,7 @@ class PhotoPrintPreview extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(width: 4),
+              const SizedBox(width: PrintLayout.copyGap),
               Flexible(fit: FlexFit.loose, child: strip),
             ],
           );

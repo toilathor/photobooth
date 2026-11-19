@@ -20,9 +20,9 @@ enum QrCorner {
   bool get isTop => this == topLeft || this == topRight;
 
   /// Top-left point of a [qrSize] square placed in this corner of [canvas],
-  /// [inset] away from both edges.
-  Offset origin(Size canvas, double qrSize, double inset) => Offset(
-    isLeft ? inset : canvas.width - qrSize - inset,
-    isTop ? inset : canvas.height - qrSize - inset,
+  /// `inset.dx` from the left/right edge and `inset.dy` from the top/bottom.
+  Offset origin(Size canvas, double qrSize, Offset inset) => Offset(
+    isLeft ? inset.dx : canvas.width - qrSize - inset.dx,
+    isTop ? inset.dy : canvas.height - qrSize - inset.dy,
   );
 }
