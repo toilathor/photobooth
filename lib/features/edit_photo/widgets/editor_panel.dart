@@ -9,6 +9,7 @@ import 'package:th_photobooth/components/secondary_button.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/filter_selector.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 import 'frame_selector.dart';
 
@@ -30,6 +31,11 @@ class EditorPanel extends StatefulWidget {
   final VoidCallback onCompleteRequested;
   final bool requiresQr;
 
+  /// Where the gallery QR sits on the print. The picker is hidden when
+  /// [onQrCornerChanged] is null (no QR is printed).
+  final QrCorner qrCorner;
+  final ValueChanged<QrCorner>? onQrCornerChanged;
+
   const EditorPanel({
     super.key,
     required this.availableFrames,
@@ -47,6 +53,8 @@ class EditorPanel extends StatefulWidget {
     this.onSaveRequested,
     required this.onCompleteRequested,
     this.requiresQr = false,
+    this.qrCorner = QrCorner.fallback,
+    this.onQrCornerChanged,
     this.isMobile = false,
   });
 
@@ -95,6 +103,13 @@ class _EditorPanelState extends State<EditorPanel> {
 
           // Tab Content
           Expanded(child: _buildTabContent(colorScheme)),
+
+          if (widget.onQrCornerChanged != null)
+            _QrCornerPicker(
+              selected: widget.qrCorner,
+              onChanged: widget.onQrCornerChanged!,
+              isMobile: widget.isMobile,
+            ),
 
           if (widget.requiresQr)
             Padding(
@@ -259,6 +274,94 @@ class _EditorPanelState extends State<EditorPanel> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _QrCornerPicker extends StatelessWidget {
+  final QrCorner selected;
+  final ValueChanged<QrCorner> onChanged;
+  final bool isMobile;
+
+  const _QrCornerPicker({
+    required this.selected,
+    required this.onChanged,
+    required this.isMobile,
+  });
+
+  String _label(QrCorner corner) => switch (corner) {
+    QrCorner.topLeft => t.editor.qrCorners.topLeft,
+    QrCorner.topRight => t.editor.qrCorners.topRight,
+    QrCorner.bottomLeft => t.editor.qrCorners.bottomLeft,
+    QrCorner.bottomRight => t.editor.qrCorners.bottomRight,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        isMobile ? 16 : 24,
+        0,
+        isMobile ? 16 : 24,
+        12,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.qr_code_2_rounded,
+            size: 18,
+            color: colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+          const Gap(8),
+          Expanded(
+            child: Text(
+              t.editor.qrPosition,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+          for (final corner in QrCorner.values)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Tooltip(
+                message: _label(corner),
+                child: Semantics(
+                  button: true,
+                  selected: corner == selected,
+                  label: '${t.editor.qrPosition}: ${_label(corner)}',
+                  excludeSemantics: true,
+                  child: Material(
+                    key: ValueKey('qr-corner-${corner.name}'),
+                    color: corner == selected
+                        ? colorScheme.secondary
+                        : colorScheme.onSurface.withValues(alpha: 0.06),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => onChanged(corner),
+                      child: SizedBox.square(
+                        dimension: 44,
+                        child: Icon(
+                          corner.icon,
+                          size: 20,
+                          color: corner == selected
+                              ? colorScheme.onSecondary
+                              : colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

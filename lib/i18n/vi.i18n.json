@@ -57,7 +57,14 @@
     "all": "Tất cả",
     "printing": "Đang chuẩn bị in...",
     "printSuccess": "Đã gửi lệnh in thành công!",
-    "printError": "Lỗi khi in: $error"
+    "printError": "Lỗi khi in: $error",
+    "qrPosition": "Vị trí mã QR",
+    "qrCorners": {
+      "topLeft": "Góc trên trái",
+      "topRight": "Góc trên phải",
+      "bottomLeft": "Góc dưới trái",
+      "bottomRight": "Góc dưới phải"
+    }
   },
   "dialogs": {
     "photoSelection": {

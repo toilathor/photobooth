@@ -9,6 +9,7 @@ import 'package:th_photobooth/core/configs/frame_config.dart';
 import 'package:th_photobooth/core/configs/storage_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 import 'package:th_photobooth/services/photo_merger_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
@@ -41,6 +42,7 @@ class EditPhotoProvider with ChangeNotifier {
   bool isProcessing = false;
   String selectedFilter = 'normal';
   double filterIntensity = 0.5;
+  QrCorner qrCorner = QrCorner.fallback;
   final List<String> filters = AppConfig.filters;
   bool _isHandlingQR = false;
 
@@ -111,6 +113,12 @@ class EditPhotoProvider with ChangeNotifier {
   void setFilterIntensity(double intensity) {
     if (isEditorLocked) return;
     filterIntensity = intensity;
+    notifyListeners();
+  }
+
+  void setQrCorner(QrCorner corner) {
+    if (isEditorLocked || corner == qrCorner) return;
+    qrCorner = corner;
     notifyListeners();
   }
 
@@ -277,6 +285,7 @@ class EditPhotoProvider with ChangeNotifier {
           ),
           isMirrored: photoIsMirrored,
           galleryUrl: galleryUrl,
+          qrCorner: qrCorner,
         );
         final jpgBytes = await _convertToJpg(framedCapture);
         if (jpgBytes != null) {

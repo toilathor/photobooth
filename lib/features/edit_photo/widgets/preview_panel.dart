@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 import 'photo_strip.dart';
 import 'video_recap_player.dart';
@@ -23,6 +24,7 @@ class PreviewPanel extends StatelessWidget {
   final ScreenshotController? paperController;
   final String? galleryUrl;
   final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PreviewPanel({
     super.key,
@@ -38,6 +40,7 @@ class PreviewPanel extends StatelessWidget {
     this.paperController,
     this.galleryUrl,
     this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
     this.isMobile = false,
   });
 
@@ -275,6 +278,7 @@ class PreviewPanel extends StatelessWidget {
         photoIsMirrored: photoIsMirrored,
         galleryUrl: galleryUrl,
         showQrPlaceholder: showQrPlaceholder,
+        qrCorner: qrCorner,
       ),
     );
   }
@@ -288,6 +292,7 @@ class PhotoPrintPreview extends StatelessWidget {
   final bool photoIsMirrored;
   final String? galleryUrl;
   final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PhotoPrintPreview({
     super.key,
@@ -298,6 +303,7 @@ class PhotoPrintPreview extends StatelessWidget {
     required this.photoIsMirrored,
     this.galleryUrl,
     this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
   });
 
   @override
@@ -310,6 +316,7 @@ class PhotoPrintPreview extends StatelessWidget {
       isMirrored: photoIsMirrored,
       galleryUrl: galleryUrl,
       showQrPlaceholder: showQrPlaceholder,
+      qrCorner: qrCorner,
     );
     final isLandscape =
         selectedFrame.size.width / selectedFrame.size.height > 0.5;

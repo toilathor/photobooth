@@ -293,6 +293,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         filterIntensity: provider.filterIntensity,
         isMirrored: provider.photoIsMirrored,
         galleryUrl: provider.galleryUrl,
+        qrCorner: provider.qrCorner,
       );
 
       return await _stripController.captureFromWidget(
@@ -324,6 +325,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         filterIntensity: provider.filterIntensity,
         photoIsMirrored: provider.photoIsMirrored,
         galleryUrl: provider.galleryUrl,
+        qrCorner: provider.qrCorner,
         showQrPlaceholder: StorageConfig.activeStorage != StorageType.none,
       );
 
@@ -355,6 +357,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       videoIsMirrored: provider.videoIsMirrored,
       isMobile: isMobile,
       galleryUrl: provider.galleryUrl,
+      qrCorner: provider.qrCorner,
       showQrPlaceholder: StorageConfig.activeStorage != StorageType.none,
     );
   }
@@ -399,6 +402,10 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                 ? () => _handleQRRequest(context)
                 : () => _handlePrintRequest(context),
             requiresQr: requiresQr,
+            qrCorner: provider.qrCorner,
+            onQrCornerChanged: StorageConfig.activeStorage != StorageType.none
+                ? provider.setQrCorner
+                : null,
             isMobile: isMobile,
           );
 

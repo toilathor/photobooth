@@ -57,7 +57,14 @@
     "all": "All",
     "printing": "Preparing to print...",
     "printSuccess": "Print job sent successfully!",
-    "printError": "Print error: $error"
+    "printError": "Print error: $error",
+    "qrPosition": "QR position",
+    "qrCorners": {
+      "topLeft": "Top left",
+      "topRight": "Top right",
+      "bottomLeft": "Bottom left",
+      "bottomRight": "Bottom right"
+    }
   },
   "dialogs": {
     "photoSelection": {
