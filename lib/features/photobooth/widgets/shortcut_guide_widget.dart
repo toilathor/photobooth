@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -94,7 +94,7 @@ class _ShortcutGuideWidgetState extends State<ShortcutGuideWidget> {
                 ),
                 child: Icon(
                   Icons.keyboard_alt_outlined,
-                  color: _isExpanded ? Colors.white : colorScheme.primary,
+                  color: _isExpanded ? Colors.white : colorScheme.secondary,
                   size: 24,
                 ),
               ),

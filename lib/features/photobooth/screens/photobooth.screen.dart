@@ -2,12 +2,13 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
+import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/components/photobooth_header.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/widgets/action_buttons_widget.dart';
@@ -16,6 +17,7 @@ import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.d
 import 'package:th_photobooth/features/photobooth/widgets/previews_footer.dart';
 import 'package:th_photobooth/features/photobooth/widgets/settings_panel.dart';
 import 'package:th_photobooth/features/photobooth/widgets/shortcut_guide_widget.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 
 class PhotoboothScreen extends StatefulWidget {
   const PhotoboothScreen({super.key});
@@ -79,7 +81,7 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
     } else if (logicalKey == LogicalKeyboardKey.keyV) {
       provider.toggleVideoRecap(!provider.isVideoRecap);
     } else if (logicalKey == LogicalKeyboardKey.keyR) {
-      provider.resetCapture();
+      confirmResetSession(context);
     } else if (logicalKey == LogicalKeyboardKey.keyF) {
       provider.enterFullscreen();
     }
@@ -187,8 +189,12 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
             // Hide header in landscape mobile to save vertical space
             if (!(isMobile && isLandscape))
               PhotoboothHeader(
+                // Desktop: the language toggle sits in the header instead of
+                // floating over it.
+                leading: isMobile ? null : const LanguageSwitcher(),
                 trailing: isMobile
                     ? IconButton(
+                        tooltip: t.settings.open,
                         icon: Icon(
                           Icons.settings_rounded,
                           color: colorScheme.secondary,
@@ -271,7 +277,7 @@ class _CenterPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: CameraPreviewWidget(controller, key: cameraPreviewKey)),
+        const Expanded(child: CameraPreviewWidget()),
         const Gap(24),
         const ActionButtonsWidget(),
         const Gap(24),
@@ -292,7 +298,7 @@ class _MobilePanel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         children: [
-          CameraPreviewWidget(controller, key: cameraPreviewKey),
+          const CameraPreviewWidget(),
           const Gap(16),
           const ActionButtonsWidget(),
           const Gap(16),
@@ -328,7 +334,7 @@ class _MobileLandscapePanel extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
-            child: CameraPreviewWidget(controller, key: cameraPreviewKey),
+            child: const CameraPreviewWidget(),
           ),
         ),
         // Right: Actions + Thumbnails (scrollable vertically)
@@ -340,14 +346,16 @@ class _MobileLandscapePanel extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
+                  tooltip: t.settings.open,
                   icon: Icon(
                     Icons.settings_rounded,
                     color: colorScheme.secondary,
                     size: 24,
                   ),
                   onPressed: onSettingsTap,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size.square(44),
+                  ),
                 ),
               ),
               Expanded(child: const PhotoPreviewsPanel(isMobile: true)),

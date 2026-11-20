@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
@@ -17,7 +17,7 @@ class PhotoboothHeader extends StatelessWidget {
         ResponsiveBreakpoints.of(context).smallerThan(DESKTOP) ||
         MediaQuery.sizeOf(context).height < 500;
     final double sideWidth = (leading != null || trailing != null)
-        ? (isMobile ? 80.0 : 96.0)
+        ? (isMobile ? 80.0 : 112.0)
         : 0.0;
 
     return Padding(

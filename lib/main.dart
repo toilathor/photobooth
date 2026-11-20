@@ -1,14 +1,14 @@
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:th_photobooth/components/copyright_watermark.dart';
-import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/di/service_locator.dart';
+import 'package:th_photobooth/core/routes/gallery_route.dart';
+import 'package:th_photobooth/features/gallery/screens/gallery.screen.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/features/photobooth/screens/photobooth.screen.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
@@ -18,7 +18,25 @@ import 'package:th_photobooth/services/storage_factory.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final allCameras = await availableCameras();
+  if (GalleryRoute.matches(Uri.base)) {
+    final gallerySectionId = GalleryRoute.sectionIdFrom(Uri.base) ?? '';
+    runApp(
+      TranslationProvider(
+        child: PhotoboothApp(
+          gallerySectionId: gallerySectionId,
+          galleryLocation: Uri.base.fragment,
+        ),
+      ),
+    );
+    return;
+  }
+
+  List<CameraDescription> allCameras = [];
+  try {
+    allCameras = await availableCameras();
+  } catch (error, stackTrace) {
+    debugPrint('Unable to enumerate cameras: $error\n$stackTrace');
+  }
   final backCameras = allCameras
       .where((c) => c.lensDirection == CameraLensDirection.back)
       .toList();
@@ -47,7 +65,7 @@ Future<void> main() async {
   await CacheService.clearCache();
 
   // Khởi tạo Storage Service theo cấu hình (Personal: Google Drive, Commercial: None)
-  await StorageFactory.instance.init();
+  await StorageFactory.init();
 
   // Khởi tạo Service Locator (GetIt)
   setupServiceLocator();
@@ -67,18 +85,31 @@ Future<void> main() async {
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+  };
 }
 
 class PhotoboothApp extends StatelessWidget {
-  const PhotoboothApp({super.key});
+  final String? gallerySectionId;
+  final String? galleryLocation;
+
+  const PhotoboothApp({super.key, this.gallerySectionId, this.galleryLocation});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: galleryLocation,
+      onGenerateRoute: galleryLocation == null
+          ? null
+          : (settings) => settings.name == galleryLocation
+                ? MaterialPageRoute<void>(
+                    settings: settings,
+                    builder: (_) =>
+                        GalleryScreen(sectionId: gallerySectionId ?? ''),
+                  )
+                : null,
       title: AppConfig.appName,
       theme: AppConfig.theme,
       darkTheme: AppConfig.darkTheme,
@@ -88,21 +119,10 @@ class PhotoboothApp extends StatelessWidget {
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
-        final bool isDesktop = MediaQuery.sizeOf(context).width >= 850 &&
-            MediaQuery.sizeOf(context).height >= 500;
         return ResponsiveBreakpoints.builder(
           child: Stack(
             children: [
               child ?? const SizedBox.shrink(),
-              if (isDesktop)
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: LanguageSwitcher(),
-                  ),
-                ),
               const CopyrightWatermark(),
             ],
           ),
@@ -114,7 +134,7 @@ class PhotoboothApp extends StatelessWidget {
           ],
         );
       },
-      home: const PhotoboothScreen(),
+      home: galleryLocation == null ? const PhotoboothScreen() : null,
       debugShowCheckedModeBanner: false,
     );
   }

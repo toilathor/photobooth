@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 import 'package:video_player/video_player.dart';
+
 import 'video_recap_components.dart';
 
 enum RecapViewMode { full, frame }
@@ -464,7 +464,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                        letterSpacing: 0.2,
                         fontSize: 12,
                       ),
                     ),
@@ -627,7 +627,9 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                                             .size
                                             .height,
                                         child: Transform.scale(
-                                          scaleX: widget.videoIsMirrored ? -1 : 1,
+                                          scaleX: widget.videoIsMirrored
+                                              ? -1
+                                              : 1,
                                           child: VideoPlayer(
                                             _slotVideoController!,
                                             key: _slotVideoKey,
@@ -663,20 +665,10 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                 if (frame.path.isNotEmpty)
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: CachedNetworkImage(
-                        imageUrl: frame.path,
+                      child: Image.asset(
+                        frame.path,
                         fit: BoxFit.fill,
-                        placeholder: (context, url) => Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(
-                                context,
-                              ).colorScheme.secondary.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) =>
+                        errorBuilder: (context, error, stackTrace) =>
                             const Icon(Icons.error_outline),
                       ),
                     ),

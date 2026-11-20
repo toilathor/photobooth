@@ -1,11 +1,13 @@
 import 'dart:io' show File;
+import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:th_photobooth/components/branded_qr_code.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 class PhotoStrip extends StatelessWidget {
   final List<XFile> photos;
@@ -13,6 +15,9 @@ class PhotoStrip extends StatelessWidget {
   final String selectedFilter;
   final double filterIntensity;
   final bool isMirrored;
+  final String? galleryUrl;
+  final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PhotoStrip({
     super.key,
@@ -21,6 +26,9 @@ class PhotoStrip extends StatelessWidget {
     required this.selectedFilter,
     required this.filterIntensity,
     required this.isMirrored,
+    this.galleryUrl,
+    this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
   });
 
   @override
@@ -43,6 +51,13 @@ class PhotoStrip extends StatelessWidget {
             builder: (context, innerConstraints) {
               final scaleX = innerConstraints.maxWidth / frame.size.width;
               final scaleY = innerConstraints.maxHeight / frame.size.height;
+              final qrScale = math.min(scaleX, scaleY);
+              final qrSize = BrandedQrCode.printSize(frame) * qrScale;
+              final qrOrigin = qrCorner.origin(
+                innerConstraints.biggest,
+                qrSize,
+                BrandedQrCode.printInset(frame) * qrScale,
+              );
 
               return Stack(
                 children: [
@@ -77,23 +92,42 @@ class PhotoStrip extends StatelessWidget {
                   if (frame.path.isNotEmpty)
                     Positioned.fill(
                       child: IgnorePointer(
-                        child: CachedNetworkImage(
-                          imageUrl: frame.path,
+                        child: Image.asset(
+                          frame.path,
                           fit: BoxFit.fill,
-                          placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(
-                                  context,
-                                ).colorScheme.secondary.withValues(alpha: 0.5),
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) =>
+                          errorBuilder: (context, error, stackTrace) =>
                               const Icon(Icons.error_outline),
                         ),
                       ),
+                    ),
+                  if (galleryUrl != null || showQrPlaceholder)
+                    Positioned(
+                      left: qrOrigin.dx,
+                      top: qrOrigin.dy,
+                      child: galleryUrl != null
+                          ? BrandedQrCode(
+                              data: galleryUrl!,
+                              size: qrSize,
+                              showLogo: false,
+                            )
+                          : ExcludeSemantics(
+                              child: Container(
+                                width: qrSize,
+                                height: qrSize,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(
+                                    qrSize * 0.12,
+                                  ),
+                                  border: Border.all(color: Colors.black12),
+                                ),
+                                child: Icon(
+                                  Icons.qr_code_2_rounded,
+                                  color: Colors.black26,
+                                  size: qrSize * 0.5,
+                                ),
+                              ),
+                            ),
                     ),
                 ],
               );

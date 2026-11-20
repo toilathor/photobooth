@@ -1,0 +1,355 @@
+{
+    "categories": [
+        {
+            "id": 11,
+            "name": "Frame Basic",
+            "created_at": "2025-06-18T10:36:07.000000Z",
+            "updated_at": "2025-08-28T00:37:41.000000Z"
+        },
+        {
+            "id": 13,
+            "name": "Frame Amazing ⭐️",
+            "created_at": "2025-06-18T10:38:14.000000Z",
+            "updated_at": "2025-09-25T09:50:51.000000Z"
+        },
+        {
+            "id": 16,
+            "name": "Frame IDOL Hoạt Họa",
+            "created_at": "2025-06-18T13:54:38.000000Z",
+            "updated_at": "2025-09-25T09:52:05.000000Z"
+        }
+    ],
+    "images": [
+        {
+            "id": 118,
+            "filename": "collected/amazing/6854e5408664d.png",
+            "name": "Giấy Kết Hôn",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-06-20T04:36:16.000000Z",
+            "updated_at": "2026-05-07T15:58:36.000000Z",
+            "category_id": "13",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 13,
+                "name": "Frame Amazing ⭐️",
+                "created_at": "2025-06-18T10:38:14.000000Z",
+                "updated_at": "2025-09-25T09:50:51.000000Z"
+            }
+        },
+        {
+            "id": 129,
+            "filename": "collected/basic/6857dd9fcbe9d.png",
+            "name": "Basic-5",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-06-22T10:40:31.000000Z",
+            "updated_at": "2025-06-22T10:40:31.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 133,
+            "filename": "collected/basic/685a41b84c9e3.png",
+            "name": "Basic-6",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-06-24T06:12:08.000000Z",
+            "updated_at": "2025-06-24T06:12:08.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 175,
+            "filename": "collected/basic/6873abf8e3917.png",
+            "name": "Vintage1",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-07-13T12:52:08.000000Z",
+            "updated_at": "2025-07-13T12:52:08.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 176,
+            "filename": "collected/basic/6873ac02ab5a1.png",
+            "name": "Vintage2",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-07-13T12:52:18.000000Z",
+            "updated_at": "2025-07-13T12:52:18.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 237,
+            "filename": "collected/amazing/689da03a3127c.png",
+            "name": "Thư",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-08-14T08:37:14.000000Z",
+            "updated_at": "2025-08-14T08:37:14.000000Z",
+            "category_id": "13",
+            "visible_locales": null,
+            "category": {
+                "id": 13,
+                "name": "Frame Amazing ⭐️",
+                "created_at": "2025-06-18T10:38:14.000000Z",
+                "updated_at": "2025-09-25T09:50:51.000000Z"
+            }
+        },
+        {
+            "id": 327,
+            "filename": "collected/amazing/68dcc67d7e7ab.png",
+            "name": "XinhhAirlines",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-01T06:13:17.000000Z",
+            "updated_at": "2026-05-07T15:59:56.000000Z",
+            "category_id": "13",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 13,
+                "name": "Frame Amazing ⭐️",
+                "created_at": "2025-06-18T10:38:14.000000Z",
+                "updated_at": "2025-09-25T09:50:51.000000Z"
+            }
+        },
+        {
+            "id": 341,
+            "filename": "collected/basic/68df41b70eb0e.png",
+            "name": "Basic-2",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-03T03:23:35.000000Z",
+            "updated_at": "2025-10-03T03:23:35.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 342,
+            "filename": "collected/basic/68df41df4934f.png",
+            "name": "Basic-7",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-03T03:24:15.000000Z",
+            "updated_at": "2025-10-03T03:24:15.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 343,
+            "filename": "collected/basic/68df420421b73.png",
+            "name": "Basic-8",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-03T03:24:52.000000Z",
+            "updated_at": "2025-10-03T03:24:52.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 345,
+            "filename": "collected/basic/68df4242dfa05.png",
+            "name": "Basic-11",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-03T03:25:54.000000Z",
+            "updated_at": "2025-10-03T03:25:54.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 346,
+            "filename": "collected/basic/68df42a174a8d.png",
+            "name": "Basic-10",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-03T03:27:29.000000Z",
+            "updated_at": "2025-10-03T03:27:29.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 379,
+            "filename": "collected/amazing/68e8e901bae50.png",
+            "name": "Girly",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-10-10T11:07:45.000000Z",
+            "updated_at": "2025-10-10T11:07:45.000000Z",
+            "category_id": "13",
+            "visible_locales": null,
+            "category": {
+                "id": 13,
+                "name": "Frame Amazing ⭐️",
+                "created_at": "2025-06-18T10:38:14.000000Z",
+                "updated_at": "2025-09-25T09:50:51.000000Z"
+            }
+        },
+        {
+            "id": 474,
+            "filename": "collected/idol-hoat-hoa/6929d01fd3d8c.png",
+            "name": "glorious.blue.eyed.king",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-11-28T16:38:55.000000Z",
+            "updated_at": "2025-11-28T16:38:55.000000Z",
+            "category_id": "16",
+            "visible_locales": null,
+            "category": {
+                "id": 16,
+                "name": "Frame IDOL Hoạt Họa",
+                "created_at": "2025-06-18T13:54:38.000000Z",
+                "updated_at": "2025-09-25T09:52:05.000000Z"
+            }
+        },
+        {
+            "id": 482,
+            "filename": "collected/basic/692d7d65603ca.png",
+            "name": "Basic-5",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-12-01T11:35:01.000000Z",
+            "updated_at": "2025-12-01T11:35:01.000000Z",
+            "category_id": "11",
+            "visible_locales": null,
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 483,
+            "filename": "collected/amazing/692d81cfb1e9f.png",
+            "name": "Theater Ticket",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2025-12-01T11:53:51.000000Z",
+            "updated_at": "2025-12-01T11:53:51.000000Z",
+            "category_id": "13",
+            "visible_locales": null,
+            "category": {
+                "id": 13,
+                "name": "Frame Amazing ⭐️",
+                "created_at": "2025-06-18T10:38:14.000000Z",
+                "updated_at": "2025-09-25T09:50:51.000000Z"
+            }
+        },
+        {
+            "id": 506,
+            "filename": "collected/amazing/69567d1275bf7.png",
+            "name": "Magazine",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-01-01T13:56:34.000000Z",
+            "updated_at": "2026-01-01T13:56:34.000000Z",
+            "category_id": "13",
+            "visible_locales": null,
+            "category": {
+                "id": 13,
+                "name": "Frame Amazing ⭐️",
+                "created_at": "2025-06-18T10:38:14.000000Z",
+                "updated_at": "2025-09-25T09:50:51.000000Z"
+            }
+        },
+        {
+            "id": 558,
+            "filename": "standard/standard_1.png",
+            "name": "standard_1",
+            "frame": "square",
+            "layout_type": "standard",
+            "created_at": "2026-06-02T10:52:09.351158",
+            "updated_at": "2026-06-02T10:52:09.351172",
+            "category_id": "11",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        },
+        {
+            "id": 559,
+            "filename": "group/group_1.png",
+            "name": "group_1",
+            "frame": "group",
+            "layout_type": "group",
+            "created_at": "2026-06-02T10:52:09.351387",
+            "updated_at": "2026-06-02T10:52:09.351394",
+            "category_id": "11",
+            "visible_locales": [
+                "vn"
+            ],
+            "category": {
+                "id": 11,
+                "name": "Frame Basic",
+                "created_at": "2025-06-18T10:36:07.000000Z",
+                "updated_at": "2025-08-28T00:37:41.000000Z"
+            }
+        }
+    ]
+}

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 
@@ -38,7 +38,10 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
           children: [
             Text(
               t.dialogs.photoSelection.subtitle(count: widget.targetCount),
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurface.withValues(alpha: 0.65),
+              ),
             ),
             const Gap(16),
             Flexible(
@@ -158,7 +161,7 @@ class _PhotoSelectionDialogState extends State<PhotoSelectionDialog> {
                 label: Text(
                   '${t.dialogs.photoSelection.confirm} (${_selected.length}/${widget.targetCount})',
                   style: const TextStyle(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
                   ),
                 ),

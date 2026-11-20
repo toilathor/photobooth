@@ -1,5 +1,5 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +15,7 @@ class LanguageSwitcher extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: isMobile ? EdgeInsets.zero : const EdgeInsets.all(16),
+      margin: EdgeInsets.zero,
       child: AnimatedToggleSwitch<AppLocale>.dual(
         current: provider.currentLocale,
         first: AppLocale.vi,
@@ -40,30 +40,22 @@ class LanguageSwitcher extends StatelessWidget {
         onChanged: (val) => provider.setLanguage(val),
         styleBuilder: (value) =>
             ToggleStyle(indicatorColor: colorScheme.secondary),
+        indicatorSize: const Size.fromWidth(40),
         iconBuilder: (value) => value == AppLocale.vi
             ? Text('🇻🇳', style: TextStyle(fontSize: isMobile ? 12 : 16))
             : Text('🇺🇸', style: TextStyle(fontSize: isMobile ? 12 : 16)),
-        textBuilder: (value) => value == AppLocale.vi
-            ? Center(
-                child: Text(
-                  'EN',
-                  style: TextStyle(
-                    fontSize: isMobile ? 8 : 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
-                ),
-              )
-            : Center(
-                child: Text(
-                  'VI',
-                  style: TextStyle(
-                    fontSize: isMobile ? 8 : 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
+        // Flag and code both name the current language, so the control
+        // never shows one language's flag beside the other's label.
+        textBuilder: (value) => Center(
+          child: Text(
+            value == AppLocale.vi ? 'VI' : 'EN',
+            style: TextStyle(
+              fontSize: isMobile ? 11 : 12,
+              fontWeight: FontWeight.w700,
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -5,13 +5,43 @@
       "name": "Web - Personal",
       "request": "launch",
       "type": "dart",
-      "args": ["--web-port", "5050", "--web-define=FLAVOR=personal"]
+      "args": [
+        "--web-port",
+        "5050",
+        "--web-define=FLAVOR=personal",
+        "--dart-define-from-file=.env"
+      ]
+    },
+    {
+      "name": "Web - Personal (WASM)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--wasm",
+        "--no-cross-origin-isolation",
+        "--web-port",
+        "5050",
+        "--web-define=FLAVOR=personal",
+        "--dart-define-from-file=.env"
+      ]
     },
     {
       "name": "Web - Commercial",
       "request": "launch",
       "type": "dart",
       "args": ["--web-port", "5050", "--web-define=FLAVOR=commercial"]
+    },
+    {
+      "name": "Web - Commercial (WASM)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--wasm",
+        "--no-cross-origin-isolation",
+        "--web-port",
+        "5050",
+        "--web-define=FLAVOR=commercial"
+      ]
     },
     {
       "name": "Android - Personal",

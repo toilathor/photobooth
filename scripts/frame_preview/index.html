@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frame preview</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f4f1ea; --fg:#222; --card:#fff; --line:#ddd; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161616; --fg:#eee; --card:#222; --line:#333; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.4 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  header { position:sticky; top:0; z-index:2; display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+           padding:10px 16px; background:var(--bg); border-bottom:1px solid var(--line); }
+  header h1 { font-size:16px; margin:0 8px 0 0; }
+  button, select { font:inherit; padding:6px 12px; border-radius:8px; border:1px solid var(--line);
+                   background:var(--card); color:var(--fg); }
+  button.on { background:#36452f; color:#fff; border-color:#36452f; }
+  #status { margin-left:auto; opacity:.6; font-size:12px; }
+  main { padding:16px; display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); }
+  main.wide { grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); }
+  figure.std .stage { justify-content:center; }
+  figure.std img { max-width:380px; }
+  figure { margin:0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .stage { background:#7bc47f; display:flex; }  /* green shows through the transparent holes */
+  .stage img { width:100%; display:block; }
+  figcaption { padding:8px 10px; font-size:12px; }
+  figcaption b { display:block; word-break:break-all; }
+  figcaption span { opacity:.65; }
+  dialog { border:0; padding:0; background:transparent; max-width:96vw; max-height:96vh; }
+  dialog::backdrop { background:rgba(0,0,0,.75); }
+  dialog img { max-width:96vw; max-height:96vh; background:#7bc47f; display:block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Frame preview</h1>
+  <button data-flavor="personal">personal</button>
+  <button data-flavor="commercial">commercial</button>
+  <button data-flavor="concepts">ý tưởng</button>
+  <select id="category"><option value="">Tất cả category</option></select>
+  <select id="layout"><option value="">Tất cả layout</option><option>standard</option><option>group</option></select>
+  <span id="status"></span>
+</header>
+<main id="grid"></main>
+<dialog id="zoom"><img alt=""></dialog>
+<script>
+const state = { flavor: localStorage.getItem('flavor') || 'personal', data: null, hash: '' };
+const grid = document.getElementById('grid');
+const catSel = document.getElementById('category');
+const laySel = document.getElementById('layout');
+const zoom = document.getElementById('zoom');
+
+// "filename" is relative to the flavor folder, same as FrameData.path.
+function framePath(f) { return f.filename; }
+
+// "ý tưởng" tab: concept frames made by scripts/generate_group_concepts.py.
+async function loadConcepts() {
+  try {
+    const res = await fetch(`concepts/manifest.json?t=${Date.now()}`, { cache: 'no-store' });
+    state.concepts = await res.json();
+    document.querySelector('[data-flavor="concepts"]').hidden = !state.concepts.length;
+    if (!state.concepts.length) {
+      // Nothing waiting for review: go back to the real frames.
+      state.flavor = 'personal';
+      sync();
+      return load();
+    }
+    catSel.hidden = laySel.hidden = true;
+    grid.classList.add('wide');
+    grid.innerHTML = state.concepts.map(c => {
+      const src = `concepts/${c.name}_preview.jpg?v=${state.hash}`;
+      return `<figure class="${c.layout === 'standard' ? 'std' : ''}"><div class="stage"><img loading="lazy" decoding="async" src="${src}" data-full="concepts/${c.name}_frame.png?v=${state.hash}"></div>
+        <figcaption><b>${c.title}</b><span>${c.desc}</span></figcaption></figure>`;
+    }).join('');
+    status(`đã tải ${new Date().toLocaleTimeString()} · chạm ảnh để xem khung gốc`);
+  } catch (e) {
+    grid.innerHTML = '<p style="padding:8px">Chưa có ý tưởng. Chạy: python3 scripts/generate_group_concepts.py</p>';
+    status('không tải được concepts/manifest.json');
+  }
+}
+
+async function load() {
+  if (state.flavor === 'concepts') return loadConcepts();
+  catSel.hidden = laySel.hidden = false;
+  const base = `frames/${state.flavor}/`;
+  try {
+    const res = await fetch(`${base}data.json?t=${Date.now()}`, { cache: 'no-store' });
+    state.data = await res.json();
+    state.base = base;
+    render();
+    status(`đã tải ${new Date().toLocaleTimeString()}`);
+  } catch (e) { status('không tải được data.json'); }
+}
+
+function status(t) { document.getElementById('status').textContent = t; }
+
+function render() {
+  const cats = [...new Set(state.data.images.map(i => i.category?.name).filter(Boolean))];
+  const keep = catSel.value;
+  catSel.innerHTML = '<option value="">Tất cả category</option>' + cats.map(c => `<option>${c}</option>`).join('');
+  catSel.value = cats.includes(keep) ? keep : '';
+
+  const items = state.data.images.filter(i =>
+    (!catSel.value || i.category?.name === catSel.value) &&
+    (!laySel.value || i.layout_type === laySel.value));
+
+  const sig = state.flavor + JSON.stringify(items.map(i => i.filename)) + catSel.value + laySel.value;
+  grid.classList.toggle('wide', items.some(i => i.layout_type === 'group'));
+  grid.innerHTML = items.map(i => {
+    const full = `${state.base}${framePath(i)}?v=${state.hash}`;
+    const thumb = `thumbs/${state.flavor}/${framePath(i).replace(/\//g, '__')}.webp?v=${state.hash}`;
+    const ratio = i.layout_type === 'group' ? '2800 / 2000' : '880 / 2650';
+    return `<figure><div class="stage"><img loading="lazy" decoding="async" style="aspect-ratio:${ratio}" src="${thumb}" data-full="${full}"></div>
+      <figcaption><b>${i.filename}</b><span>${i.layout_type} · ${i.category?.name ?? ''}</span></figcaption></figure>`;
+  }).join('') || '<p>Không có khung nào.</p>';
+}
+
+// Re-check every few seconds; refresh images when any frame file changed.
+async function poll() {
+  if (state.flavor === 'concepts') {
+    const stamp = await fetch('concepts/manifest.json', { method: 'HEAD', cache: 'no-store' })
+      .then(r => r.headers.get('last-modified') || '').catch(() => '');
+    if (stamp !== state.hash) { state.hash = stamp; await load(); }
+    return;
+  }
+  if (!state.data) return;
+  // thumbs/index.json (written by thumbs.py) changes whenever a frame or data.json changes.
+  const hash = await fetch('thumbs/index.json', { cache: 'no-store' })
+    .then(r => r.text()).then(t => String(t.length) + ':' + t.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0))
+    .catch(() => '');
+  if (hash && hash !== state.hash) { state.hash = hash; await load(); }
+}
+
+document.querySelectorAll('[data-flavor]').forEach(b => {
+  b.onclick = () => { state.flavor = b.dataset.flavor; localStorage.setItem('flavor', state.flavor); sync(); load(); };
+});
+function sync() { document.querySelectorAll('[data-flavor]').forEach(b => b.classList.toggle('on', b.dataset.flavor === state.flavor)); }
+catSel.onchange = laySel.onchange = render;
+grid.onclick = e => { const img = e.target.closest('img'); if (img) { zoom.querySelector('img').src = img.dataset.full; zoom.showModal(); } };
+zoom.onclick = () => zoom.close();
+
+sync(); load(); setInterval(poll, 4000);
+</script>
+</body>
+</html>

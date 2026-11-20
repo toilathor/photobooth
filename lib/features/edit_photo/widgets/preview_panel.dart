@@ -1,11 +1,12 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:th_photobooth/components/expressive_button_group.dart';
+import 'package:th_photobooth/core/configs/print_layout.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 import 'photo_strip.dart';
 import 'video_recap_player.dart';
@@ -15,36 +16,32 @@ class PreviewPanel extends StatelessWidget {
   final List<XFile> photos;
   final FrameData selectedFrame;
   final List<FrameData> availableFrames;
-  final bool printTwoCopies;
-  final bool showPaperPreview;
-  final ValueChanged<bool> onTogglePrintTwoCopies;
-  final ValueChanged<bool> onTogglePaperPreview;
   final XFile? videoRecapFile;
   final List<Duration> photoTimestamps;
   final String selectedFilter;
   final double filterIntensity;
   final bool photoIsMirrored;
   final bool videoIsMirrored;
-  final ScreenshotController? stripController;
   final ScreenshotController? paperController;
+  final String? galleryUrl;
+  final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PreviewPanel({
     super.key,
     required this.photos,
     required this.selectedFrame,
     required this.availableFrames,
-    required this.printTwoCopies,
-    required this.showPaperPreview,
-    required this.onTogglePrintTwoCopies,
-    required this.onTogglePaperPreview,
     this.videoRecapFile,
     this.photoTimestamps = const [],
     required this.selectedFilter,
     required this.filterIntensity,
     required this.photoIsMirrored,
     required this.videoIsMirrored,
-    this.stripController,
     this.paperController,
+    this.galleryUrl,
+    this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
     this.isMobile = false,
   });
 
@@ -52,46 +49,15 @@ class PreviewPanel extends StatelessWidget {
 
   void _showVideoRecap(BuildContext context) {
     if (videoRecapFile == null) return;
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      barrierColor: Colors.black87,
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, anim1, anim2) {
-        return Center(
-          child: Container(
-            constraints: isMobile
-                ? null
-                : const BoxConstraints(maxWidth: 900, maxHeight: 800),
-            width: isMobile ? MediaQuery.sizeOf(context).width : null,
-            height: isMobile ? MediaQuery.sizeOf(context).height : null,
-            margin: isMobile ? EdgeInsets.zero : const EdgeInsets.all(32),
-            child: Material(
-              color: Colors.transparent,
-              child: VideoRecapPlayer(
-                videoFile: videoRecapFile!,
-                frame: selectedFrame,
-                photoTimestamps: photoTimestamps,
-                videoIsMirrored: videoIsMirrored,
-                photoIsMirrored: photoIsMirrored,
-                photos: photos,
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, anim1, anim2, child) {
-        return FadeTransition(
-          opacity: anim1,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-              CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
-            ),
-            child: child,
-          ),
-        );
-      },
+    showVideoRecapDialog(
+      context,
+      videoFile: videoRecapFile!,
+      frame: selectedFrame,
+      photoTimestamps: photoTimestamps,
+      videoIsMirrored: videoIsMirrored,
+      photoIsMirrored: photoIsMirrored,
+      photos: photos,
+      isMobile: isMobile,
     );
   }
 
@@ -99,7 +65,6 @@ class PreviewPanel extends StatelessWidget {
     required IconData icon,
     required VoidCallback onTap,
     required bool isActive,
-    required ColorScheme colorScheme,
     required String tooltip,
   }) {
     return Tooltip(
@@ -108,8 +73,10 @@ class PreviewPanel extends StatelessWidget {
       verticalOffset: 20,
       child: GestureDetector(
         onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.all(6),
+          // 44pt target: 12 + 20 + 12.
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isActive
                 ? Colors.white.withValues(alpha: 0.25)
@@ -120,7 +87,7 @@ class PreviewPanel extends StatelessWidget {
               width: 1,
             ),
           ),
-          child: Icon(icon, color: Colors.white, size: 16),
+          child: Icon(icon, color: Colors.white, size: 20),
         ),
       ),
     );
@@ -132,12 +99,6 @@ class PreviewPanel extends StatelessWidget {
     final orientation = MediaQuery.orientationOf(context);
     final bool isLandscapeOrientation = orientation == Orientation.landscape;
 
-    final double frameAspectRatio =
-        selectedFrame.size.width / selectedFrame.size.height;
-    // If aspect ratio > 0.5, it's better to print Landscape (2 photos stacked horizontally or vertically)
-    // For our specific frames: Strips are ~0.33 (Portrait), frame1 is ~0.77 (Landscape)
-    final bool isLandscape = frameAspectRatio > 0.5;
-    final bool paperIsLandscape = isLandscape && !printTwoCopies;
     final bool isMobileLandscape = isMobile && isLandscapeOrientation;
 
     if (isMobile) {
@@ -151,81 +112,45 @@ class PreviewPanel extends StatelessWidget {
               padding: isMobileLandscape
                   ? const EdgeInsets.fromLTRB(12, 32, 12, 44)
                   : const EdgeInsets.fromLTRB(8, 8, 8, 44),
-              child: _buildPreview(isLandscape: paperIsLandscape),
+              child: _buildPreview(),
             ),
           ),
-          // Floating Glass Control Pill (iOS / Western Style)
-          Positioned(
-            bottom: 8,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        blurRadius: 15,
-                        offset: const Offset(0, 4),
+          if (videoRecapFile != null)
+            Positioned(
+              bottom: 8,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        width: 1,
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // View Mode Toggle (Edit / Print Preview)
-                      _buildGlassPillButton(
-                        icon: showPaperPreview
-                            ? Icons.local_printshop_rounded
-                            : Icons.edit_rounded,
-                        isActive: showPaperPreview,
-                        onTap: () => onTogglePaperPreview(!showPaperPreview),
-                        colorScheme: colorScheme,
-                        tooltip: showPaperPreview
-                            ? t.preview.print_mode
-                            : t.preview.edit_mode,
-                      ),
-                      const SizedBox(width: 8),
-                      // Copies Count Toggle (1 / 2 Copies)
-                      _buildGlassPillButton(
-                        icon: printTwoCopies
-                            ? Icons.looks_two_rounded
-                            : Icons.looks_one_rounded,
-                        isActive: printTwoCopies,
-                        onTap: () => onTogglePrintTwoCopies(!printTwoCopies),
-                        colorScheme: colorScheme,
-                        tooltip: printTwoCopies
-                            ? '${t.preview.copy}: 2'
-                            : '${t.preview.copy}: 1',
-                      ),
-                      if (videoRecapFile != null) ...[
-                        const SizedBox(width: 8),
-                        // Video Recap Preview Button
-                        _buildGlassPillButton(
-                          icon: Icons.videocam_rounded,
-                          isActive: false,
-                          onTap: () => _showVideoRecap(context),
-                          colorScheme: colorScheme,
-                          tooltip: t.editor.watchVideoRecap,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 15,
+                          offset: const Offset(0, 4),
                         ),
                       ],
-                    ],
+                    ),
+                    child: Builder(
+                      builder: (buttonContext) => _buildGlassPillButton(
+                        icon: Icons.videocam_rounded,
+                        isActive: false,
+                        onTap: () => _showVideoRecap(buttonContext),
+                        tooltip: t.editor.watchVideoRecap,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       );
 
@@ -280,9 +205,9 @@ class PreviewPanel extends StatelessWidget {
                     Text(
                       t.preview.title,
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                        letterSpacing: 2,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 17,
+                        letterSpacing: -0.2,
                         color: colorScheme.secondary,
                       ),
                     ),
@@ -300,40 +225,6 @@ class PreviewPanel extends StatelessWidget {
                     ],
                   ],
                 ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ExpressiveButtonGroup(
-                      selectedIndex: showPaperPreview ? 1 : 0,
-                      onChanged: (index) => onTogglePaperPreview(index == 1),
-                      items: [
-                        ExpressiveItemData(
-                          label: t.preview.edit_mode,
-                          icon: Icons.edit_outlined,
-                        ),
-                        ExpressiveItemData(
-                          label: t.preview.print_mode,
-                          icon: Icons.local_printshop_outlined,
-                        ),
-                      ],
-                    ),
-                    ExpressiveButtonGroup(
-                      selectedIndex: printTwoCopies ? 1 : 0,
-                      onChanged: (index) => onTogglePrintTwoCopies(index == 1),
-                      items: [
-                        ExpressiveItemData(
-                          label: t.preview.copy,
-                          icon: Icons.looks_one_outlined,
-                        ),
-                        ExpressiveItemData(
-                          label: t.preview.copy,
-                          icon: Icons.looks_two_outlined,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -341,7 +232,7 @@ class PreviewPanel extends StatelessWidget {
             child: Center(
               child: Container(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: _buildPreview(isLandscape: paperIsLandscape),
+                child: _buildPreview(),
               ),
             ),
           ),
@@ -350,76 +241,146 @@ class PreviewPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildPhotoStripsContent() {
+  Widget _buildPreview() {
+    return Screenshot(
+      controller: paperController ?? ScreenshotController(),
+      child: PhotoPrintPreview(
+        photos: photos,
+        selectedFrame: selectedFrame,
+        selectedFilter: selectedFilter,
+        filterIntensity: filterIntensity,
+        photoIsMirrored: photoIsMirrored,
+        galleryUrl: galleryUrl,
+        showQrPlaceholder: showQrPlaceholder,
+        qrCorner: qrCorner,
+      ),
+    );
+  }
+}
+
+class PhotoPrintPreview extends StatelessWidget {
+  final List<XFile> photos;
+  final FrameData selectedFrame;
+  final String selectedFilter;
+  final double filterIntensity;
+  final bool photoIsMirrored;
+  final String? galleryUrl;
+  final bool showQrPlaceholder;
+  final QrCorner qrCorner;
+
+  const PhotoPrintPreview({
+    super.key,
+    required this.photos,
+    required this.selectedFrame,
+    required this.selectedFilter,
+    required this.filterIntensity,
+    required this.photoIsMirrored,
+    this.galleryUrl,
+    this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final strip = PhotoStrip(
       photos: photos,
       frame: selectedFrame,
       selectedFilter: selectedFilter,
       filterIntensity: filterIntensity,
       isMirrored: photoIsMirrored,
+      galleryUrl: galleryUrl,
+      showQrPlaceholder: showQrPlaceholder,
+      qrCorner: qrCorner,
     );
+    final isLandscape = PrintLayout.stacksCopies(selectedFrame);
+    final content = isLandscape
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(fit: FlexFit.loose, child: strip),
+              const SizedBox(height: PrintLayout.copyGap),
+              Flexible(fit: FlexFit.loose, child: strip),
+            ],
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(fit: FlexFit.loose, child: strip),
+              const SizedBox(width: PrintLayout.copyGap),
+              Flexible(fit: FlexFit.loose, child: strip),
+            ],
+          );
 
-    if (printTwoCopies) {
-      final double frameAspectRatio =
-          selectedFrame.size.width / selectedFrame.size.height;
-      final bool isLandscape = frameAspectRatio > 0.5;
+    return ColoredBox(
+      color: Colors.white,
+      child: Stack(
+        children: [
+          VirtualPaper(isLandscape: false, child: content),
+          Positioned.fill(child: _CutGuide(isVertical: !isLandscape)),
+        ],
+      ),
+    );
+  }
+}
 
-      if (isLandscape) {
-        // Stack two landscape photos vertically to fit portrait paper
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(fit: FlexFit.loose, child: strip),
-            const SizedBox(height: 4),
-            Flexible(fit: FlexFit.loose, child: strip),
-          ],
+class _CutGuide extends StatelessWidget {
+  final bool isVertical;
+
+  const _CutGuide({required this.isVertical});
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: CustomPaint(
+        key: ValueKey(
+          isVertical
+              ? 'print-cut-guide-vertical'
+              : 'print-cut-guide-horizontal',
+        ),
+        painter: _CutGuidePainter(isVertical: isVertical),
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+}
+
+class _CutGuidePainter extends CustomPainter {
+  final bool isVertical;
+
+  const _CutGuidePainter({required this.isVertical});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black38
+      ..strokeWidth = 0.5;
+    final length = isVertical ? size.height : size.width;
+
+    for (double offset = 0; offset < length; offset += 12) {
+      final end = (offset + 7).clamp(0, length).toDouble();
+      if (isVertical) {
+        canvas.drawLine(
+          Offset(size.width / 2, offset),
+          Offset(size.width / 2, end),
+          paint,
         );
       } else {
-        // Place two portrait strips side-by-side to fit portrait paper
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(fit: FlexFit.loose, child: strip),
-            const SizedBox(width: 4),
-            Flexible(fit: FlexFit.loose, child: strip),
-          ],
+        canvas.drawLine(
+          Offset(offset, size.height / 2),
+          Offset(end, size.height / 2),
+          paint,
         );
       }
     }
-    return strip;
   }
 
-  Widget _buildPreview({required bool isLandscape}) {
-    if (showPaperPreview) {
-      return Screenshot(
-        controller: paperController ?? ScreenshotController(),
-        child: VirtualPaper(
-          isLandscape: isLandscape,
-          child: _buildPhotoStripsContent(),
-        ),
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Screenshot(
-        controller: stripController ?? ScreenshotController(),
-        child: _buildPhotoStripsContent(),
-      ),
-    );
-  }
+  @override
+  bool shouldRepaint(_CutGuidePainter oldDelegate) =>
+      oldDelegate.isVertical != isVertical;
 }
 
 class _CompactVideoRecapButton extends StatelessWidget {
@@ -445,80 +406,122 @@ class _CompactVideoRecapButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.secondary,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            showGeneralDialog(
-              context: context,
-              barrierDismissible: true,
-              barrierLabel: '',
-              barrierColor: Colors.black87,
-              transitionDuration: const Duration(milliseconds: 400),
-              pageBuilder: (context, anim1, anim2) {
-                return Center(
-                  child: Container(
-                    constraints: isMobile
-                        ? null
-                        : const BoxConstraints(maxWidth: 900, maxHeight: 800),
-                    width: isMobile ? MediaQuery.sizeOf(context).width : null,
-                    height: isMobile ? MediaQuery.sizeOf(context).height : null,
-                    margin: isMobile
-                        ? EdgeInsets.zero
-                        : const EdgeInsets.all(32),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: VideoRecapPlayer(
-                        videoFile: videoFile,
-                        frame: frame,
-                        photoTimestamps: photoTimestamps,
-                        videoIsMirrored: videoIsMirrored,
-                        photoIsMirrored: photoIsMirrored,
-                        photos: photos,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              transitionBuilder: (context, anim1, anim2, child) {
-                return FadeTransition(
-                  opacity: anim1,
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: anim1,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    ),
-                    child: child,
-                  ),
-                );
-              },
-            );
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              Icons.videocam_rounded,
-              color: colorScheme.onSecondary,
-              size: 20,
+    return Tooltip(
+      message: t.editor.watchVideoRecap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.secondary,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () => showVideoRecapDialog(
+              context,
+              videoFile: videoFile,
+              frame: frame,
+              photoTimestamps: photoTimestamps,
+              videoIsMirrored: videoIsMirrored,
+              photoIsMirrored: photoIsMirrored,
+              photos: photos,
+              isMobile: isMobile,
+            ),
+            child: Padding(
+              // 44pt target: 12 + 20 + 12.
+              padding: const EdgeInsets.all(12.0),
+              child: Icon(
+                Icons.videocam_rounded,
+                color: colorScheme.onSecondary,
+                size: 20,
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Opens the video recap growing out of the button that was tapped, and
+/// shrinks back into it on close (same path in and out).
+void showVideoRecapDialog(
+  BuildContext context, {
+  required XFile videoFile,
+  required FrameData frame,
+  required List<Duration> photoTimestamps,
+  required bool videoIsMirrored,
+  required bool photoIsMirrored,
+  required List<XFile> photos,
+  required bool isMobile,
+}) {
+  final screen = MediaQuery.sizeOf(context);
+  Alignment origin = Alignment.center;
+  final box = context.findRenderObject();
+  if (box is RenderBox && box.hasSize && screen.width > 0) {
+    final center = box.localToGlobal(box.size.center(Offset.zero));
+    origin = Alignment(
+      (center.dx / screen.width) * 2 - 1,
+      (center.dy / screen.height) * 2 - 1,
+    );
+  }
+  final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black87,
+    transitionDuration: reduceMotion
+        ? const Duration(milliseconds: 150)
+        : const Duration(milliseconds: 350),
+    pageBuilder: (context, anim1, anim2) {
+      return Center(
+        child: Container(
+          constraints: isMobile
+              ? null
+              : const BoxConstraints(maxWidth: 900, maxHeight: 800),
+          width: isMobile ? MediaQuery.sizeOf(context).width : null,
+          height: isMobile ? MediaQuery.sizeOf(context).height : null,
+          margin: isMobile ? EdgeInsets.zero : const EdgeInsets.all(32),
+          child: Material(
+            color: Colors.transparent,
+            child: VideoRecapPlayer(
+              videoFile: videoFile,
+              frame: frame,
+              photoTimestamps: photoTimestamps,
+              videoIsMirrored: videoIsMirrored,
+              photoIsMirrored: photoIsMirrored,
+              photos: photos,
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, anim1, anim2, child) {
+      final curved = CurvedAnimation(
+        parent: anim1,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      if (reduceMotion) {
+        return FadeTransition(opacity: curved, child: child);
+      }
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          alignment: origin,
+          scale: Tween<double>(begin: 0.6, end: 1.0).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
 }

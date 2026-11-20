@@ -1,7 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:material_ui/material_ui.dart';
 
 class FrameItem extends StatelessWidget {
   final String framePath;
@@ -19,16 +16,9 @@ class FrameItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return CupertinoContextMenu(
-      actions: [
-        CupertinoContextMenuAction(
-          child: Text(t.editor.chooseFrame),
-          onPressed: () {
-            onTap();
-            Navigator.pop(context);
-          },
-        ),
-      ],
+    return Semantics(
+      button: true,
+      selected: isSelected,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -62,27 +52,11 @@ class FrameItem extends StatelessWidget {
                     ),
                   )
                 else
-                  CachedNetworkImage(
-                    imageUrl: framePath,
+                  Image.asset(
+                    framePath,
                     fit: BoxFit.cover,
-                    maxWidthDiskCache: 150,
-                    memCacheWidth: 150,
-                    placeholder: (context, url) => Container(
-                      padding: const EdgeInsets.all(24),
-                      color: colorScheme.onSurface.withValues(alpha: 0.05),
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colorScheme.secondary.withValues(alpha: 0.5),
-                          ),
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
+                    cacheWidth: 150,
+                    errorBuilder: (context, error, stackTrace) => Container(
                       color: colorScheme.errorContainer,
                       child: Icon(
                         Icons.error_outline,
@@ -97,13 +71,13 @@ class FrameItem extends StatelessWidget {
                     right: 4,
                     child: Container(
                       padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
+                      child: Icon(
+                        Icons.check_rounded,
+                        color: colorScheme.onSecondary,
                         size: 14,
                       ),
                     ),

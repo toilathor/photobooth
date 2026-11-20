@@ -2,7 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
@@ -227,11 +227,11 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
             const Gap(32),
             Text(
               showGrantUI ? t.auth.grant_title : t.auth.title,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 color: colorScheme.secondary,
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
-                letterSpacing: 4,
+                letterSpacing: 0.2,
               ),
               textAlign: TextAlign.center,
             ),
@@ -241,7 +241,7 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
               child: Text(
                 showGrantUI ? t.auth.grant_description : t.auth.description,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: colorScheme.onSurface.withValues(alpha: 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -280,7 +280,7 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
                         : const Icon(Icons.cloud_done_rounded),
                     label: Text(
                       t.auth.grant_btn,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
@@ -292,7 +292,7 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
                 const Gap(12),
                 Text(
                   _errorMessage!,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: colorScheme.error,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -307,11 +307,11 @@ class __WebLoginDialogContentState extends State<_WebLoginDialogContent> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 t.auth.back,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: colorScheme.onSurface.withValues(alpha: 0.3),
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 2,
+                  letterSpacing: 0.2,
                 ),
               ),
             ),

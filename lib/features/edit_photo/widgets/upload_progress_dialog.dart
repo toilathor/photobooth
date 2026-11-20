@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.dart';
@@ -99,7 +99,7 @@ class UploadProgressDialog extends StatelessWidget {
                                   '${(value * 100).toInt()}',
                                   style: TextStyle(
                                     fontSize: 48,
-                                    fontWeight: FontWeight.w900,
+                                    fontWeight: FontWeight.w700,
                                     color: colorScheme.secondary,
                                     height: 1,
                                     letterSpacing: -2,
@@ -113,15 +113,17 @@ class UploadProgressDialog extends StatelessWidget {
                                     color: colorScheme.secondary.withValues(
                                       alpha: 0.5,
                                     ),
-                                    letterSpacing: 2,
+                                    letterSpacing: 0.2,
                                   ),
                                 ),
                               ],
                             )
                           else
                             TweenAnimationBuilder<double>(
-                              tween: Tween<double>(begin: 0.8, end: 1.2),
-                              duration: const Duration(seconds: 1),
+                              tween: Tween<double>(begin: 0.9, end: 1.0),
+                              duration: MediaQuery.disableAnimationsOf(context)
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 600),
                               curve: Curves.easeInOutSine,
                               builder: (context, scale, child) {
                                 return Transform.scale(

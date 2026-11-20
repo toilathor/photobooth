@@ -3,7 +3,9 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
+import 'package:th_photobooth/components/branded_qr_code.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 
 class PhotoMergerService {
@@ -20,6 +22,8 @@ class PhotoMergerService {
     required FrameData frameData,
     List<double>? colorFilterMatrix,
     bool isMirrored = false,
+    String? galleryUrl,
+    QrCorner qrCorner = QrCorner.fallback,
   }) async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
@@ -118,6 +122,33 @@ class PhotoMergerService {
     // Draw the frame covering the entire canvas
     canvas.drawImageRect(frameImage, frameSrcRect, canvasRect, framePaint);
     frameImage.dispose();
+
+    if (galleryUrl != null) {
+      final qrSize = BrandedQrCode.printSize(frameData);
+      final qrBytes = await BrandedQrCode.renderPng(
+        data: galleryUrl,
+        size: qrSize,
+      );
+      final qrCodec = await ui.instantiateImageCodec(qrBytes);
+      final qrImage = (await qrCodec.getNextFrame()).image;
+      qrCodec.dispose();
+      final inset = BrandedQrCode.printInset(frameData);
+      final destination =
+          qrCorner.origin(frameData.size, qrSize, inset) &
+          ui.Size.square(qrSize);
+      canvas.drawImageRect(
+        qrImage,
+        ui.Rect.fromLTWH(
+          0,
+          0,
+          qrImage.width.toDouble(),
+          qrImage.height.toDouble(),
+        ),
+        destination,
+        ui.Paint()..isAntiAlias = true,
+      );
+      qrImage.dispose();
+    }
 
     // 3. Export to PNG
     final ui.Picture picture = recorder.endRecording();

@@ -3,12 +3,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-void main() async {
+// Usage: dart run lib/helper/FILE.dart [personal|commercial] (default: commercial)
+void main(List<String> args) async {
+  final flavor = args.isNotEmpty ? args.first : 'commercial';
+  final root = 'assets/frames/$flavor';
   print('Starting frames data update...');
 
-  final dataFile = File('assets/frames/data.json');
+  final dataFile = File('$root/data.json');
   if (!dataFile.existsSync()) {
-    print('Error: assets/frames/data.json does not exist.');
+    print('Error: $root/data.json does not exist.');
     return;
   }
 
@@ -16,21 +19,6 @@ void main() async {
   final data = jsonDecode(jsonString) as Map<String, dynamic>;
   final categories = data['categories'] as List<dynamic>? ?? [];
   final images = data['images'] as List<dynamic>? ?? [];
-
-  // Ensure "Frame Custom" category exists
-  const customCategoryId = '99';
-  bool hasCustomCategory = categories.any(
-    (cat) => cat['id'].toString() == customCategoryId,
-  );
-  if (!hasCustomCategory) {
-    print('Adding category "Frame Custom" (ID $customCategoryId)...');
-    categories.add({
-      "id": 99,
-      "name": "Frame Custom",
-      "created_at": DateTime.now().toIso8601String(),
-      "updated_at": DateTime.now().toIso8601String(),
-    });
-  }
 
   // Helper to find max ID in images list
   int getMaxId() {
@@ -46,71 +34,41 @@ void main() async {
 
   int currentMaxId = getMaxId();
 
-  // Scan assets/frames/custom/standard
-  final standardDir = Directory('assets/frames/custom/standard');
-  if (standardDir.existsSync()) {
-    final files = standardDir.listSync().whereType<File>().toList();
+  // Scan the frame folders of the flavor: <folder under the flavor root>,
+  // data.json "frame" value and "layout_type" value. "filename" is relative to
+  // the flavor root (e.g. standard/standard_1.png). New frames have no
+  // category; set "category_id" and "category" in data.json to group them.
+  const layouts = [
+    ('standard', 'square', 'standard'),
+    ('group', 'group', 'group'),
+  ];
+
+  for (final (folder, frameType, layoutType) in layouts) {
+    final dir = Directory('$root/$folder');
+    if (!dir.existsSync()) continue;
+
+    final files = dir.listSync().whereType<File>().toList();
     for (final file in files) {
-      final filename = file.uri.pathSegments.last;
-      if (!filename.toLowerCase().endsWith('.png')) continue;
+      final name = file.uri.pathSegments.last;
+      if (!name.toLowerCase().endsWith('.png')) continue;
 
-      // Check if already in data.json
+      final filename = '$folder/$name';
       final exists = images.any((img) => img['filename'] == filename);
-      if (!exists) {
-        currentMaxId++;
-        print('Adding custom standard frame: $filename with ID $currentMaxId');
-        images.add({
-          "id": currentMaxId,
-          "filename": filename,
-          "name": filename.replaceAll('.png', ''),
-          "frame": "square",
-          "layout_type": "standard",
-          "created_at": DateTime.now().toIso8601String(),
-          "updated_at": DateTime.now().toIso8601String(),
-          "category_id": customCategoryId,
-          "visible_locales": ["vn"],
-          "category": {
-            "id": 99,
-            "name": "Frame Custom",
-            "created_at": DateTime.now().toIso8601String(),
-            "updated_at": DateTime.now().toIso8601String(),
-          },
-        });
-      }
-    }
-  }
+      if (exists) continue;
 
-  // Scan assets/frames/custom/group
-  final groupDir = Directory('assets/frames/custom/group');
-  if (groupDir.existsSync()) {
-    final files = groupDir.listSync().whereType<File>().toList();
-    for (final file in files) {
-      final filename = file.uri.pathSegments.last;
-      if (!filename.toLowerCase().endsWith('.png')) continue;
-
-      // Check if already in data.json
-      final exists = images.any((img) => img['filename'] == filename);
-      if (!exists) {
-        currentMaxId++;
-        print('Adding custom group frame: $filename with ID $currentMaxId');
-        images.add({
-          "id": currentMaxId,
-          "filename": filename,
-          "name": filename.replaceAll('.png', ''),
-          "frame": "group",
-          "layout_type": "group",
-          "created_at": DateTime.now().toIso8601String(),
-          "updated_at": DateTime.now().toIso8601String(),
-          "category_id": customCategoryId,
-          "visible_locales": ["vn"],
-          "category": {
-            "id": 99,
-            "name": "Frame Custom",
-            "created_at": DateTime.now().toIso8601String(),
-            "updated_at": DateTime.now().toIso8601String(),
-          },
-        });
-      }
+      currentMaxId++;
+      print('Adding $layoutType frame: $filename with ID $currentMaxId');
+      images.add({
+        "id": currentMaxId,
+        "filename": filename,
+        "name": name.replaceAll('.png', ''),
+        "frame": frameType,
+        "layout_type": layoutType,
+        "created_at": DateTime.now().toIso8601String(),
+        "updated_at": DateTime.now().toIso8601String(),
+        "category_id": '',
+        "visible_locales": ["vn"],
+      });
     }
   }
 
@@ -121,5 +79,38 @@ void main() async {
     "images": images,
   });
   await dataFile.writeAsString(prettyJson);
-  print('assets/frames/data.json successfully updated.');
+  print('$root/data.json successfully updated.');
+
+  await _syncPubspecAssets();
+}
+
+/// Flutter does not bundle assets recursively, so every frame folder of every
+/// flavor must be listed in pubspec.yaml. Regenerates the block between the
+/// `# frames:begin` and `# frames:end` markers.
+Future<void> _syncPubspecAssets() async {
+  final framesDir = Directory('assets/frames');
+  final dirs = <String>[];
+  for (final entity in framesDir.listSync(recursive: true)) {
+    if (entity is! File) continue;
+    final path = entity.path;
+    if (path.contains('/thumbnails/')) continue;
+    if (!path.endsWith('.png') && !path.endsWith('.json')) continue;
+    final dir = '${entity.parent.path}/';
+    if (!dirs.contains(dir)) dirs.add(dir);
+  }
+  dirs.sort();
+
+  final pubspec = File('pubspec.yaml');
+  final content = await pubspec.readAsString();
+  final pattern = RegExp(r'( *# frames:begin[^\n]*\n)[\s\S]*?( *# frames:end)');
+  final match = pattern.firstMatch(content);
+  if (match == null) {
+    print('Warning: frames markers not found in pubspec.yaml, skipped.');
+    return;
+  }
+  final block = dirs.map((d) => '    - $d\n').join();
+  await pubspec.writeAsString(
+    content.replaceFirst(pattern, '${match.group(1)}$block${match.group(2)}'),
+  );
+  print('pubspec.yaml frame assets synced (${dirs.length} folders).');
 }

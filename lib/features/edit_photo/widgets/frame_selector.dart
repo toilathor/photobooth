@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:th_photobooth/components/custom_scrollbar.dart';
@@ -101,7 +101,7 @@ class _FrameSelectorState extends State<FrameSelector> {
                 child: Center(
                   child: Text(
                     displayLabel,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: isSelected
                           ? FontWeight.bold
