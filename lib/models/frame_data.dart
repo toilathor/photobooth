@@ -20,10 +20,14 @@ class FrameData {
 
   /// Factory for standard frames. The slot count follows the flavor
   /// ([AppConfig.standardPhotoCount]): 2 for personal, 4 for commercial.
+  /// [slots] (from `slots` in data.json) replaces the default photo areas for
+  /// frames laid out differently; it is ignored unless it holds exactly one
+  /// rect per photo.
   factory FrameData.standard({
     String filename = '',
     String categoryId = '',
     String categoryName = '',
+    List<Rect>? slots,
   }) {
     const allSlots = [
       Rect.fromLTWH(40, 40, 800, 600),
@@ -36,7 +40,9 @@ class FrameData {
       filename: filename,
       photoSlots: count,
       size: const Size(880, 2650),
-      slots: allSlots.sublist(0, count),
+      slots: slots != null && slots.length == count
+          ? slots
+          : allSlots.sublist(0, count),
       categoryId: categoryId,
       categoryName: categoryName,
     );
@@ -47,16 +53,22 @@ class FrameData {
     String filename = '',
     String categoryId = '',
     String categoryName = '',
+    Rect? slot,
   }) {
     return FrameData(
       filename: filename,
       photoSlots: 1,
       size: const Size(2800, 2000),
-      // The personal group frames have the two people standing beside a smaller
-      // photo area (see scripts/generate_personal_frames.py).
-      slots: AppConfig.flavor == AppFlavor.personal
-          ? const [Rect.fromLTWH(498, 323.5, 1804, 1353)]
-          : const [Rect.fromLTWH(350, 212, 2100, 1575)],
+      // [slot] (from `slot` in data.json) overrides the default for frames whose
+      // photo area differs. The personal default fits the frames with the two
+      // people standing beside a smaller photo area
+      // (see scripts/generate_personal_frames.py).
+      slots: [
+        slot ??
+            (AppConfig.flavor == AppFlavor.personal
+                ? const Rect.fromLTWH(498, 323.5, 1804, 1353)
+                : const Rect.fromLTWH(350, 212, 2100, 1575)),
+      ],
       categoryId: categoryId,
       categoryName: categoryName,
     );
@@ -65,21 +77,8 @@ class FrameData {
   /// Check if the frame layout is for a group shot (1 slot)
   bool get isGroup => photoSlots == 1;
 
-  /// Check if this is a custom frame designed by the user
-  bool get isCustom =>
-      filename.startsWith('standard_custom_') ||
-      filename.startsWith('group_custom_');
-
-  /// Asset path of the frame image (bundled with the app)
-  String get path {
-    if (filename.isEmpty) return '';
-
-    if (filename.startsWith('standard_custom_')) {
-      return '${AppConfig.framesAssetRoot}standard/$filename';
-    } else if (filename.startsWith('group_custom_')) {
-      return '${AppConfig.framesAssetRoot}group/$filename';
-    } else {
-      return '${AppConfig.framesAssetRoot}collected/$filename';
-    }
-  }
+  /// Asset path of the frame image (bundled with the app). [filename] is
+  /// relative to the flavor folder, e.g. `standard/standard_1.png`.
+  String get path =>
+      filename.isEmpty ? '' : '${AppConfig.framesAssetRoot}$filename';
 }

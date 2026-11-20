@@ -126,8 +126,11 @@ fvm flutter run -d chrome --web-port 5050 \
   --web-define=FLAVOR=personal \
   --dart-define-from-file=.env
 
-# Hoặc chạy thử nghiệm với WebAssembly (WASM)
-fvm flutter run -d chrome --wasm --web-port 5050 \
+# Hoặc chạy thử nghiệm với WebAssembly (WASM).
+# --no-cross-origin-isolation tắt header COOP same-origin mà dev server tự thêm
+# khi chạy --wasm; header đó làm popup đăng nhập Google kẹt ở trang trắng
+# accounts.google.com/gsi/transform. GitHub Pages cũng không gửi header này.
+fvm flutter run -d chrome --wasm --no-cross-origin-isolation --web-port 5050 \
   --web-define=FLAVOR=personal \
   --dart-define-from-file=.env
 ```

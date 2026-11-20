@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
@@ -5,7 +6,7 @@ import 'package:th_photobooth/models/frame_data.dart';
 void main() {
   group('FrameData.standard', () {
     test('has as many 800x600 slots as the flavor standard mode', () {
-      final frame = FrameData.standard(filename: 'standard_custom_1.png');
+      final frame = FrameData.standard(filename: 'standard/standard_1.png');
 
       expect(frame.photoSlots, AppConfig.standardPhotoCount);
       expect(frame.size.width, 880);
@@ -15,20 +16,35 @@ void main() {
       expect(frame.isGroup, false);
     });
 
-    test('is a custom frame resolved from the bundled flavor folder', () {
-      final frame = FrameData.standard(filename: 'standard_custom_1.png');
+    test('resolves its asset path from the bundled flavor folder', () {
+      final frame = FrameData.standard(filename: 'standard/standard_1.png');
 
-      expect(frame.isCustom, true);
-      expect(
-        frame.path,
-        '${AppConfig.framesAssetRoot}standard/standard_custom_1.png',
+      expect(frame.path, '${AppConfig.framesAssetRoot}standard/standard_1.png');
+    });
+
+    test('uses the photo areas a frame declares, one per photo', () {
+      final custom = [
+        for (var i = 0; i < AppConfig.standardPhotoCount; i++)
+          Rect.fromLTWH(60, 800 + i * 620.0, 760, 570),
+      ];
+      final frame = FrameData.standard(slots: custom);
+
+      expect(frame.slots, custom);
+      expect(frame.photoSlots, AppConfig.standardPhotoCount);
+    });
+
+    test('keeps the default photo areas when the declared count differs', () {
+      final frame = FrameData.standard(
+        slots: const [Rect.fromLTWH(60, 800, 760, 570)],
       );
+
+      expect(frame.slots, FrameData.standard().slots);
     });
   });
 
   group('FrameData.group', () {
     test('keeps a 4:3 slot inside the 2800x2000 frame', () {
-      final frame = FrameData.group(filename: 'group_custom_1.png');
+      final frame = FrameData.group(filename: 'group/group_1.png');
       final slot = frame.slots.single;
 
       expect(frame.size.width, 2800);

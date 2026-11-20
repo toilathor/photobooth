@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:th_photobooth/components/custom_scrollbar.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
+import 'package:th_photobooth/i18n/strings.g.dart';
 
 import 'photo_item_card.dart';
 import 'previews_footer.dart';
@@ -24,6 +25,23 @@ class _PhotoPreviewsPanelState extends State<PhotoPreviewsPanel> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _removeWithUndo(PhotoboothProvider provider, int index) {
+    if (index >= provider.capturedPhotos.length) return;
+    final photo = provider.capturedPhotos[index];
+    provider.removePhoto(index);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(t.preview.photoRemoved),
+          action: SnackBarAction(
+            label: t.preview.undo,
+            onPressed: () => provider.restorePhoto(index, photo),
+          ),
+        ),
+      );
   }
 
   @override
@@ -53,7 +71,7 @@ class _PhotoPreviewsPanelState extends State<PhotoPreviewsPanel> {
                           : null,
                       isCapturing: provider.isCapturing,
                       isMirrored: provider.photoRequiresFlip,
-                      onDelete: () => provider.removePhoto(index),
+                      onDelete: () => _removeWithUndo(provider, index),
                       isNextCapture:
                           provider.isCapturing &&
                           provider.capturedPhotos.length == index,
@@ -102,7 +120,7 @@ class _PhotoPreviewsPanelState extends State<PhotoPreviewsPanel> {
                             : null,
                         isCapturing: provider.isCapturing,
                         isMirrored: provider.photoRequiresFlip,
-                        onDelete: () => provider.removePhoto(index),
+                        onDelete: () => _removeWithUndo(provider, index),
                         isNextCapture:
                             provider.isCapturing &&
                             provider.capturedPhotos.length == index,

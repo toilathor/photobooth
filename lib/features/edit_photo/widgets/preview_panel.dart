@@ -3,8 +3,10 @@ import 'dart:ui' show ImageFilter;
 import 'package:camera/camera.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:th_photobooth/core/configs/print_layout.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 import 'photo_strip.dart';
 import 'video_recap_player.dart';
@@ -23,6 +25,7 @@ class PreviewPanel extends StatelessWidget {
   final ScreenshotController? paperController;
   final String? galleryUrl;
   final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PreviewPanel({
     super.key,
@@ -38,6 +41,7 @@ class PreviewPanel extends StatelessWidget {
     this.paperController,
     this.galleryUrl,
     this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
     this.isMobile = false,
   });
 
@@ -45,46 +49,15 @@ class PreviewPanel extends StatelessWidget {
 
   void _showVideoRecap(BuildContext context) {
     if (videoRecapFile == null) return;
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      barrierColor: Colors.black87,
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, anim1, anim2) {
-        return Center(
-          child: Container(
-            constraints: isMobile
-                ? null
-                : const BoxConstraints(maxWidth: 900, maxHeight: 800),
-            width: isMobile ? MediaQuery.sizeOf(context).width : null,
-            height: isMobile ? MediaQuery.sizeOf(context).height : null,
-            margin: isMobile ? EdgeInsets.zero : const EdgeInsets.all(32),
-            child: Material(
-              color: Colors.transparent,
-              child: VideoRecapPlayer(
-                videoFile: videoRecapFile!,
-                frame: selectedFrame,
-                photoTimestamps: photoTimestamps,
-                videoIsMirrored: videoIsMirrored,
-                photoIsMirrored: photoIsMirrored,
-                photos: photos,
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, anim1, anim2, child) {
-        return FadeTransition(
-          opacity: anim1,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-              CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
-            ),
-            child: child,
-          ),
-        );
-      },
+    showVideoRecapDialog(
+      context,
+      videoFile: videoRecapFile!,
+      frame: selectedFrame,
+      photoTimestamps: photoTimestamps,
+      videoIsMirrored: videoIsMirrored,
+      photoIsMirrored: photoIsMirrored,
+      photos: photos,
+      isMobile: isMobile,
     );
   }
 
@@ -100,8 +73,10 @@ class PreviewPanel extends StatelessWidget {
       verticalOffset: 20,
       child: GestureDetector(
         onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.all(6),
+          // 44pt target: 12 + 20 + 12.
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isActive
                 ? Colors.white.withValues(alpha: 0.25)
@@ -112,7 +87,7 @@ class PreviewPanel extends StatelessWidget {
               width: 1,
             ),
           ),
-          child: Icon(icon, color: Colors.white, size: 16),
+          child: Icon(icon, color: Colors.white, size: 20),
         ),
       ),
     );
@@ -164,11 +139,13 @@ class PreviewPanel extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: _buildGlassPillButton(
-                      icon: Icons.videocam_rounded,
-                      isActive: false,
-                      onTap: () => _showVideoRecap(context),
-                      tooltip: t.editor.watchVideoRecap,
+                    child: Builder(
+                      builder: (buttonContext) => _buildGlassPillButton(
+                        icon: Icons.videocam_rounded,
+                        isActive: false,
+                        onTap: () => _showVideoRecap(buttonContext),
+                        tooltip: t.editor.watchVideoRecap,
+                      ),
                     ),
                   ),
                 ),
@@ -228,9 +205,9 @@ class PreviewPanel extends StatelessWidget {
                     Text(
                       t.preview.title,
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                        letterSpacing: 2,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 17,
+                        letterSpacing: -0.2,
                         color: colorScheme.secondary,
                       ),
                     ),
@@ -275,6 +252,7 @@ class PreviewPanel extends StatelessWidget {
         photoIsMirrored: photoIsMirrored,
         galleryUrl: galleryUrl,
         showQrPlaceholder: showQrPlaceholder,
+        qrCorner: qrCorner,
       ),
     );
   }
@@ -288,6 +266,7 @@ class PhotoPrintPreview extends StatelessWidget {
   final bool photoIsMirrored;
   final String? galleryUrl;
   final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PhotoPrintPreview({
     super.key,
@@ -298,6 +277,7 @@ class PhotoPrintPreview extends StatelessWidget {
     required this.photoIsMirrored,
     this.galleryUrl,
     this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
   });
 
   @override
@@ -310,9 +290,9 @@ class PhotoPrintPreview extends StatelessWidget {
       isMirrored: photoIsMirrored,
       galleryUrl: galleryUrl,
       showQrPlaceholder: showQrPlaceholder,
+      qrCorner: qrCorner,
     );
-    final isLandscape =
-        selectedFrame.size.width / selectedFrame.size.height > 0.5;
+    final isLandscape = PrintLayout.stacksCopies(selectedFrame);
     final content = isLandscape
         ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -320,7 +300,7 @@ class PhotoPrintPreview extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(height: 4),
+              const SizedBox(height: PrintLayout.copyGap),
               Flexible(fit: FlexFit.loose, child: strip),
             ],
           )
@@ -330,7 +310,7 @@ class PhotoPrintPreview extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(fit: FlexFit.loose, child: strip),
-              const SizedBox(width: 4),
+              const SizedBox(width: PrintLayout.copyGap),
               Flexible(fit: FlexFit.loose, child: strip),
             ],
           );
@@ -426,80 +406,122 @@ class _CompactVideoRecapButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.secondary,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            showGeneralDialog(
-              context: context,
-              barrierDismissible: true,
-              barrierLabel: '',
-              barrierColor: Colors.black87,
-              transitionDuration: const Duration(milliseconds: 400),
-              pageBuilder: (context, anim1, anim2) {
-                return Center(
-                  child: Container(
-                    constraints: isMobile
-                        ? null
-                        : const BoxConstraints(maxWidth: 900, maxHeight: 800),
-                    width: isMobile ? MediaQuery.sizeOf(context).width : null,
-                    height: isMobile ? MediaQuery.sizeOf(context).height : null,
-                    margin: isMobile
-                        ? EdgeInsets.zero
-                        : const EdgeInsets.all(32),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: VideoRecapPlayer(
-                        videoFile: videoFile,
-                        frame: frame,
-                        photoTimestamps: photoTimestamps,
-                        videoIsMirrored: videoIsMirrored,
-                        photoIsMirrored: photoIsMirrored,
-                        photos: photos,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              transitionBuilder: (context, anim1, anim2, child) {
-                return FadeTransition(
-                  opacity: anim1,
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: anim1,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    ),
-                    child: child,
-                  ),
-                );
-              },
-            );
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              Icons.videocam_rounded,
-              color: colorScheme.onSecondary,
-              size: 20,
+    return Tooltip(
+      message: t.editor.watchVideoRecap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.secondary,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () => showVideoRecapDialog(
+              context,
+              videoFile: videoFile,
+              frame: frame,
+              photoTimestamps: photoTimestamps,
+              videoIsMirrored: videoIsMirrored,
+              photoIsMirrored: photoIsMirrored,
+              photos: photos,
+              isMobile: isMobile,
+            ),
+            child: Padding(
+              // 44pt target: 12 + 20 + 12.
+              padding: const EdgeInsets.all(12.0),
+              child: Icon(
+                Icons.videocam_rounded,
+                color: colorScheme.onSecondary,
+                size: 20,
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Opens the video recap growing out of the button that was tapped, and
+/// shrinks back into it on close (same path in and out).
+void showVideoRecapDialog(
+  BuildContext context, {
+  required XFile videoFile,
+  required FrameData frame,
+  required List<Duration> photoTimestamps,
+  required bool videoIsMirrored,
+  required bool photoIsMirrored,
+  required List<XFile> photos,
+  required bool isMobile,
+}) {
+  final screen = MediaQuery.sizeOf(context);
+  Alignment origin = Alignment.center;
+  final box = context.findRenderObject();
+  if (box is RenderBox && box.hasSize && screen.width > 0) {
+    final center = box.localToGlobal(box.size.center(Offset.zero));
+    origin = Alignment(
+      (center.dx / screen.width) * 2 - 1,
+      (center.dy / screen.height) * 2 - 1,
+    );
+  }
+  final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black87,
+    transitionDuration: reduceMotion
+        ? const Duration(milliseconds: 150)
+        : const Duration(milliseconds: 350),
+    pageBuilder: (context, anim1, anim2) {
+      return Center(
+        child: Container(
+          constraints: isMobile
+              ? null
+              : const BoxConstraints(maxWidth: 900, maxHeight: 800),
+          width: isMobile ? MediaQuery.sizeOf(context).width : null,
+          height: isMobile ? MediaQuery.sizeOf(context).height : null,
+          margin: isMobile ? EdgeInsets.zero : const EdgeInsets.all(32),
+          child: Material(
+            color: Colors.transparent,
+            child: VideoRecapPlayer(
+              videoFile: videoFile,
+              frame: frame,
+              photoTimestamps: photoTimestamps,
+              videoIsMirrored: videoIsMirrored,
+              photoIsMirrored: photoIsMirrored,
+              photos: photos,
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, anim1, anim2, child) {
+      final curved = CurvedAnimation(
+        parent: anim1,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      if (reduceMotion) {
+        return FadeTransition(opacity: curved, child: child);
+      }
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          alignment: origin,
+          scale: Tween<double>(begin: 0.6, end: 1.0).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
 }

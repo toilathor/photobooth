@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/components/branded_qr_code.dart';
 import 'package:th_photobooth/core/configs/filter_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 class PhotoStrip extends StatelessWidget {
   final List<XFile> photos;
@@ -16,6 +17,7 @@ class PhotoStrip extends StatelessWidget {
   final bool isMirrored;
   final String? galleryUrl;
   final bool showQrPlaceholder;
+  final QrCorner qrCorner;
 
   const PhotoStrip({
     super.key,
@@ -26,6 +28,7 @@ class PhotoStrip extends StatelessWidget {
     required this.isMirrored,
     this.galleryUrl,
     this.showQrPlaceholder = false,
+    this.qrCorner = QrCorner.fallback,
   });
 
   @override
@@ -50,6 +53,11 @@ class PhotoStrip extends StatelessWidget {
               final scaleY = innerConstraints.maxHeight / frame.size.height;
               final qrScale = math.min(scaleX, scaleY);
               final qrSize = BrandedQrCode.printSize(frame) * qrScale;
+              final qrOrigin = qrCorner.origin(
+                innerConstraints.biggest,
+                qrSize,
+                BrandedQrCode.printInset(frame) * qrScale,
+              );
 
               return Stack(
                 children: [
@@ -94,8 +102,8 @@ class PhotoStrip extends StatelessWidget {
                     ),
                   if (galleryUrl != null || showQrPlaceholder)
                     Positioned(
-                      right: BrandedQrCode.printInset(frame) * qrScale,
-                      bottom: BrandedQrCode.printInset(frame) * qrScale,
+                      left: qrOrigin.dx,
+                      top: qrOrigin.dy,
                       child: galleryUrl != null
                           ? BrandedQrCode(
                               data: galleryUrl!,

@@ -9,6 +9,7 @@ import 'package:th_photobooth/components/secondary_button.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/filter_selector.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 import 'frame_selector.dart';
 
@@ -28,7 +29,16 @@ class EditorPanel extends StatefulWidget {
   final void Function(double) onFilterIntensityChanged;
   final VoidCallback? onSaveRequested;
   final VoidCallback onCompleteRequested;
+
+  /// Names what "complete" actually does here: create a QR or print.
+  final String completeLabel;
   final bool requiresQr;
+  final bool photoIsMirrored;
+
+  /// Where the gallery QR sits on the print. The picker is hidden when
+  /// [onQrCornerChanged] is null (no QR is printed).
+  final QrCorner qrCorner;
+  final ValueChanged<QrCorner>? onQrCornerChanged;
 
   const EditorPanel({
     super.key,
@@ -46,7 +56,11 @@ class EditorPanel extends StatefulWidget {
     required this.onFilterIntensityChanged,
     this.onSaveRequested,
     required this.onCompleteRequested,
+    required this.completeLabel,
     this.requiresQr = false,
+    this.photoIsMirrored = false,
+    this.qrCorner = QrCorner.fallback,
+    this.onQrCornerChanged,
     this.isMobile = false,
   });
 
@@ -96,6 +110,13 @@ class _EditorPanelState extends State<EditorPanel> {
           // Tab Content
           Expanded(child: _buildTabContent(colorScheme)),
 
+          if (widget.onQrCornerChanged != null)
+            _QrCornerPicker(
+              selected: widget.qrCorner,
+              onChanged: widget.onQrCornerChanged!,
+              isMobile: widget.isMobile,
+            ),
+
           if (widget.requiresQr)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -110,7 +131,7 @@ class _EditorPanelState extends State<EditorPanel> {
                   Expanded(
                     child: Text(
                       t.editor.completeEditingHint,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onSurface.withValues(alpha: 0.65),
@@ -143,6 +164,7 @@ class _EditorPanelState extends State<EditorPanel> {
                                 : t.editor.saveToDevice,
                             child: SecondaryButton(
                               onTap: widget.onSaveRequested,
+                              semanticLabel: t.editor.saveToDevice,
                               icon: Icons.save_alt_rounded,
                               height: btnHeight,
                             ),
@@ -158,6 +180,7 @@ class _EditorPanelState extends State<EditorPanel> {
                             message: t.editor.saveToDevice,
                             child: SecondaryButton(
                               onTap: widget.onSaveRequested!,
+                              semanticLabel: t.editor.saveToDevice,
                               icon: Icons.save_alt_rounded,
                               height: btnHeight,
                             ),
@@ -168,13 +191,10 @@ class _EditorPanelState extends State<EditorPanel> {
                     ],
                     Expanded(
                       flex: 3,
-                      child: Tooltip(
-                        message: t.editor.completeEditing,
-                        child: PrimaryButton(
-                          onTap: widget.onCompleteRequested,
-                          label: t.editor.completeEditing,
-                          height: btnHeight,
-                        ),
+                      child: PrimaryButton(
+                        onTap: widget.onCompleteRequested,
+                        label: widget.completeLabel,
+                        height: btnHeight,
                       ),
                     ),
                   ],
@@ -209,6 +229,10 @@ class _EditorPanelState extends State<EditorPanel> {
                 selectedFilter: widget.selectedFilter,
                 onFilterSelected: widget.onFilterSelected,
                 colorScheme: colorScheme,
+                previewImagePath: widget.photos.isNotEmpty
+                    ? widget.photos.first.path
+                    : null,
+                previewIsMirrored: widget.photoIsMirrored,
                 isMobile: widget.isMobile,
               ),
             ),
@@ -231,6 +255,9 @@ class _EditorPanelState extends State<EditorPanel> {
                     Expanded(
                       child: Slider(
                         value: widget.filterIntensity,
+                        label: '${(widget.filterIntensity * 100).toInt()}%',
+                        semanticFormatterCallback: (v) =>
+                            '${t.filters.title} ${(v * 100).toInt()}%',
                         onChanged: widget.onFilterIntensityChanged,
                         activeColor: colorScheme.secondary,
                         inactiveColor: colorScheme.onSurface.withValues(
@@ -243,7 +270,7 @@ class _EditorPanelState extends State<EditorPanel> {
                       width: 40,
                       child: Text(
                         '${(widget.filterIntensity * 100).toInt()}%',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: colorScheme.secondary,
@@ -259,6 +286,94 @@ class _EditorPanelState extends State<EditorPanel> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _QrCornerPicker extends StatelessWidget {
+  final QrCorner selected;
+  final ValueChanged<QrCorner> onChanged;
+  final bool isMobile;
+
+  const _QrCornerPicker({
+    required this.selected,
+    required this.onChanged,
+    required this.isMobile,
+  });
+
+  String _label(QrCorner corner) => switch (corner) {
+    QrCorner.topLeft => t.editor.qrCorners.topLeft,
+    QrCorner.topRight => t.editor.qrCorners.topRight,
+    QrCorner.bottomLeft => t.editor.qrCorners.bottomLeft,
+    QrCorner.bottomRight => t.editor.qrCorners.bottomRight,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        isMobile ? 16 : 24,
+        0,
+        isMobile ? 16 : 24,
+        12,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.qr_code_2_rounded,
+            size: 18,
+            color: colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+          const Gap(8),
+          Expanded(
+            child: Text(
+              t.editor.qrPosition,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+          for (final corner in QrCorner.values)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Tooltip(
+                message: _label(corner),
+                child: Semantics(
+                  button: true,
+                  selected: corner == selected,
+                  label: '${t.editor.qrPosition}: ${_label(corner)}',
+                  excludeSemantics: true,
+                  child: Material(
+                    key: ValueKey('qr-corner-${corner.name}'),
+                    color: corner == selected
+                        ? colorScheme.secondary
+                        : colorScheme.onSurface.withValues(alpha: 0.06),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => onChanged(corner),
+                      child: SizedBox.square(
+                        dimension: 44,
+                        child: Icon(
+                          corner.icon,
+                          size: 20,
+                          color: corner == selected
+                              ? colorScheme.onSecondary
+                              : colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

@@ -29,10 +29,11 @@ class PreviewsFooter extends StatelessWidget {
               total: provider.selectedPhotoCount,
             ),
             style: GoogleFonts.inter(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface.withValues(alpha: 0.8),
               fontSize: 14,
-              letterSpacing: 2,
+              letterSpacing: 0.2,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const Gap(24),
@@ -54,9 +55,12 @@ class PreviewsFooter extends StatelessWidget {
                     } catch (_) {}
                     if (!context.mounted) return;
 
-                    await Navigator.push(
+                    // The editor pops with `true` only once the session is
+                    // finished (shared, saved or printed). A plain Back keeps
+                    // the photos so the guest can retake a shot.
+                    final bool? finished = await Navigator.push<bool>(
                       context,
-                      MaterialPageRoute<void>(
+                      MaterialPageRoute<bool>(
                         builder: (context) => EditPhotoScreen(
                           photos: provider.capturedPhotos,
                           photoCount: provider.selectedPhotoCount,
@@ -70,17 +74,25 @@ class PreviewsFooter extends StatelessWidget {
 
                     if (context.mounted) {
                       try {
-                        await provider.clearSession();
+                        if (finished == true) await provider.clearSession();
                         provider.startCamera();
                       } catch (_) {}
                     }
                   }
                 : null,
             height: isLandscape ? 48 : 56,
+            // Say how far there is to go instead of a bare "not enough".
             label: provider.capturedPhotos.length >= provider.selectedPhotoCount
                 ? t.preview.continue_btn
-                : t.preview.not_enough_photos,
-            icon: Icons.arrow_forward_ios_rounded,
+                : t.preview.remaining(
+                    count:
+                        provider.selectedPhotoCount -
+                        provider.capturedPhotos.length,
+                  ),
+            trailingIcon:
+                provider.capturedPhotos.length >= provider.selectedPhotoCount
+                ? Icons.arrow_forward_rounded
+                : null,
           ),
         ),
       ],

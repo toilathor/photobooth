@@ -19,6 +19,7 @@ class CameraPreviewWidget extends StatelessWidget {
     final provider = context.watch<PhotoboothProvider>();
     final colorScheme = Theme.of(context).colorScheme;
     final bool isMobile = MediaQuery.sizeOf(context).shortestSide < 600;
+    final bool reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     final controller = provider.cameraController;
     double cameraAspectRatio = 1.0;
@@ -81,6 +82,7 @@ class CameraPreviewWidget extends StatelessWidget {
                               top: 8,
                               left: 8,
                               child: _ControlButton(
+                                tooltip: t.actions.switchCamera,
                                 icon: Icons.flip_camera_ios_rounded,
                                 onTap:
                                     (provider.isDoneTakingPhotos ||
@@ -94,6 +96,8 @@ class CameraPreviewWidget extends StatelessWidget {
                             top: 8,
                             right: 8,
                             child: _ControlButton(
+                              tooltip: t.actions.mirror,
+                              isActive: provider.isMirrored,
                               icon: Icons.flip_rounded,
                               onTap:
                                   (provider.isDoneTakingPhotos ||
@@ -112,7 +116,27 @@ class CameraPreviewWidget extends StatelessWidget {
                                 ),
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
-                                  child: provider.isPreparing
+                                  child: reduceMotion
+                                      ? Text(
+                                          provider.isPreparing
+                                              ? t.actions.prepare
+                                              : '${provider.currentCountdownValue}',
+                                          style: GoogleFonts.inter(
+                                            fontSize: isMobile ? 80 : 140,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                            letterSpacing: -2,
+                                            shadows: [
+                                              Shadow(
+                                                blurRadius: 30,
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.7,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      : provider.isPreparing
                                       ? AnimatedTextKit(
                                           animatedTexts: [
                                             ScaleAnimatedText(
@@ -122,7 +146,8 @@ class CameraPreviewWidget extends StatelessWidget {
                                               ),
                                               textStyle: GoogleFonts.inter(
                                                 fontSize: isMobile ? 56 : 96,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -1.5,
                                                 color: colorScheme.secondary,
                                                 shadows: [
                                                   Shadow(
@@ -149,9 +174,10 @@ class CameraPreviewWidget extends StatelessWidget {
                                           animatedTexts: [
                                             ScaleAnimatedText(
                                               '${provider.currentCountdownValue}',
-                                              textStyle: GoogleFonts.outfit(
+                                              textStyle: GoogleFonts.inter(
                                                 fontSize: isMobile ? 80 : 140,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -2,
                                                 color: Colors.white,
                                                 shadows: [
                                                   Shadow(
@@ -208,49 +234,41 @@ class _CancelButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The one action that matters during a countdown, so it gets a full
+    // 48pt target and readable type. Neutral glass reads over any scene.
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.red.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Material(
+          color: Colors.black.withValues(alpha: 0.45),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.25)),
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 120),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 22),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
                       Icons.close_rounded,
                       color: Colors.white,
-                      size: 16,
+                      size: 20,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Text(
                       t.actions.cancel,
                       style: GoogleFonts.inter(
                         color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
                   ],
@@ -268,11 +286,15 @@ class _ControlButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
   final ColorScheme colorScheme;
+  final String tooltip;
+  final bool isActive;
 
   const _ControlButton({
     required this.icon,
     this.onTap,
     required this.colorScheme,
+    required this.tooltip,
+    this.isActive = false,
   });
 
   @override
@@ -280,11 +302,18 @@ class _ControlButton extends StatelessWidget {
     final isEnabled = onTap != null;
     return IconButton(
       onPressed: onTap,
+      tooltip: tooltip,
+      isSelected: isActive,
       style: IconButton.styleFrom(
+        minimumSize: const Size.square(44),
         foregroundColor: Colors.white.withValues(alpha: isEnabled ? 1.0 : 0.5),
-        backgroundColor: Colors.black.withValues(alpha: 0.3),
+        disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
+        backgroundColor: isActive
+            ? Colors.white.withValues(alpha: 0.3)
+            : Colors.black.withValues(alpha: 0.35),
+        disabledBackgroundColor: Colors.black.withValues(alpha: 0.2),
       ),
-      icon: Icon(icon, size: 20),
+      icon: Icon(icon, size: 22),
     );
   }
 }

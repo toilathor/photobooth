@@ -18,6 +18,8 @@
   #status { margin-left:auto; opacity:.6; font-size:12px; }
   main { padding:16px; display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); }
   main.wide { grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); }
+  figure.std .stage { justify-content:center; }
+  figure.std img { max-width:380px; }
   figure { margin:0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
   .stage { background:#7bc47f; display:flex; }  /* green shows through the transparent holes */
   .stage img { width:100%; display:block; }
@@ -34,6 +36,7 @@
   <h1>Frame preview</h1>
   <button data-flavor="personal">personal</button>
   <button data-flavor="commercial">commercial</button>
+  <button data-flavor="concepts">ý tưởng</button>
   <select id="category"><option value="">Tất cả category</option></select>
   <select id="layout"><option value="">Tất cả layout</option><option>standard</option><option>group</option></select>
   <span id="status"></span>
@@ -47,15 +50,38 @@ const catSel = document.getElementById('category');
 const laySel = document.getElementById('layout');
 const zoom = document.getElementById('zoom');
 
-// Same rules as FrameData.path in the app.
-function framePath(f) {
-  const n = f.filename;
-  if (n.startsWith('standard_custom_')) return `standard/${n}`;
-  if (n.startsWith('group_custom_')) return `group/${n}`;
-  return `collected/${n}`;
+// "filename" is relative to the flavor folder, same as FrameData.path.
+function framePath(f) { return f.filename; }
+
+// "ý tưởng" tab: concept frames made by scripts/generate_group_concepts.py.
+async function loadConcepts() {
+  try {
+    const res = await fetch(`concepts/manifest.json?t=${Date.now()}`, { cache: 'no-store' });
+    state.concepts = await res.json();
+    document.querySelector('[data-flavor="concepts"]').hidden = !state.concepts.length;
+    if (!state.concepts.length) {
+      // Nothing waiting for review: go back to the real frames.
+      state.flavor = 'personal';
+      sync();
+      return load();
+    }
+    catSel.hidden = laySel.hidden = true;
+    grid.classList.add('wide');
+    grid.innerHTML = state.concepts.map(c => {
+      const src = `concepts/${c.name}_preview.jpg?v=${state.hash}`;
+      return `<figure class="${c.layout === 'standard' ? 'std' : ''}"><div class="stage"><img loading="lazy" decoding="async" src="${src}" data-full="concepts/${c.name}_frame.png?v=${state.hash}"></div>
+        <figcaption><b>${c.title}</b><span>${c.desc}</span></figcaption></figure>`;
+    }).join('');
+    status(`đã tải ${new Date().toLocaleTimeString()} · chạm ảnh để xem khung gốc`);
+  } catch (e) {
+    grid.innerHTML = '<p style="padding:8px">Chưa có ý tưởng. Chạy: python3 scripts/generate_group_concepts.py</p>';
+    status('không tải được concepts/manifest.json');
+  }
 }
 
 async function load() {
+  if (state.flavor === 'concepts') return loadConcepts();
+  catSel.hidden = laySel.hidden = false;
   const base = `frames/${state.flavor}/`;
   try {
     const res = await fetch(`${base}data.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -81,20 +107,28 @@ function render() {
   const sig = state.flavor + JSON.stringify(items.map(i => i.filename)) + catSel.value + laySel.value;
   grid.classList.toggle('wide', items.some(i => i.layout_type === 'group'));
   grid.innerHTML = items.map(i => {
-    const src = `${state.base}${framePath(i)}?v=${state.hash}`;
-    return `<figure><div class="stage"><img loading="lazy" src="${src}" data-full="${src}"></div>
+    const full = `${state.base}${framePath(i)}?v=${state.hash}`;
+    const thumb = `thumbs/${state.flavor}/${framePath(i).replace(/\//g, '__')}.webp?v=${state.hash}`;
+    const ratio = i.layout_type === 'group' ? '2800 / 2000' : '880 / 2650';
+    return `<figure><div class="stage"><img loading="lazy" decoding="async" style="aspect-ratio:${ratio}" src="${thumb}" data-full="${full}"></div>
       <figcaption><b>${i.filename}</b><span>${i.layout_type} · ${i.category?.name ?? ''}</span></figcaption></figure>`;
   }).join('') || '<p>Không có khung nào.</p>';
 }
 
 // Re-check every few seconds; refresh images when any frame file changed.
 async function poll() {
+  if (state.flavor === 'concepts') {
+    const stamp = await fetch('concepts/manifest.json', { method: 'HEAD', cache: 'no-store' })
+      .then(r => r.headers.get('last-modified') || '').catch(() => '');
+    if (stamp !== state.hash) { state.hash = stamp; await load(); }
+    return;
+  }
   if (!state.data) return;
-  const urls = state.data.images.map(i => `${state.base}${framePath(i)}`);
-  const stamps = await Promise.all(urls.map(u => fetch(u, { method: 'HEAD', cache: 'no-store' })
-    .then(r => r.headers.get('last-modified') || '').catch(() => '')));
-  const hash = stamps.join('|');
-  if (hash !== state.hash) { state.hash = hash; await load(); }
+  // thumbs/index.json (written by thumbs.py) changes whenever a frame or data.json changes.
+  const hash = await fetch('thumbs/index.json', { cache: 'no-store' })
+    .then(r => r.text()).then(t => String(t.length) + ':' + t.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0))
+    .catch(() => '');
+  if (hash && hash !== state.hash) { state.hash = hash; await load(); }
 }
 
 document.querySelectorAll('[data-flavor]').forEach(b => {
@@ -105,7 +139,7 @@ catSel.onchange = laySel.onchange = render;
 grid.onclick = e => { const img = e.target.closest('img'); if (img) { zoom.querySelector('img').src = img.dataset.full; zoom.showModal(); } };
 zoom.onclick = () => zoom.close();
 
-sync(); load(); setInterval(poll, 3000);
+sync(); load(); setInterval(poll, 4000);
 </script>
 </body>
 </html>

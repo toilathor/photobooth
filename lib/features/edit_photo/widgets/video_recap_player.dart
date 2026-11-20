@@ -464,7 +464,7 @@ class _VideoRecapPlayerState extends State<VideoRecapPlayer> {
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                        letterSpacing: 0.2,
                         fontSize: 12,
                       ),
                     ),

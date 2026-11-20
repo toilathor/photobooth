@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:th_photobooth/components/branded_qr_code.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 import 'package:th_photobooth/services/frame_service.dart';
 
 class PhotoMergerService {
@@ -22,6 +23,7 @@ class PhotoMergerService {
     List<double>? colorFilterMatrix,
     bool isMirrored = false,
     String? galleryUrl,
+    QrCorner qrCorner = QrCorner.fallback,
   }) async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
@@ -131,12 +133,9 @@ class PhotoMergerService {
       final qrImage = (await qrCodec.getNextFrame()).image;
       qrCodec.dispose();
       final inset = BrandedQrCode.printInset(frameData);
-      final destination = ui.Rect.fromLTWH(
-        canvasWidth - qrSize - inset,
-        canvasHeight - qrSize - inset,
-        qrSize,
-        qrSize,
-      );
+      final destination =
+          qrCorner.origin(frameData.size, qrSize, inset) &
+          ui.Size.square(qrSize);
       canvas.drawImageRect(
         qrImage,
         ui.Rect.fromLTWH(

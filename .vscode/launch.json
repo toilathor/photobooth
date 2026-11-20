@@ -18,6 +18,7 @@
       "type": "dart",
       "args": [
         "--wasm",
+        "--no-cross-origin-isolation",
         "--web-port",
         "5050",
         "--web-define=FLAVOR=personal",
@@ -36,6 +37,7 @@
       "type": "dart",
       "args": [
         "--wasm",
+        "--no-cross-origin-isolation",
         "--web-port",
         "5050",
         "--web-define=FLAVOR=commercial"
