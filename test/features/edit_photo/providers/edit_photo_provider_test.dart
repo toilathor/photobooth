@@ -8,6 +8,7 @@ import 'package:th_photobooth/features/edit_photo/providers/edit_photo.provider.
 import 'package:th_photobooth/services/storage_section.dart';
 import 'package:th_photobooth/services/storage_service_interface.dart';
 import 'package:th_photobooth/services/storage_user.dart';
+import 'package:th_photobooth/services/upload_queue.dart';
 
 void main() {
   test('exports the print PNG and unchanged source photos', () async {
@@ -36,54 +37,117 @@ void main() {
     expect(img.decodePng(files['session_test_anh_dem_di_in.png']!), isNotNull);
   });
 
-  test('retries the same section then marks the upload ready', () async {
-    final storage = _FakeStorageService()..failNextUpload = true;
-    final provider = EditPhotoProvider(storageService: storage)
-      ..sessionId = 'session_test';
+  test(
+    'retries on the same section, saves once, then queues the upload',
+    () async {
+      final storage = _FakeStorageService();
+      final queue = UploadQueue(storage: storage, retryDelay: Duration.zero);
+      final provider = EditPhotoProvider(
+        storageService: storage,
+        uploadQueue: queue,
+      )..sessionId = 'session_test';
+      final png = Uint8List.fromList(
+        img.encodePng(img.Image(width: 2, height: 2)),
+      );
+      String? error;
+      var completed = 0;
+      var printCaptures = 0;
+      final saved = <Map<String, Uint8List>>[];
+
+      Future<void> request() => provider.handleQRRequest(
+        onHideLoading: () {},
+        onShowLogin: () {},
+        onStartUpload: () {},
+        onUploadComplete: () {
+          expect(provider.isSectionReady, isTrue);
+          completed++;
+        },
+        onShowError: (value) => error = value,
+        captureStrip: () async => png,
+        // The first render fails, as a stalled export would.
+        capturePrintContent: () async =>
+            printCaptures++ == 0 ? throw Exception('render failed') : png,
+        saveToDevice: (files) async => saved.add(files),
+      );
+
+      await request();
+      expect(error, isNotNull);
+      expect(saved, isEmpty);
+      expect(provider.isSectionReady, isFalse);
+      expect(completed, 0);
+
+      error = null;
+      await request();
+      expect(error, isNull);
+      expect(storage.prepareCalls, 1);
+      expect(saved.single, same(provider.completedFiles));
+      expect(provider.isSectionReady, isTrue);
+      expect(provider.isEditorLocked, isTrue);
+      expect(completed, 1);
+      expect(provider.galleryUrl, contains('#/gallery/drive_section_123456'));
+
+      // The QR is shown before Drive has the files; the queue sends them after.
+      await pumpEventQueue();
+      expect(storage.uploadCalls, 1);
+      expect(queue.isUploaded('drive_section_123456'), isTrue);
+
+      final originalFilter = provider.selectedFilter;
+      provider.setFilter('sepia');
+      expect(provider.selectedFilter, originalFilter);
+    },
+  );
+
+  test('names the session after the wedding and its time', () {
+    expect(
+      EditPhotoProvider.sessionIdAt(DateTime(2026, 11, 21, 14, 32, 5)),
+      'thohien-wedding-20261121-143205',
+    );
+  });
+
+  test('a retry after a timeout waits for the run in flight', () async {
+    final storage = _FakeStorageService()..slowPrepare = Completer<void>();
+    final queue = UploadQueue(storage: storage, retryDelay: Duration.zero);
+    final provider = EditPhotoProvider(
+      storageService: storage,
+      uploadQueue: queue,
+      prepareTimeout: const Duration(milliseconds: 20),
+    )..sessionId = 'session_test';
     final png = Uint8List.fromList(
       img.encodePng(img.Image(width: 2, height: 2)),
     );
-    String? error;
-    var completedUploads = 0;
+    final errors = <String>[];
+    final saved = <Map<String, Uint8List>>[];
 
     Future<void> request() => provider.handleQRRequest(
       onHideLoading: () {},
       onShowLogin: () {},
       onStartUpload: () {},
-      onUploadComplete: () {
-        expect(provider.isSectionReady, isTrue);
-        completedUploads++;
-      },
-      onShowError: (value) => error = value,
+      onUploadComplete: () {},
+      onShowError: errors.add,
       captureStrip: () async => png,
       capturePrintContent: () async => png,
+      saveToDevice: (files) async => saved.add(files),
     );
 
-    await request();
-    expect(provider.isSectionReady, isFalse);
-    expect(completedUploads, 0);
-    expect(error, isNotNull);
+    await request(); // Drive is slow: times out
+    expect(errors, hasLength(1));
 
-    error = null;
-    await request();
-    expect(error, isNull);
+    final retry = request();
+    storage.slowPrepare!.complete();
+    await retry;
+
     expect(storage.prepareCalls, 1);
-    expect(storage.uploadCalls, 2);
+    expect(saved, hasLength(1));
     expect(provider.isSectionReady, isTrue);
-    expect(completedUploads, 1);
-    expect(provider.isEditorLocked, isTrue);
-    expect(provider.galleryUrl, contains('#/gallery/drive_section_123456'));
-
-    final originalFilter = provider.selectedFilter;
-    provider.setFilter('sepia');
-    expect(provider.selectedFilter, originalFilter);
   });
 }
 
 class _FakeStorageService implements StorageService {
   int prepareCalls = 0;
   int uploadCalls = 0;
-  bool failNextUpload = false;
+
+  /// When set, [prepareSection] waits for it, like Drive on a weak network.
+  Completer<void>? slowPrepare;
 
   @override
   StorageUser? get currentUser => const StorageUser(
@@ -101,6 +165,7 @@ class _FakeStorageService implements StorageService {
   @override
   Future<StorageSection?> prepareSection(String folderName) async {
     prepareCalls++;
+    await slowPrepare?.future;
     return const StorageSection(
       id: 'drive_section_123456',
       webViewUrl: 'https://drive.google.com/drive/folders/drive_section_123456',
@@ -114,21 +179,8 @@ class _FakeStorageService implements StorageService {
     void Function(int current, int total)? onProgress,
   }) async {
     uploadCalls++;
-    if (failNextUpload) {
-      failNextUpload = false;
-      throw Exception('upload failed');
-    }
     onProgress?.call(files.length, files.length);
   }
-
-  @override
-  Future<String?> uploadImage(Uint8List bytes, String fileName) async => null;
-
-  @override
-  Future<StorageUser?> signIn() async => currentUser;
-
-  @override
-  Future<void> signOut() async {}
 
   @override
   Future<bool> hasRequiredScopes() async => true;

@@ -3,6 +3,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:image/image.dart' as img;
+
 // Usage: dart run lib/helper/FILE.dart [personal|commercial] (default: commercial)
 void main(List<String> args) async {
   final flavor = args.isNotEmpty ? args.first : 'commercial';
@@ -78,10 +80,39 @@ void main(List<String> args) async {
     "categories": categories,
     "images": images,
   });
-  await dataFile.writeAsString(prettyJson);
+  await dataFile.writeAsString('$prettyJson\n');
   print('$root/data.json successfully updated.');
 
+  _syncThumbnails(root, images);
   await _syncPubspecAssets();
+}
+
+/// The frame picker shows small tiles: decoding every full frame (~1.5MB,
+/// 880×2650) for them is slow, so each frame gets a 200px-wide copy at
+/// `thumbnails/<filename>`, redone when the frame file is newer.
+void _syncThumbnails(String root, List<dynamic> images) {
+  var count = 0;
+  for (final image in images) {
+    final filename = image['filename'] as String;
+    final source = File('$root/$filename');
+    final thumbnail = File('$root/thumbnails/$filename');
+    if (!source.existsSync()) continue;
+    if (thumbnail.existsSync() &&
+        !source.lastModifiedSync().isAfter(thumbnail.lastModifiedSync())) {
+      continue;
+    }
+    final decoded = img.decodeImage(source.readAsBytesSync());
+    if (decoded == null) {
+      print('Failed to decode $filename, no thumbnail.');
+      continue;
+    }
+    thumbnail.parent.createSync(recursive: true);
+    thumbnail.writeAsBytesSync(
+      img.encodePng(img.copyResize(decoded, width: 200)),
+    );
+    count++;
+  }
+  print('Thumbnails: $count generated or refreshed.');
 }
 
 /// Flutter does not bundle assets recursively, so every frame folder of every
@@ -93,7 +124,6 @@ Future<void> _syncPubspecAssets() async {
   for (final entity in framesDir.listSync(recursive: true)) {
     if (entity is! File) continue;
     final path = entity.path;
-    if (path.contains('/thumbnails/')) continue;
     if (!path.endsWith('.png') && !path.endsWith('.json')) continue;
     final dir = '${entity.parent.path}/';
     if (!dirs.contains(dir)) dirs.add(dir);

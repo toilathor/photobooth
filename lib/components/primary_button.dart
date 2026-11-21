@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:th_photobooth/components/shortcut_keycap.dart';
 
 class PrimaryButton extends StatefulWidget {
   final VoidCallback? onTap;
@@ -9,6 +10,9 @@ class PrimaryButton extends StatefulWidget {
 
   /// Trailing icon, for directional actions (continue →).
   final IconData? trailingIcon;
+
+  /// Key that also triggers the button, shown as a keycap while enabled.
+  final ShortcutKey? shortcut;
   final double height;
 
   const PrimaryButton({
@@ -17,6 +21,7 @@ class PrimaryButton extends StatefulWidget {
     required this.label,
     this.icon,
     this.trailingIcon,
+    this.shortcut,
     this.height = 72,
   });
 
@@ -97,6 +102,15 @@ class _PrimaryButtonState extends State<PrimaryButton> {
                       if (widget.trailingIcon != null) ...[
                         const SizedBox(width: 8),
                         iconWidget(widget.trailingIcon!),
+                      ],
+                      if (widget.shortcut != null &&
+                          isEnabled &&
+                          ShortcutKeycap.isShown(context)) ...[
+                        const SizedBox(width: 12),
+                        ShortcutKeycap(
+                          widget.shortcut!,
+                          color: colorScheme.onSecondary,
+                        ),
                       ],
                     ],
                   ),

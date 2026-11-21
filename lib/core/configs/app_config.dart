@@ -30,6 +30,11 @@ class AppConfig {
     return AppFlavor.personal;
   }
 
+  /// Start of every session name (Drive folder, zip, files): the wedding's
+  /// own name on the personal build.
+  static String get sessionPrefix =>
+      flavor == AppFlavor.personal ? 'thohien-wedding' : 'photobooth';
+
   static String get appName =>
       flavor == AppFlavor.personal ? 'TH PhotoBooth' : 'PhotoBooth';
   static ThemeData get theme => flavor == AppFlavor.personal

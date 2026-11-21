@@ -6,18 +6,26 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:th_photobooth/components/branded_qr_code.dart';
+import 'package:th_photobooth/components/nudge_bounce.dart';
 import 'package:th_photobooth/components/primary_button.dart';
+import 'package:th_photobooth/components/shortcut_keycap.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 
 class QrSharePanel extends StatelessWidget {
   final String url;
   final bool isMobile;
-  final VoidCallback onDownload;
+
+  /// How the background Drive upload is going; the QR works once it is done.
+  final String? uploadStatus;
+
+  /// Ends the session and goes back to capture for the next guest.
+  final VoidCallback onNextGuest;
 
   const QrSharePanel({
     super.key,
     required this.url,
-    required this.onDownload,
+    required this.onNextGuest,
+    this.uploadStatus,
     this.isMobile = false,
   });
 
@@ -28,6 +36,18 @@ class QrSharePanel extends StatelessWidget {
           .showSnackBar(SnackBar(content: Text(t.editor.linkCopied)));
     }
   }
+
+  // Hops to say this is the next step once the QR is out.
+  Widget _nextGuest() => NudgeBounce(
+    active: true,
+    child: PrimaryButton(
+      onTap: onNextGuest,
+      label: t.editor.nextGuest,
+      shortcut: ShortcutKey.enter,
+      icon: Icons.add_a_photo_rounded,
+      height: 56,
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +70,7 @@ class QrSharePanel extends StatelessWidget {
               constraints.maxHeight -
               padding * 2 -
               (isMobile ? 80 : 88) -
+              (uploadStatus == null ? 0 : 28) -
               actionHeight;
           final qrSize = math.min(
             availableWidth,
@@ -64,7 +85,8 @@ class QrSharePanel extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.cloud_done_rounded,
+                      // Not "cloud done": the upload may still be running.
+                      Icons.qr_code_2_rounded,
                       color: colorScheme.secondary,
                       size: isMobile ? 32 : 40,
                     ),
@@ -93,6 +115,18 @@ class QrSharePanel extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                if (uploadStatus != null) ...[
+                  const Gap(8),
+                  Text(
+                    uploadStatus!,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: colorScheme.secondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
                 const Gap(16),
                 BrandedQrCode(
                   data: url,
@@ -103,15 +137,7 @@ class QrSharePanel extends StatelessWidget {
                 if (stackActions)
                   Column(
                     children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: PrimaryButton(
-                          onTap: onDownload,
-                          label: t.editor.saveToDevice,
-                          icon: Icons.download_rounded,
-                          height: 56,
-                        ),
-                      ),
+                      SizedBox(width: double.infinity, child: _nextGuest()),
                       const Gap(12),
                       _LinkField(url: url, onCopy: () => _copyLink(context)),
                     ],
@@ -119,15 +145,7 @@ class QrSharePanel extends StatelessWidget {
                 else
                   Row(
                     children: [
-                      SizedBox(
-                        width: 200,
-                        child: PrimaryButton(
-                          onTap: onDownload,
-                          label: t.editor.saveToDevice,
-                          icon: Icons.download_rounded,
-                          height: 56,
-                        ),
-                      ),
+                      SizedBox(width: 220, child: _nextGuest()),
                       const Gap(12),
                       Expanded(
                         child: _LinkField(

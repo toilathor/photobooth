@@ -2,12 +2,17 @@ import 'package:material_ui/material_ui.dart';
 
 class FrameItem extends StatelessWidget {
   final String framePath;
+
+  /// Small copy shown in the tile; the full frame is the fallback when a new
+  /// frame has no thumbnail yet.
+  final String thumbnailPath;
   final bool isSelected;
   final VoidCallback onTap;
 
   const FrameItem({
     super.key,
     required this.framePath,
+    this.thumbnailPath = '',
     required this.isSelected,
     required this.onTap,
   });
@@ -53,15 +58,20 @@ class FrameItem extends StatelessWidget {
                   )
                 else
                   Image.asset(
-                    framePath,
+                    thumbnailPath.isEmpty ? framePath : thumbnailPath,
                     fit: BoxFit.cover,
                     cacheWidth: 150,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: colorScheme.errorContainer,
-                      child: Icon(
-                        Icons.error_outline,
-                        color: colorScheme.error,
-                        size: 40,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      framePath,
+                      fit: BoxFit.cover,
+                      cacheWidth: 150,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: colorScheme.errorContainer,
+                        child: Icon(
+                          Icons.error_outline,
+                          color: colorScheme.error,
+                          size: 40,
+                        ),
                       ),
                     ),
                   ),

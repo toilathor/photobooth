@@ -110,9 +110,8 @@ class ThemeConfig {
     scaffoldBackgroundColor: const Color(0xFF5A0001),
     textTheme: const TextTheme(
       headlineLarge: TextStyle(
-        fontFamily: 'Pacifico',
-        fontSize: 36,
-        fontWeight: FontWeight.w700,
+        fontFamily: 'PinyonScript',
+        fontSize: 48,
         color: Color(0xFFD4AF37),
       ),
     ),

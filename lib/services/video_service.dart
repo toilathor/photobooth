@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:th_photobooth/helper/blob_url.dart';
 
 /// Service quản lý logic quay video recap và lưu trữ timestamp của các ảnh đã chụp.
 class VideoService {
@@ -48,6 +49,7 @@ class VideoService {
 
   /// Reset toàn bộ dữ liệu video.
   void reset() {
+    if (_videoRecapFile case final file?) revokeBlobUrl(file.path);
     _videoRecapFile = null;
     _photoTimestamps.clear();
     _videoStartTime = null;

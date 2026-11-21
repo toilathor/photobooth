@@ -3,6 +3,19 @@
  * Composites a session video into a photobooth frame and records the result.
  */
 
+// Waits for a media event, but fails on a load error or after `ms`, so a
+// broken recap can't hang the editor (the Dart side falls back on error).
+function waitForMedia(el, event, ms = 10000) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(`${event} timed out`)), ms);
+        el.addEventListener(event, () => { clearTimeout(timer); resolve(); }, { once: true });
+        el.addEventListener('error', () => {
+            clearTimeout(timer);
+            reject(new Error('Recap video failed to load'));
+        }, { once: true });
+    });
+}
+
 window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson, preferredMimeType, isMirrored) {
     const layoutData = JSON.parse(layoutDataJson);
     const { canvasWidth, canvasHeight, slots, timestamps, recapDuration } = layoutData;
@@ -55,15 +68,16 @@ window.exportRecapVideo = async function (videoUrl, frameUrl, layoutDataJson, pr
                 v.style.height = '1px';
                 container.appendChild(v);
 
+                const loaded = waitForMedia(v, 'loadedmetadata');
                 v.src = videoUrl;
-
-                await new Promise((res) => { v.onloadedmetadata = res; });
+                await loaded;
 
                 const photoTime = timestamps && timestamps[index] !== undefined ? timestamps[index] : 0;
                 const startTime = Math.max(0, photoTime - durationSec);
                 
+                const seeked = waitForMedia(v, 'seeked');
                 v.currentTime = startTime;
-                await new Promise((res) => { v.onseeked = res; });
+                await seeked;
                 
                 return {
                     element: v,
@@ -261,8 +275,9 @@ window.flipVideo = async function (videoUrl, isMirrored, preferredMimeType) {
             v.style.height = '1px';
             container.appendChild(v);
 
+            const loaded = waitForMedia(v, 'loadedmetadata');
             v.src = videoUrl;
-            await new Promise((res) => { v.onloadedmetadata = res; });
+            await loaded;
 
             const canvas = document.createElement('canvas');
             canvas.width = v.videoWidth;
@@ -362,32 +377,8 @@ window.flipVideo = async function (videoUrl, isMirrored, preferredMimeType) {
     });
 };
 
+// Downloads each file straight into the browser's download folder (no prompt).
 window.saveFilesToDevice = async function (filesMap) {
-    let useDirectoryPicker = typeof window.showDirectoryPicker === 'function';
-    
-    if (useDirectoryPicker) {
-        try {
-            const dirHandle = await window.showDirectoryPicker({
-                mode: 'readwrite'
-            });
-            
-            for (const [fileName, fileData] of Object.entries(filesMap)) {
-                const blob = fileData instanceof Blob ? fileData : new Blob([fileData]);
-                const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
-                const writable = await fileHandle.createWritable();
-                await writable.write(blob);
-                await writable.close();
-            }
-            return "success";
-        } catch (e) {
-            if (e.name === 'AbortError') {
-                return "aborted";
-            }
-            console.warn("Directory picker failed, falling back to direct download:", e);
-        }
-    }
-    
-    // Fallback: download files individually
     for (const [fileName, fileData] of Object.entries(filesMap)) {
         const blob = fileData instanceof Blob ? fileData : new Blob([fileData]);
         const url = URL.createObjectURL(blob);

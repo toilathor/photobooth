@@ -17,7 +17,9 @@ import 'package:th_photobooth/features/photobooth/widgets/photo_previews_panel.d
 import 'package:th_photobooth/features/photobooth/widgets/previews_footer.dart';
 import 'package:th_photobooth/features/photobooth/widgets/settings_panel.dart';
 import 'package:th_photobooth/features/photobooth/widgets/shortcut_guide_widget.dart';
+import 'package:th_photobooth/features/photobooth/widgets/upload_manager_dialog.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
+import 'package:th_photobooth/services/upload_queue.dart';
 
 class PhotoboothScreen extends StatefulWidget {
   const PhotoboothScreen({super.key});
@@ -84,6 +86,9 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
       confirmResetSession(context);
     } else if (logicalKey == LogicalKeyboardKey.keyF) {
       provider.enterFullscreen();
+    } else if (logicalKey == LogicalKeyboardKey.enter ||
+        logicalKey == LogicalKeyboardKey.numpadEnter) {
+      openEditor(context, provider);
     }
   }
 
@@ -191,7 +196,9 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
               PhotoboothHeader(
                 // Desktop: the language toggle sits in the header instead of
                 // floating over it.
-                leading: isMobile ? null : const LanguageSwitcher(),
+                leading: isMobile
+                    ? const _UploadIndicator()
+                    : const LanguageSwitcher(),
                 trailing: isMobile
                     ? IconButton(
                         tooltip: t.settings.open,
@@ -202,7 +209,12 @@ class _PhotoboothScreenState extends State<PhotoboothScreen>
                         ),
                         onPressed: () => _showSettingsBottomSheet(context),
                       )
-                    : null,
+                    // Left of the slot: the fullscreen button floats over its
+                    // right side until the booth goes fullscreen.
+                    : const Align(
+                        alignment: Alignment.centerLeft,
+                        child: _UploadIndicator(),
+                      ),
               ),
             Expanded(
               child: isMobile
@@ -366,6 +378,38 @@ class _MobileLandscapePanel extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Tells the operator sessions are still uploading in the background, so the
+/// tab is not closed before Drive has them; tapping opens the upload manager.
+class _UploadIndicator extends StatelessWidget {
+  const _UploadIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    final queue = UploadQueue.instance;
+    return ListenableBuilder(
+      listenable: queue,
+      builder: (context, _) {
+        final pending = queue.pending;
+        if (pending.isEmpty) return const SizedBox.shrink();
+        final colorScheme = Theme.of(context).colorScheme;
+        final failed = pending.first.failed;
+        final color = failed ? colorScheme.error : colorScheme.secondary;
+        final label = t.google_drive.upload_pending(count: pending.length);
+        return IconButton(
+          tooltip: failed ? '$label\n${t.google_drive.upload_retrying}' : label,
+          onPressed: () => UploadManagerDialog.show(context, queue),
+          icon: Badge.count(
+            count: pending.length,
+            backgroundColor: color,
+            textColor: failed ? colorScheme.onError : colorScheme.onSecondary,
+            child: Icon(Icons.cloud_upload_rounded, color: color, size: 32),
+          ),
+        );
+      },
     );
   }
 }

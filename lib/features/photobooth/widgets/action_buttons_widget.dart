@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:th_photobooth/components/shortcut_keycap.dart';
 import 'package:th_photobooth/features/photobooth/providers/photobooth.provider.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 
@@ -62,6 +63,7 @@ class ActionButtonsWidget extends StatelessWidget {
             label: t.actions.retake,
             colorScheme: colorScheme,
             onTap: () => confirmResetSession(context),
+            shortcut: ShortcutKey.r,
             isEnabled:
                 !provider.isAutoCapturing && provider.capturedPhotos.isNotEmpty,
           ),
@@ -72,6 +74,7 @@ class ActionButtonsWidget extends StatelessWidget {
             colorScheme: colorScheme,
             isPrimary: true,
             onTap: provider.startAutoCapture,
+            shortcut: ShortcutKey.space,
             isEnabled: !provider.isAutoCapturing,
           ),
           Gap(isMobile ? 16 : 32),
@@ -97,6 +100,7 @@ class _ActionIcon extends StatefulWidget {
   final bool isPrimary;
   final VoidCallback? onTap;
   final bool isEnabled;
+  final ShortcutKey? shortcut;
 
   const _ActionIcon({
     required this.icon,
@@ -105,6 +109,7 @@ class _ActionIcon extends StatefulWidget {
     this.isPrimary = false,
     this.onTap,
     this.isEnabled = true,
+    this.shortcut,
   });
 
   @override
@@ -239,20 +244,34 @@ class _ActionIconState extends State<_ActionIcon> {
               ),
             ),
             const Gap(12),
-            Text(
-              widget.label,
-              style: GoogleFonts.inter(
-                fontSize: widget.isPrimary
-                    ? (isMobile ? 14 : 15)
-                    : (isMobile ? 13 : 14),
-                fontWeight: widget.isPrimary
-                    ? FontWeight.w700
-                    : FontWeight.w500,
-                color: widget.isPrimary
-                    ? widget.colorScheme.secondary
-                    : widget.colorScheme.onSurface,
-                letterSpacing: 0.2,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.label,
+                  style: GoogleFonts.inter(
+                    fontSize: widget.isPrimary
+                        ? (isMobile ? 14 : 15)
+                        : (isMobile ? 13 : 14),
+                    fontWeight: widget.isPrimary
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    color: widget.isPrimary
+                        ? widget.colorScheme.secondary
+                        : widget.colorScheme.onSurface,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                if (widget.shortcut != null) ...[
+                  const Gap(8),
+                  ShortcutKeycap(
+                    widget.shortcut!,
+                    color: widget.isPrimary
+                        ? widget.colorScheme.secondary
+                        : widget.colorScheme.onSurface,
+                  ),
+                ],
+              ],
             ),
           ],
         ),

@@ -81,4 +81,9 @@ class FrameData {
   /// relative to the flavor folder, e.g. `standard/standard_1.png`.
   String get path =>
       filename.isEmpty ? '' : '${AppConfig.framesAssetRoot}$filename';
+
+  /// Small copy for the frame picker, made by `update_frames_data.dart`.
+  String get thumbnailPath => filename.isEmpty
+      ? ''
+      : '${AppConfig.framesAssetRoot}thumbnails/$filename';
 }

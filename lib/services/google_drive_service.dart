@@ -97,12 +97,6 @@ class GoogleDriveService implements StorageService {
     return _initCompleter?.future;
   }
 
-  @override
-  Future<StorageUser?> signIn() async {
-    final account = await _signInAccount();
-    return _toStorageUser(account);
-  }
-
   Future<GoogleSignInAccount?> _signInAccount() async {
     await init();
 
@@ -124,19 +118,6 @@ class GoogleDriveService implements StorageService {
       if (kDebugMode) print('Error signing in: $e');
       return null;
     }
-  }
-
-  @override
-  Future<void> signOut() async {
-    await init();
-    await _googleSignIn.signOut();
-  }
-
-  @override
-  Future<String?> uploadImage(Uint8List bytes, String fileName) async {
-    // Để tương thích, chúng ta vẫn có thể dùng phương thức này hoặc
-    // chuyển hướng nó sang một collection có 1 tệp.
-    return null;
   }
 
   @override
@@ -193,101 +174,126 @@ class GoogleDriveService implements StorageService {
       );
 
       httpClient = _AuthenticatedClient(authorization.accessToken);
-      final driveApi = drive.DriveApi(httpClient);
-
-      final Map<String, String> subFolderIds = {};
-      int currentCount = 0;
-      final int totalCount = files.length;
-
-      onProgress?.call(0, totalCount);
-
-      final fileNames = files.keys.toList();
-      for (var fileName in fileNames) {
-        final fileBytes = files[fileName];
-        if (fileBytes == null) continue;
-
-        String actualFileName = fileName;
-        String parentId = sectionId;
-
-        // Xử lý thư mục con (chỉ hỗ trợ 1 cấp)
-        if (actualFileName.contains('/')) {
-          final parts = actualFileName.split('/');
-          final subFolderName = parts[0];
-          actualFileName = parts.sublist(1).join('/');
-
-          if (subFolderIds.containsKey(subFolderName)) {
-            parentId = subFolderIds[subFolderName]!;
-          } else {
-            parentId = await _getOrCreateSubFolder(
-              driveApi,
-              sectionId,
-              subFolderName,
-            );
-            subFolderIds[subFolderName] = parentId;
-          }
-        }
-
-        final mimeType = _getMimeType(actualFileName);
-        final metadata = drive.File()
-          ..name = actualFileName
-          ..mimeType = mimeType;
-
-        // Đảm bảo Stream được tạo từ một bản sao sạch của tệp
-        final media = drive.Media(
-          Stream.fromIterable([fileBytes]),
-          fileBytes.length,
-          contentType: mimeType,
-        );
-
-        final escapedName = _escapeQuery(actualFileName);
-        final existing = await driveApi.files.list(
-          q: "name = '$escapedName' and '$parentId' in parents and trashed = false",
-          $fields: 'files(id)',
-        );
-        final existingId = existing.files?.firstOrNull?.id;
-        if (existingId == null) {
-          metadata.parents = [parentId];
-          await driveApi.files.create(
-            metadata,
-            uploadMedia: media,
-            uploadOptions: drive.UploadOptions.resumable,
-          );
-        } else {
-          await driveApi.files.update(
-            metadata,
-            existingId,
-            uploadMedia: media,
-            uploadOptions: drive.UploadOptions.resumable,
-          );
-        }
-
-        currentCount++;
-        onProgress?.call(currentCount, totalCount);
-      }
-
-      final permissions = await driveApi.permissions.list(
-        sectionId,
-        $fields: 'permissions(id, role, type)',
+      await uploadFiles(
+        drive.DriveApi(httpClient),
+        files: files,
+        sectionId: sectionId,
+        onProgress: onProgress,
       );
-      final isPublic =
-          permissions.permissions?.any(
-            (permission) =>
-                permission.type == 'anyone' && permission.role == 'reader',
-          ) ??
-          false;
-      if (!isPublic) {
-        await driveApi.permissions.create(
-          drive.Permission()
-            ..role = 'reader'
-            ..type = 'anyone',
-          sectionId,
-        );
-      }
     } catch (e) {
       if (kDebugMode) print('Error uploading collection: $e');
       rethrow;
     } finally {
       httpClient?.close();
+    }
+  }
+
+  /// Makes the section public, then sends [files] into it. Files Drive already
+  /// has at the same size are skipped, so a retry resumes where it stopped.
+  @visibleForTesting
+  Future<void> uploadFiles(
+    drive.DriveApi driveApi, {
+    required Map<String, Uint8List> files,
+    required String sectionId,
+    void Function(int current, int total)? onProgress,
+  }) async {
+    // Public first: the QR is shown before the upload ends, and a guest who
+    // scans early should see an empty gallery rather than an error.
+    final permissions = await driveApi.permissions.list(
+      sectionId,
+      $fields: 'permissions(id, role, type)',
+    );
+    final isPublic =
+        permissions.permissions?.any(
+          (permission) =>
+              permission.type == 'anyone' && permission.role == 'reader',
+        ) ??
+        false;
+    if (!isPublic) {
+      await driveApi.permissions.create(
+        drive.Permission()
+          ..role = 'reader'
+          ..type = 'anyone',
+        sectionId,
+      );
+    }
+
+    final Map<String, String> subFolderIds = {};
+    int currentCount = 0;
+    final int totalCount = files.length;
+
+    onProgress?.call(0, totalCount);
+
+    final fileNames = files.keys.toList();
+    for (var fileName in fileNames) {
+      final fileBytes = files[fileName];
+      if (fileBytes == null) continue;
+
+      String actualFileName = fileName;
+      String parentId = sectionId;
+
+      // Xử lý thư mục con (chỉ hỗ trợ 1 cấp)
+      if (actualFileName.contains('/')) {
+        final parts = actualFileName.split('/');
+        final subFolderName = parts[0];
+        actualFileName = parts.sublist(1).join('/');
+
+        if (subFolderIds.containsKey(subFolderName)) {
+          parentId = subFolderIds[subFolderName]!;
+        } else {
+          parentId = await _getOrCreateSubFolder(
+            driveApi,
+            sectionId,
+            subFolderName,
+          );
+          subFolderIds[subFolderName] = parentId;
+        }
+      }
+
+      final mimeType = _getMimeType(actualFileName);
+      final metadata = drive.File()
+        ..name = actualFileName
+        ..mimeType = mimeType;
+
+      // Đảm bảo Stream được tạo từ một bản sao sạch của tệp
+      final media = drive.Media(
+        Stream.fromIterable([fileBytes]),
+        fileBytes.length,
+        contentType: mimeType,
+      );
+
+      final escapedName = _escapeQuery(actualFileName);
+      final existing = await driveApi.files.list(
+        q: "name = '$escapedName' and '$parentId' in parents and trashed = false",
+        $fields: 'files(id, size)',
+      );
+      final existingFile = existing.files?.firstOrNull;
+      final existingId = existingFile?.id;
+      // Already sent by an earlier attempt: a retry resumes instead of
+      // sending every video again over a weak network.
+      if (existingFile?.size == '${fileBytes.length}') {
+        currentCount++;
+        onProgress?.call(currentCount, totalCount);
+        continue;
+      }
+      if (existingId == null) {
+        metadata.parents = [parentId];
+        await driveApi.files.create(
+          metadata,
+          uploadMedia: media,
+          uploadOptions: drive.UploadOptions.resumable,
+        );
+      } else {
+        await driveApi.files.update(
+          metadata,
+          existingId,
+          uploadMedia: media,
+          uploadOptions: drive.UploadOptions.resumable,
+        );
+      }
+
+      currentCount++;
+      onProgress?.call(currentCount, totalCount);
     }
   }
 

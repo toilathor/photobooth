@@ -152,16 +152,14 @@ Mở trình duyệt truy cập: `http://localhost:8000/photobooth/`
 
 #### ☁️ Deploy lên GitHub Pages
 
-```bash
-# Tạo mới nhánh gh-pages tinh gọn (nếu chưa có)
-git switch --orphan gh-pages
+Chỉ deploy bản đã release (đã có tag trên `master`):
 
-# Commit code trong thư mục build/web
-git add .
-git commit -m "Deploy Web Build"
-git remote add origin https://github.com/toilathor/photobooth.git
-git push -u origin gh-pages
+```bash
+make publish-web TAG=v1.2.0 PUSH=--push
 ```
+
+Toàn bộ quy trình release (git flow, version, tag, deploy) xem ở
+[docs/release.md](docs/release.md).
 
 ### 🤖 2. Build cho Android
 
