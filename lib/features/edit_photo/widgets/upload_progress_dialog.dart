@@ -30,7 +30,6 @@ class UploadProgressDialog extends StatelessWidget {
     return Consumer<EditPhotoProvider>(
       builder: (context, provider, _) {
         final colorScheme = Theme.of(context).colorScheme;
-        final progress = provider.uploadProgress;
 
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -56,96 +55,56 @@ class UploadProgressDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween<double>(
-                    begin: 0,
-                    end: provider.isPreparingUpload ? 0 : progress,
-                  ),
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return SizedBox(
-                      width: 160,
-                      height: 160,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Background circle
-                          SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: 1.0,
-                              strokeWidth: 12,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.primary.withValues(alpha: 0.05),
-                              ),
-                            ),
+                // The upload itself runs in the background (UploadQueue): this
+                // dialog only covers preparing the files.
+                SizedBox(
+                  width: 160,
+                  height: 160,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Background circle
+                      SizedBox.expand(
+                        child: CircularProgressIndicator(
+                          value: 1.0,
+                          strokeWidth: 12,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.primary.withValues(alpha: 0.05),
                           ),
-                          // Progress circle
-                          SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: provider.isPreparingUpload ? null : value,
-                              strokeWidth: 12,
-                              strokeCap: StrokeCap.round,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.secondary,
-                              ),
-                            ),
-                          ),
-                          if (!provider.isPreparingUpload)
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '${(value * 100).toInt()}',
-                                  style: TextStyle(
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.w700,
-                                    color: colorScheme.secondary,
-                                    height: 1,
-                                    letterSpacing: -2,
-                                  ),
-                                ),
-                                Text(
-                                  '%',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.secondary.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ],
-                            )
-                          else
-                            TweenAnimationBuilder<double>(
-                              tween: Tween<double>(begin: 0.9, end: 1.0),
-                              duration: MediaQuery.disableAnimationsOf(context)
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 600),
-                              curve: Curves.easeInOutSine,
-                              builder: (context, scale, child) {
-                                return Transform.scale(
-                                  scale: scale,
-                                  child: Icon(
-                                    Icons.cloud_upload_rounded,
-                                    color: colorScheme.secondary,
-                                    size: 56,
-                                  ),
-                                );
-                              },
-                            ),
-                        ],
+                        ),
                       ),
-                    );
-                  },
+                      SizedBox.expand(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 12,
+                          strokeCap: StrokeCap.round,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.secondary,
+                          ),
+                        ),
+                      ),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0.9, end: 1.0),
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 600),
+                        curve: Curves.easeInOutSine,
+                        builder: (context, scale, child) {
+                          return Transform.scale(
+                            scale: scale,
+                            child: Icon(
+                              Icons.cloud_upload_rounded,
+                              color: colorScheme.secondary,
+                              size: 56,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 const Gap(40),
                 Text(
-                  provider.isPreparingUpload
-                      ? t.google_drive.preparing
-                      : t.google_drive.uploading,
+                  t.google_drive.preparing,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,

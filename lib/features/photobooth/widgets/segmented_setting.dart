@@ -11,12 +11,16 @@ class SegmentedSetting<T> extends StatelessWidget {
   final ValueChanged<T>? onChanged;
   final String Function(T) itemLabelBuilder;
 
+  /// Optional note under the control, e.g. what the selected option suits.
+  final String? hint;
+
   const SegmentedSetting({
     super.key,
     required this.label,
     required this.value,
     required this.items,
     required this.itemLabelBuilder,
+    this.hint,
     this.onChanged,
   });
 
@@ -110,6 +114,17 @@ class SegmentedSetting<T> extends StatelessWidget {
             ),
           ),
         ),
+        if (hint != null) ...[
+          const Gap(6),
+          Text(
+            hint!,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface.withValues(alpha: 0.65),
+            ),
+          ),
+        ],
       ],
     );
   }

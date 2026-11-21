@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:th_photobooth/helper/blob_url.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/configs/asset_config.dart';
 import 'package:th_photobooth/core/async/cancellation_token.dart';
@@ -291,7 +292,7 @@ class PhotoboothProvider extends ChangeNotifier {
     isAutoCapturing = true;
     isPreparing = true;
     _captureCancellation.reset();
-    capturedPhotos.clear();
+    _discardPhotos();
     _videoService.reset();
     currentPhotoIndex = 0;
     currentCountdownValue = 2; // 2 seconds to prepare
@@ -403,7 +404,7 @@ class PhotoboothProvider extends ChangeNotifier {
     isAutoCapturing = false;
     isPreparing = false;
     _captureCancellation.reset();
-    capturedPhotos.clear();
+    _discardPhotos();
     _videoService.reset();
     currentCountdownValue = 0;
     currentPhotoIndex = 0;
@@ -453,11 +454,20 @@ class PhotoboothProvider extends ChangeNotifier {
   }
 
   void resetCapture() {
-    capturedPhotos.clear();
+    _discardPhotos();
     _videoService.reset();
     currentPhotoIndex = 0;
     isCapturing = false;
     notifyListeners();
+  }
+
+  /// Drops the captured photos for good (retake or finished session) and
+  /// frees their memory on web. Not for [removePhoto], which can be undone.
+  void _discardPhotos() {
+    for (final photo in capturedPhotos) {
+      revokeBlobUrl(photo.path);
+    }
+    capturedPhotos.clear();
   }
 
   /// Hoàn thành phiên hiện tại và dọn dẹp toàn bộ cache.

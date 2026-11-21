@@ -15,6 +15,7 @@ import 'package:th_photobooth/services/photo_merger_service.dart';
 import 'package:th_photobooth/services/storage_factory.dart';
 import 'package:th_photobooth/services/storage_section.dart';
 import 'package:th_photobooth/services/storage_service_interface.dart';
+import 'package:th_photobooth/services/upload_queue.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
 Future<Uint8List?> _encodeJpg(Uint8List pngBytes) async {
@@ -30,9 +31,14 @@ Future<Uint8List?> _encodeJpg(Uint8List pngBytes) async {
 
 class EditPhotoProvider with ChangeNotifier {
   final StorageService _storageService;
+  final UploadQueue _uploadQueue;
 
-  EditPhotoProvider({StorageService? storageService})
-    : _storageService = storageService ?? StorageFactory.instance {
+  EditPhotoProvider({
+    StorageService? storageService,
+    UploadQueue? uploadQueue,
+    this.prepareTimeout = const Duration(minutes: 3),
+  }) : _storageService = storageService ?? StorageFactory.instance,
+       _uploadQueue = uploadQueue ?? UploadQueue.instance {
     filteredFrames = allFrames;
     selectedFrame = allFrames.isNotEmpty
         ? allFrames.first
@@ -52,10 +58,24 @@ class EditPhotoProvider with ChangeNotifier {
   late FrameData selectedFrame;
   StorageSection? storageSection;
   String? galleryUrl;
-  static const Duration _uploadTimeout = Duration(minutes: 3);
+
+  /// How long the guest waits behind the dialog before being offered a retry.
+  final Duration prepareTimeout;
+
+  /// The [_prepareFiles] run in flight. A retry after a timeout waits for it
+  /// rather than starting a second run, which would make another Drive folder
+  /// and could leave the screen showing a different QR than the print.
+  Future<Map<String, Uint8List>>? _preparing;
 
   bool isSectionReady = false;
   bool get isEditorLocked => isSectionReady;
+
+  /// Uploads finished sessions in the background (see [handleQRRequest]).
+  UploadQueue get uploadQueue => _uploadQueue;
+
+  /// Files of the finished session, kept so a later download reuses them
+  /// instead of rendering the videos again.
+  Map<String, Uint8List>? completedFiles;
 
   // Photobooth Session Data
   List<XFile> capturedPhotos = [];
@@ -66,10 +86,17 @@ class EditPhotoProvider with ChangeNotifier {
   bool videoIsMirrored = false;
 
   // Upload State
-  bool isUploading = false;
-  double uploadProgress = 0.0;
   String uploadStatusMessage = '';
-  bool isPreparingUpload = false;
+
+  /// Names the session's Drive folder, zip and files, readable by date, e.g.
+  /// `thohien-wedding-20261121-143205`.
+  @visibleForTesting
+  static String sessionIdAt(DateTime time) {
+    String two(int value) => value.toString().padLeft(2, '0');
+    return '${AppConfig.sessionPrefix}-${time.year}${two(time.month)}'
+        '${two(time.day)}-${two(time.hour)}${two(time.minute)}'
+        '${two(time.second)}';
+  }
 
   void initForPhotoCount(int count) {
     filteredFrames = allFrames.where((f) => f.photoSlots == count).toList();
@@ -90,7 +117,7 @@ class EditPhotoProvider with ChangeNotifier {
     capturedPhotos = photos;
     videoRecapFile = videoFile;
     photoTimestamps = timestamps ?? [];
-    sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
+    sessionId = sessionIdAt(DateTime.now());
     this.photoIsMirrored = photoIsMirrored;
     this.videoIsMirrored = videoIsMirrored;
 
@@ -129,20 +156,14 @@ class EditPhotoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setUploadState({
-    required bool isUploading,
-    double progress = 0.0,
-    String message = '',
-    bool isPreparing = false,
-  }) {
-    this.isUploading = isUploading;
-    uploadProgress = progress;
+  void setUploadStatus(String message) {
     uploadStatusMessage = message;
-    isPreparingUpload = isPreparing;
     notifyListeners();
   }
 
-  /// Xử lý yêu cầu lấy mã QR và upload
+  /// Finishes the session: prepares the Drive folder behind the QR, renders
+  /// the files once and saves them to the device, then hands the upload to
+  /// [uploadQueue] so the guest gets the QR without waiting for Drive.
   Future<void> handleQRRequest({
     required VoidCallback onHideLoading,
     required VoidCallback onShowLogin,
@@ -151,6 +172,7 @@ class EditPhotoProvider with ChangeNotifier {
     required void Function(String error) onShowError,
     required Future<Uint8List?> Function() captureStrip,
     required Future<Uint8List?> Function() capturePrintContent,
+    required Future<void> Function(Map<String, Uint8List> files) saveToDevice,
   }) async {
     if (StorageConfig.activeStorage == StorageType.none) return;
 
@@ -174,26 +196,23 @@ class EditPhotoProvider with ChangeNotifier {
       }
 
       onStartUpload();
-      storageSection ??= await _storageService.prepareSection(sessionId!);
-      if (storageSection == null) {
-        throw StateError('Unable to prepare Google Drive section');
-      }
-      galleryUrl = AppConfig.galleryUrl(storageSection!.id);
-      debugPrint('Gallery URL: $galleryUrl');
-      if (kDebugMode && kIsWeb) {
-        final localGalleryUrl = Uri.base.replace(
-          fragment: '/gallery/${Uri.encodeComponent(storageSection!.id)}',
-        );
-        debugPrint('Local gallery URL: $localGalleryUrl');
-      }
-      notifyListeners();
-
       // A stalled network must never leave the guest stuck behind the
       // non-dismissible progress dialog: give up and offer a retry.
-      await uploadCollection(
+      final preparing = _preparing ??= _prepareFiles(
         captureStrip: captureStrip,
         capturePrintContent: capturePrintContent,
-      ).timeout(_uploadTimeout);
+        saveToDevice: saveToDevice,
+      );
+      unawaited(
+        preparing.then(
+          (_) {},
+          onError: (Object _) {
+            if (identical(_preparing, preparing)) _preparing = null;
+          },
+        ),
+      );
+      final files = await preparing.timeout(prepareTimeout);
+      _uploadQueue.add(storageSection!.id, files);
       isSectionReady = true;
       notifyListeners();
       onHideLoading();
@@ -202,46 +221,43 @@ class EditPhotoProvider with ChangeNotifier {
       onHideLoading();
       onShowError(e.toString());
     } finally {
+      setUploadStatus('');
       _isHandlingQR = false;
     }
   }
 
-  /// Thực hiện quy trình upload bộ sưu tập
-  /// Cần truyền vào function capture để lấy dữ liệu từ UI (vì UI quản lý RepaintBoundary)
-  Future<void> uploadCollection({
+  /// The part of [handleQRRequest] the guest waits for. The Drive folder comes
+  /// first because its link is the QR drawn into the files.
+  Future<Map<String, Uint8List>> _prepareFiles({
     required Future<Uint8List?> Function() captureStrip,
     required Future<Uint8List?> Function() capturePrintContent,
+    required Future<void> Function(Map<String, Uint8List> files) saveToDevice,
   }) async {
-    try {
-      final filesToUpload = await generateAllFiles(
-        captureStrip: captureStrip,
-        capturePrintContent: capturePrintContent,
-      );
-
-      if (filesToUpload == null || filesToUpload.isEmpty) {
-        throw StateError('No files generated');
-      }
-
-      await _storageService.uploadCollection(
-        files: filesToUpload,
-        sectionId: storageSection!.id,
-        onProgress: (int current, int total) {
-          setUploadState(
-            isUploading: true,
-            progress: current / total,
-            message: t.google_drive.uploading_files(
-              current: current,
-              total: total,
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('Upload error: $e');
-      rethrow;
-    } finally {
-      setUploadState(isUploading: false);
+    storageSection ??= await _storageService.prepareSection(sessionId!);
+    if (storageSection == null) {
+      throw StateError('Unable to prepare Google Drive section');
     }
+    galleryUrl = AppConfig.galleryUrl(storageSection!.id);
+    debugPrint('Gallery URL: $galleryUrl');
+    if (kDebugMode && kIsWeb) {
+      final localGalleryUrl = Uri.base.replace(
+        fragment: '/gallery/${Uri.encodeComponent(storageSection!.id)}',
+      );
+      debugPrint('Local gallery URL: $localGalleryUrl');
+    }
+    notifyListeners();
+
+    final files = await generateAllFiles(
+      captureStrip: captureStrip,
+      capturePrintContent: capturePrintContent,
+    );
+    if (files == null || files.isEmpty) {
+      throw StateError('No files generated');
+    }
+
+    setUploadStatus(t.editor.savingToDevice);
+    await saveToDevice(files);
+    return completedFiles = files;
   }
 
   /// Thực hiện quy trình upload bộ sưu tập
@@ -251,16 +267,12 @@ class EditPhotoProvider with ChangeNotifier {
     required Future<Uint8List?> Function() capturePrintContent,
   }) async {
     if (sessionId == null && capturedPhotos.isNotEmpty) {
-      sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
+      sessionId = sessionIdAt(DateTime.now());
     }
 
     if (sessionId == null) return null;
 
-    setUploadState(
-      isUploading: true,
-      isPreparing: true,
-      message: t.google_drive.preparing_data,
-    );
+    setUploadStatus(t.google_drive.preparing_data);
 
     try {
       final Map<String, Uint8List> filesToUpload = {};
@@ -308,11 +320,7 @@ class EditPhotoProvider with ChangeNotifier {
       }
       // 4. Xử lý video recap
       if (videoRecapFile != null) {
-        setUploadState(
-          isUploading: true,
-          isPreparing: true,
-          message: t.google_drive.creating_recap,
-        );
+        setUploadStatus(t.google_drive.creating_recap);
 
         var originalExt = _getVideoExtension(videoRecapFile!);
         Uint8List finalOriginalBytes;
@@ -372,7 +380,7 @@ class EditPhotoProvider with ChangeNotifier {
       debugPrint('Generation error: $e');
       rethrow;
     } finally {
-      setUploadState(isUploading: false);
+      setUploadStatus('');
     }
   }
 

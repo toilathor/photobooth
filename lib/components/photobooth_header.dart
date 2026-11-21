@@ -42,17 +42,27 @@ class PhotoboothHeader extends StatelessWidget {
                       ? t.header.titlePersonal
                       : t.header.titleCommercial,
                   style:
-                      GoogleFonts.pacifico(
-                        fontSize: isMobile ? 24 : 36,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.secondary,
-                      ).copyWith(
-                        fontFamilyFallback: [
-                          'Apple Color Emoji',
-                          'Segoe UI Emoji',
-                          'Noto Color Emoji',
-                        ],
-                      ),
+                      (AppConfig.flavor == AppFlavor.personal
+                              // The script of the names on the invitation; it
+                              // is thin, so it runs larger than Pacifico.
+                              ? TextStyle(
+                                  fontFamily: 'PinyonScript',
+                                  fontSize: isMobile ? 34 : 52,
+                                  height: 1.2,
+                                  color: colorScheme.secondary,
+                                )
+                              : GoogleFonts.pacifico(
+                                  fontSize: isMobile ? 24 : 36,
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.secondary,
+                                ))
+                          .copyWith(
+                            fontFamilyFallback: [
+                              'Apple Color Emoji',
+                              'Segoe UI Emoji',
+                              'Noto Color Emoji',
+                            ],
+                          ),
                 ),
               ),
             ),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:gal/gal.dart';
 import 'package:gap/gap.dart';
@@ -15,6 +16,7 @@ import 'package:th_photobooth/components/language_switcher.dart';
 import 'package:th_photobooth/components/loading_indicator.dart';
 import 'package:th_photobooth/components/primary_button.dart';
 import 'package:th_photobooth/components/secondary_button.dart';
+import 'package:th_photobooth/components/shortcut_keycap.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/core/configs/storage_config.dart';
 import 'package:th_photobooth/core/di/service_locator.dart';
@@ -83,10 +85,8 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
   void _playCompletionAnimation() {
     if (!mounted || MediaQuery.disableAnimationsOf(context)) return;
 
+    // The QR comes in once the check has played (CompletionCheckAnimation).
     setState(() => _showCompletionAnimation = true);
-    Future<void>.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) setState(() => _showCompletionAnimation = false);
-    });
   }
 
   Future<void> _handleQRRequest(BuildContext context) async {
@@ -116,6 +116,49 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       },
       captureStrip: () => _captureStripIndependent(provider),
       capturePrintContent: () => _capturePrintContentIndependent(provider),
+      saveToDevice: (files) => _saveToDeviceWeb(context, provider, files),
+    );
+  }
+
+  /// Downloads the session as one zip into the browser's download folder.
+  Future<void> _saveToDeviceWeb(
+    BuildContext context,
+    EditPhotoProvider provider,
+    Map<String, Uint8List> files,
+  ) async {
+    final result = await saveFilesToDeviceWeb(
+      files,
+      '${provider.sessionId}.zip',
+    );
+    if (!context.mounted) return;
+    if (result == 'downloaded') {
+      _sessionFinished = true;
+      _showMessage(context, t.editor.saveToDeviceSuccess);
+    } else {
+      debugPrint('Web save failed: $result');
+      _showMessage(
+        context,
+        t.editor.genericError,
+        actionLabel: t.editor.retry,
+        onAction: () => _handleSaveRequest(context),
+      );
+    }
+  }
+
+  /// What the background upload of this session is doing, for the QR panel.
+  String? _uploadStatus(EditPhotoProvider provider) {
+    final sectionId = provider.storageSection?.id;
+    if (sectionId == null) return null;
+    final queue = provider.uploadQueue;
+    if (queue.isUploaded(sectionId)) return t.google_drive.success;
+    final job = queue.pending
+        .where((job) => job.sectionId == sectionId)
+        .firstOrNull;
+    if (job == null) return null;
+    if (job.failed) return t.google_drive.upload_retrying;
+    return t.google_drive.uploading_files(
+      current: job.sent,
+      total: job.files.length,
     );
   }
 
@@ -125,34 +168,19 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     bool dialogPopped = false;
 
     try {
-      final files = await provider.generateAllFiles(
-        captureStrip: () => _captureStripIndependent(provider),
-        capturePrintContent: () => _capturePrintContentIndependent(provider),
-      );
+      // A finished session reuses its files instead of rendering the videos
+      // again.
+      final files =
+          provider.completedFiles ??
+          await provider.generateAllFiles(
+            captureStrip: () => _captureStripIndependent(provider),
+            capturePrintContent: () =>
+                _capturePrintContentIndependent(provider),
+          );
 
       if (files != null && files.isNotEmpty) {
         if (kIsWeb) {
-          final result = await saveFilesToDeviceWeb(files);
-          if (context.mounted && Navigator.canPop(context)) {
-            Navigator.pop(context);
-            dialogPopped = true;
-          }
-          if (context.mounted) {
-            if (result == 'success' || result == 'downloaded') {
-              _sessionFinished = true;
-              _showMessage(context, t.editor.saveToDeviceSuccess);
-            } else if (result == 'aborted') {
-              _showMessage(context, t.editor.saveToDeviceCancel);
-            } else {
-              debugPrint('Web save failed: $result');
-              _showMessage(
-                context,
-                t.editor.genericError,
-                actionLabel: t.editor.retry,
-                onAction: () => _handleSaveRequest(context),
-              );
-            }
-          }
+          if (context.mounted) await _saveToDeviceWeb(context, provider, files);
           return;
         }
 
@@ -234,7 +262,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         if (context.mounted && printBytes != null) {
           final printSuccess = await PrintService.printImage(
             printBytes,
-            name: 'photobooth_${provider.sessionId ?? 'photo'}',
+            name: provider.sessionId ?? AppConfig.sessionPrefix,
           );
 
           if (printSuccess) _sessionFinished = true;
@@ -420,15 +448,23 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         kIsWeb && StorageConfig.activeStorage != StorageType.none;
     final isReady = provider.isSectionReady && provider.galleryUrl != null;
     final panel = _showCompletionAnimation
-        ? const CompletionCheckAnimation(
-            key: ValueKey('completion-check-animation'),
+        ? CompletionCheckAnimation(
+            key: const ValueKey('completion-check-animation'),
+            onFinished: () {
+              if (mounted) setState(() => _showCompletionAnimation = false);
+            },
           )
         : isReady
-        ? QrSharePanel(
+        ? ListenableBuilder(
             key: const ValueKey('qr-share-panel'),
-            url: provider.galleryUrl!,
-            onDownload: () => _handleSaveRequest(context),
-            isMobile: isMobile,
+            listenable: provider.uploadQueue,
+            builder: (context, _) => QrSharePanel(
+              url: provider.galleryUrl!,
+              uploadStatus: _uploadStatus(provider),
+              // The pop handler reports the session as finished.
+              onNextGuest: () => Navigator.maybePop(context),
+              isMobile: isMobile,
+            ),
           )
         : EditorPanel(
             key: const ValueKey('editor-panel'),
@@ -444,14 +480,16 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
             filterIntensity: provider.filterIntensity,
             onFilterSelected: provider.setFilter,
             onFilterIntensityChanged: provider.setFilterIntensity,
-            onSaveRequested: !requiresQr || provider.isSectionReady
-                ? () => _handleSaveRequest(context)
-                : null,
+            // With Drive, "Hoàn tất" already saves to the device.
+            onSaveRequested: requiresQr
+                ? null
+                : () => _handleSaveRequest(context),
             onCompleteRequested: requiresQr
                 ? () => _handleQRRequest(context)
                 : () => _handlePrintRequest(context),
-            completeLabel: requiresQr ? t.editor.createQr : t.editor.printPhoto,
-            requiresQr: requiresQr,
+            completeLabel: requiresQr
+                ? t.editor.completeEditing
+                : t.editor.printPhoto,
             photoIsMirrored: provider.photoIsMirrored,
             qrCorner: provider.qrCorner,
             onQrCornerChanged: StorageConfig.activeStorage != StorageType.none
@@ -512,7 +550,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
               final requiresQr =
                   kIsWeb && StorageConfig.activeStorage != StorageType.none;
               final completeLabel = requiresQr
-                  ? t.editor.createQr
+                  ? t.editor.completeEditing
                   : t.editor.printPhoto;
               final backButton = IconButton.filledTonal(
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
@@ -526,211 +564,236 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                 ),
               );
 
-              return PopScope(
-                canPop: false,
-                onPopInvokedWithResult: (didPop, _) {
-                  if (didPop) return;
-                  Navigator.pop(
-                    context,
-                    _sessionFinished || editPhotoProvider.isSectionReady,
-                  );
+              // Enter moves the flow on (Hoàn tất / In ảnh, then a new
+              // session); Esc goes back. Dialogs keep their own focus.
+              void next() {
+                if (editPhotoProvider.isSectionReady) {
+                  Navigator.maybePop(context);
+                } else if (requiresQr) {
+                  _handleQRRequest(context);
+                } else {
+                  _handlePrintRequest(context);
+                }
+              }
+
+              return CallbackShortcuts(
+                bindings: {
+                  const SingleActivator(LogicalKeyboardKey.enter): next,
+                  const SingleActivator(LogicalKeyboardKey.numpadEnter): next,
+                  const SingleActivator(LogicalKeyboardKey.escape): () =>
+                      Navigator.maybePop(context),
                 },
-                child: Scaffold(
-                  backgroundColor: colorScheme.surface,
-                  appBar: (isMobile && isLandscape)
-                      ? null
-                      : AppBar(
-                          elevation: 0,
-                          scrolledUnderElevation: 0,
-                          backgroundColor: Colors.transparent,
-                          leadingWidth: isMobile ? null : 64,
-                          leading: isMobile
-                              ? Center(child: backButton)
-                              : Row(children: [const Gap(16), backButton]),
-                          actions: [
-                            const LanguageSwitcher(isMobile: true),
-                            const Gap(16),
-                          ],
-                        ),
-                  bottomNavigationBar:
-                      (isMobile &&
-                          !isLandscape &&
-                          !editPhotoProvider.isSectionReady)
-                      ? SafeArea(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            child: Row(
-                              children: [
-                                if (kIsWeb) ...[
-                                  Expanded(
-                                    flex: 1,
-                                    child: Tooltip(
-                                      message: editPhotoProvider.isSectionReady
-                                          ? t.editor.saveToDevice
-                                          : t.editor.completeBeforeDownload,
-                                      child: SecondaryButton(
-                                        onTap: editPhotoProvider.isSectionReady
-                                            ? () => _handleSaveRequest(context)
-                                            : null,
-                                        semanticLabel: t.editor.saveToDevice,
-                                        icon: Icons.save_alt_rounded,
-                                        height: 56,
-                                      ),
+                child: Focus(
+                  autofocus: true,
+                  child: PopScope(
+                    canPop: false,
+                    onPopInvokedWithResult: (didPop, _) {
+                      if (didPop) return;
+                      Navigator.pop(
+                        context,
+                        _sessionFinished || editPhotoProvider.isSectionReady,
+                      );
+                    },
+                    child: Scaffold(
+                      backgroundColor: colorScheme.surface,
+                      appBar: (isMobile && isLandscape)
+                          ? null
+                          : AppBar(
+                              elevation: 0,
+                              scrolledUnderElevation: 0,
+                              backgroundColor: Colors.transparent,
+                              leadingWidth: isMobile ? null : 112,
+                              leading: isMobile
+                                  ? Center(child: backButton)
+                                  : Row(
+                                      children: [
+                                        const Gap(16),
+                                        backButton,
+                                        const Gap(8),
+                                        ShortcutKeycap(
+                                          ShortcutKey.escape,
+                                          color: colorScheme.secondary,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                ] else ...[
-                                  Expanded(
-                                    flex: 1,
-                                    child: Tooltip(
-                                      message: t.editor.saveToDevice,
-                                      child: SecondaryButton(
-                                        onTap: () =>
-                                            _handleSaveRequest(context),
-                                        semanticLabel: t.editor.saveToDevice,
-                                        icon: Icons.save_alt_rounded,
-                                        height: 56,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                ],
-                                Expanded(
-                                  flex: 3,
-                                  child: PrimaryButton(
-                                    onTap: requiresQr
-                                        ? () => _handleQRRequest(context)
-                                        : () => _handlePrintRequest(context),
-                                    label: completeLabel,
-                                    height: 56,
-                                  ),
-                                ),
+                              actions: [
+                                const LanguageSwitcher(isMobile: true),
+                                const Gap(16),
                               ],
                             ),
-                          ),
-                        )
-                      : null,
-                  body: SafeArea(
-                    child: Padding(
-                      padding: isMobile
-                          ? EdgeInsets.symmetric(
-                              horizontal: isLandscape ? 8.0 : 12.0,
-                              vertical: isLandscape ? 4.0 : 8.0,
-                            )
-                          : const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: isMobile
-                                ? (isLandscape
-                                      // Landscape mobile: Row layout
-                                      ? Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Left: Preview (scrollable)
-                                            Expanded(
-                                              flex: 3,
-                                              child: Stack(
-                                                children: [
-                                                  Positioned.fill(
-                                                    child: _buildPreviewPanel(
-                                                      provider:
-                                                          editPhotoProvider,
-                                                      isMobile: true,
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    top: 8,
-                                                    left: 8,
-                                                    child: IconButton.filledTonal(
-                                                      tooltip:
-                                                          MaterialLocalizations.of(
-                                                            context,
-                                                          ).backButtonTooltip,
-                                                      icon: const Icon(
-                                                        Icons
-                                                            .arrow_back_ios_new_rounded,
-                                                        size: 16,
-                                                      ),
-                                                      onPressed: () =>
-                                                          Navigator.maybePop(
-                                                            context,
-                                                          ),
-                                                      style: IconButton.styleFrom(
-                                                        backgroundColor:
-                                                            colorScheme.surface
-                                                                .withValues(
-                                                                  alpha: 0.8,
-                                                                ),
-                                                        foregroundColor:
-                                                            colorScheme
-                                                                .secondary,
-                                                        minimumSize:
-                                                            const Size.square(
-                                                              44,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const Gap(8),
-                                            // Right: Editor
-                                            Expanded(
-                                              flex: 3,
-                                              child: _buildRightPanel(
-                                                context: context,
-                                                provider: editPhotoProvider,
-                                                isMobile: true,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      // Portrait mobile: Column layout (no page scroll)
-                                      : Column(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: _buildPreviewPanel(
-                                                provider: editPhotoProvider,
-                                                isMobile: true,
-                                              ),
-                                            ),
-                                            const Gap(12),
-                                            Expanded(
-                                              flex: 3,
-                                              child: _buildRightPanel(
-                                                context: context,
-                                                provider: editPhotoProvider,
-                                                isMobile: true,
-                                              ),
-                                            ),
-                                          ],
-                                        ))
-                                : Row(
-                                    children: [
+                      bottomNavigationBar:
+                          (isMobile &&
+                              !isLandscape &&
+                              !editPhotoProvider.isSectionReady)
+                          ? SafeArea(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  0,
+                                  16,
+                                  16,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // With Drive, "Hoàn tất" already saves.
+                                    if (!requiresQr) ...[
                                       Expanded(
-                                        flex: 2,
-                                        child: _buildPreviewPanel(
-                                          provider: editPhotoProvider,
-                                          isMobile: false,
+                                        flex: 1,
+                                        child: Tooltip(
+                                          message: t.editor.saveToDevice,
+                                          child: SecondaryButton(
+                                            onTap: () =>
+                                                _handleSaveRequest(context),
+                                            semanticLabel:
+                                                t.editor.saveToDevice,
+                                            icon: Icons.save_alt_rounded,
+                                            height: 56,
+                                          ),
                                         ),
                                       ),
-                                      const Gap(24),
-                                      Expanded(
-                                        flex: 3,
-                                        child: _buildRightPanel(
-                                          context: context,
-                                          provider: editPhotoProvider,
-                                          isMobile: false,
-                                        ),
-                                      ),
+                                      const SizedBox(width: 16),
                                     ],
-                                  ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: PrimaryButton(
+                                        onTap: requiresQr
+                                            ? () => _handleQRRequest(context)
+                                            : () =>
+                                                  _handlePrintRequest(context),
+                                        label: completeLabel,
+                                        height: 56,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : null,
+                      body: SafeArea(
+                        child: Padding(
+                          padding: isMobile
+                              ? EdgeInsets.symmetric(
+                                  horizontal: isLandscape ? 8.0 : 12.0,
+                                  vertical: isLandscape ? 4.0 : 8.0,
+                                )
+                              : const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: isMobile
+                                    ? (isLandscape
+                                          // Landscape mobile: Row layout
+                                          ? Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Left: Preview (scrollable)
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: Stack(
+                                                    children: [
+                                                      Positioned.fill(
+                                                        child: _buildPreviewPanel(
+                                                          provider:
+                                                              editPhotoProvider,
+                                                          isMobile: true,
+                                                        ),
+                                                      ),
+                                                      Positioned(
+                                                        top: 8,
+                                                        left: 8,
+                                                        child: IconButton.filledTonal(
+                                                          tooltip:
+                                                              MaterialLocalizations.of(
+                                                                context,
+                                                              ).backButtonTooltip,
+                                                          icon: const Icon(
+                                                            Icons
+                                                                .arrow_back_ios_new_rounded,
+                                                            size: 16,
+                                                          ),
+                                                          onPressed: () =>
+                                                              Navigator.maybePop(
+                                                                context,
+                                                              ),
+                                                          style: IconButton.styleFrom(
+                                                            backgroundColor:
+                                                                colorScheme
+                                                                    .surface
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.8,
+                                                                    ),
+                                                            foregroundColor:
+                                                                colorScheme
+                                                                    .secondary,
+                                                            minimumSize:
+                                                                const Size.square(
+                                                                  44,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const Gap(8),
+                                                // Right: Editor
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: _buildRightPanel(
+                                                    context: context,
+                                                    provider: editPhotoProvider,
+                                                    isMobile: true,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          // Portrait mobile: Column layout (no page scroll)
+                                          : Column(
+                                              children: [
+                                                Expanded(
+                                                  flex: 5,
+                                                  child: _buildPreviewPanel(
+                                                    provider: editPhotoProvider,
+                                                    isMobile: true,
+                                                  ),
+                                                ),
+                                                const Gap(12),
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: _buildRightPanel(
+                                                    context: context,
+                                                    provider: editPhotoProvider,
+                                                    isMobile: true,
+                                                  ),
+                                                ),
+                                              ],
+                                            ))
+                                    : Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 2,
+                                            child: _buildPreviewPanel(
+                                              provider: editPhotoProvider,
+                                              isMobile: false,
+                                            ),
+                                          ),
+                                          const Gap(24),
+                                          Expanded(
+                                            flex: 3,
+                                            child: _buildRightPanel(
+                                              context: context,
+                                              provider: editPhotoProvider,
+                                              isMobile: false,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

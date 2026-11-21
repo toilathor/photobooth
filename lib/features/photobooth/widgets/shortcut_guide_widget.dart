@@ -174,6 +174,8 @@ class _ShortcutGuideWidgetState extends State<ShortcutGuideWidget> {
                   _buildShortcutRow(context, 'V', t.shortcuts.key_v),
                   _buildShortcutRow(context, 'R', t.shortcuts.key_r),
                   _buildShortcutRow(context, 'F', t.shortcuts.key_f),
+                  _buildShortcutRow(context, 'Enter', t.shortcuts.key_enter),
+                  _buildShortcutRow(context, 'Esc', t.shortcuts.key_esc),
                 ],
               ),
             ),

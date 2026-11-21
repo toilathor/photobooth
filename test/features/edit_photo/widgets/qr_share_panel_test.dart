@@ -12,8 +12,8 @@ void main() {
   testWidgets('keeps the uploaded QR panel branded', (tester) async {
     const url =
         'https://toilathor.github.io/photobooth/#/gallery/section_123456';
-    var downloads = 0;
     String? copiedText;
+    var nextGuest = 0;
     final messenger =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -33,7 +33,7 @@ void main() {
           body: SizedBox(
             width: 600,
             height: 600,
-            child: QrSharePanel(url: url, onDownload: () => downloads++),
+            child: QrSharePanel(url: url, onNextGuest: () => nextGuest++),
           ),
         ),
       ),
@@ -53,15 +53,35 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text(t.editor.saveToDevice), findsOneWidget);
+    expect(find.text(t.editor.saveToDevice), findsNothing);
+
+    await tester.tap(find.text(t.editor.nextGuest));
+    expect(nextGuest, 1);
     expect(find.text(url), findsOneWidget);
     expect(find.byTooltip(t.editor.copyLink), findsOneWidget);
-
-    await tester.tap(find.text(t.editor.saveToDevice));
-    expect(downloads, 1);
 
     await tester.tap(find.byIcon(Icons.copy_rounded));
     await tester.pump();
     expect(copiedText, url);
+  });
+
+  testWidgets('says how the background upload is going', (tester) async {
+    await tester.pumpWidget(
+      testApp(
+        child: Scaffold(
+          body: SizedBox(
+            width: 600,
+            height: 600,
+            child: QrSharePanel(
+              url: 'https://toilathor.github.io/photobooth/#/gallery/section_123456',
+              uploadStatus: t.google_drive.upload_retrying,
+              onNextGuest: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(t.google_drive.upload_retrying), findsOneWidget);
   });
 }

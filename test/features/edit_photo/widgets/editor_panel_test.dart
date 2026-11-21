@@ -8,10 +8,10 @@ import 'package:th_photobooth/models/qr_corner.dart';
 import '../../../support/test_app.dart';
 
 void main() {
-  testWidgets('uses the QR action as the complete editing action', (
+  testWidgets('shows only the complete action when completing also saves', (
     tester,
   ) async {
-    var qrRequests = 0;
+    var completeRequests = 0;
     final frame = FrameData.standard();
 
     await tester.pumpWidget(
@@ -31,10 +31,8 @@ void main() {
               filterIntensity: 0.5,
               onFilterSelected: (_) {},
               onFilterIntensityChanged: (_) {},
-              onSaveRequested: () {},
-              onCompleteRequested: () => qrRequests++,
-              completeLabel: t.editor.createQr,
-              requiresQr: true,
+              onCompleteRequested: () => completeRequests++,
+              completeLabel: t.editor.completeEditing,
             ),
           ),
         ),
@@ -44,12 +42,12 @@ void main() {
     expect(find.byIcon(Icons.qr_code_2_rounded), findsNothing);
     expect(find.byIcon(Icons.local_printshop_rounded), findsNothing);
     expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
-    expect(find.text(t.editor.createQr), findsOneWidget);
-    expect(find.byTooltip(t.editor.saveToDevice), findsOneWidget);
+    expect(find.text(t.editor.completeEditing), findsOneWidget);
+    expect(find.byTooltip(t.editor.saveToDevice), findsNothing);
 
-    await tester.tap(find.text(t.editor.createQr));
+    await tester.tap(find.text(t.editor.completeEditing));
 
-    expect(qrRequests, 1);
+    expect(completeRequests, 1);
   });
 
   testWidgets('lets the guest move the QR to another corner', (tester) async {
@@ -74,7 +72,7 @@ void main() {
               onFilterSelected: (_) {},
               onFilterIntensityChanged: (_) {},
               onCompleteRequested: () {},
-              completeLabel: t.editor.createQr,
+              completeLabel: t.editor.completeEditing,
               onQrCornerChanged: (corner) => picked = corner,
             ),
           ),
