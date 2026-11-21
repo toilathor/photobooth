@@ -7,15 +7,6 @@ abstract class StorageService {
   /// Khởi tạo dịch vụ
   Future<void> init();
 
-  /// Đăng nhập (nếu cần)
-  Future<StorageUser?> signIn();
-
-  /// Đăng xuất
-  Future<void> signOut();
-
-  /// Tải ảnh lên và trả về URL
-  Future<String?> uploadImage(Uint8List bytes, String fileName);
-
   /// Tìm hoặc tạo section Drive trước khi render QR vào ảnh.
   Future<StorageSection?> prepareSection(String folderName);
 

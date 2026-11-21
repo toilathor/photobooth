@@ -40,10 +40,12 @@ class SettingsPanel extends StatelessWidget {
           label: t.settings.photoCount,
           value: provider.selectedPhotoCount,
           items: provider.photoCounts,
-          // Say how many shots each mode takes, not just its name.
           itemLabelBuilder: (val) =>
-              '${val == 1 ? t.settings.modeGroup : t.settings.modeStandard}'
-              ' · ${t.settings.photos(count: val)}',
+              val == 1 ? t.settings.modeGroup : t.settings.modeStandard,
+          // Which mode suits how many people in front of the camera.
+          hint: provider.selectedPhotoCount == 1
+              ? t.settings.modeGroupHint
+              : t.settings.modeStandardHint,
           onChanged: provider.isAutoCapturing
               ? null
               : (val) {

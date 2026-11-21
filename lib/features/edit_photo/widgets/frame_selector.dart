@@ -144,6 +144,7 @@ class _FrameSelectorState extends State<FrameSelector> {
                   padding: const EdgeInsets.only(right: 12),
                   child: FrameItem(
                     framePath: frame.path,
+                    thumbnailPath: frame.thumbnailPath,
                     isSelected: widget.selectedFrame == frame.path,
                     onTap: () => widget.onFrameSelected(frame),
                   ),
@@ -178,6 +179,7 @@ class _FrameSelectorState extends State<FrameSelector> {
                 final frame = filteredFrames[index];
                 return FrameItem(
                   framePath: frame.path,
+                  thumbnailPath: frame.thumbnailPath,
                   isSelected: widget.selectedFrame == frame.path,
                   onTap: () => widget.onFrameSelected(frame),
                 );

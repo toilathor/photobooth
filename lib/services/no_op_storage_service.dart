@@ -14,15 +14,6 @@ class NoOpStorageService implements StorageService {
   }
 
   @override
-  Future<StorageUser?> signIn() async => null;
-
-  @override
-  Future<void> signOut() async {}
-
-  @override
-  Future<String?> uploadImage(Uint8List bytes, String fileName) async => null;
-
-  @override
   Future<StorageSection?> prepareSection(String folderName) async => null;
 
   @override

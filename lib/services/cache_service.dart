@@ -36,40 +36,4 @@ class CacheService {
       debugPrint('CacheService: Lỗi khi xóa cache: $e');
     }
   }
-
-  /// Tính toán dung lượng cache hiện tại (theo bytes).
-  static Future<int> getCacheSize() async {
-    if (kIsWeb) return 0;
-
-    int totalSize = 0;
-    try {
-      final Directory tempDir = await getTemporaryDirectory();
-      if (await tempDir.exists()) {
-        final List<FileSystemEntity> entities = tempDir.listSync(
-          recursive: true,
-        );
-        for (final FileSystemEntity entity in entities) {
-          if (entity is File) {
-            totalSize += await entity.length();
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('CacheService: Lỗi khi tính dung lượng cache: $e');
-    }
-    return totalSize;
-  }
-
-  /// Định dạng dung lượng sang chuỗi đọc được (KB, MB, GB).
-  static String formatSize(int bytes) {
-    if (bytes <= 0) return '0 B';
-    const List<String> suffixes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    int i = 0;
-    double size = bytes.toDouble();
-    while (size >= 1024 && i < suffixes.length - 1) {
-      size /= 1024;
-      i++;
-    }
-    return '${size.toStringAsFixed(2)} ${suffixes[i]}';
-  }
 }

@@ -8,13 +8,14 @@
     "photoCount": "Chế độ",
     "modeGroup": "Chụp nhóm",
     "modeStandard": "Tiêu chuẩn",
+    "modeGroupHint": "Phù hợp nhóm đông, khoảng 5 người trở lên",
+    "modeStandardHint": "Phù hợp 1–4 người",
     "countdown": "Đếm ngược",
     "seconds": "giây",
     "language": "Ngôn ngữ",
     "mirror": "Gương",
     "veryHighResolution": "FullHD",
     "saveVideo": "Lưu video recap",
-    "photos": "$count ảnh",
     "open": "Cài đặt"
   },
   "actions": {
@@ -46,7 +47,7 @@
     "title": "Chỉnh sửa ảnh",
     "watchVideoRecap": "Xem video recap",
     "completeEditing": "Hoàn tất",
-    "completeEditingHint": "Tạo mã QR để mở khoá nút Tải xuống",
+    "nextGuest": "Tiếp tục lào",
     "frame_mode": "Gắn khung",
     "full_mode": "Toàn bộ",
     "frames": "Khung hình",
@@ -56,19 +57,17 @@
     "saveError": "Lỗi khi lưu ảnh: $error",
     "viewNow": "Xem ngay",
     "saveToDevice": "Tải xuống",
-    "completeBeforeDownload": "Hoàn tất chỉnh sửa trước để tải xuống",
     "copyLink": "Sao chép liên kết",
     "linkCopied": "Đã sao chép liên kết",
     "saveToDeviceSuccess": "Đã lưu toàn bộ ảnh và video vào thiết bị!",
-    "saveToDeviceCancel": "Đã hủy lưu tệp.",
     "chooseFrame": "Chọn khung hình",
     "all": "Tất cả",
     "printing": "Đang chuẩn bị in...",
     "printSuccess": "Đã gửi lệnh in thành công!",
     "printError": "Lỗi khi in: $error",
-    "createQr": "Tạo mã QR",
     "printPhoto": "In ảnh",
     "processing": "Đang xử lý ảnh…",
+    "savingToDevice": "Đang lưu về máy…",
     "genericError": "Chưa lưu được ảnh. Vui lòng thử lại.",
     "printFailed": "Chưa in được ảnh. Kiểm tra máy in và thử lại.",
     "retry": "Thử lại",
@@ -107,10 +106,11 @@
     }
   },
   "google_drive": {
-    "uploading": "Đang tải lên Google Drive...",
     "creating_recap": "Đang tạo video recap gắn khung...",
     "preparing_data": "Đang chuẩn bị dữ liệu...",
     "uploading_files": "Đang tải tệp $current/$total...",
+    "upload_retrying": "Mạng yếu, sẽ tự tải lên lại…",
+    "upload_pending": "Phiên đang tải lên Drive: $count",
     "preparing": "Đang chuẩn bị",
     "success": "Tải lên thành công!",
     "error": "Lỗi khi tải lên: $error",
@@ -120,7 +120,14 @@
     "folder_framed": "Ảnh frame",
     "folder_video_framed": "Video frame",
     "folder_video_full": "Video gốc",
-    "failed": "Chưa tải lên được. Kiểm tra kết nối mạng và thử lại."
+    "failed": "Chưa tải lên được. Kiểm tra kết nối mạng và thử lại.",
+    "manager_title": "Tải lên Drive",
+    "manager_empty": "Không còn phiên nào chờ tải lên.",
+    "manager_done": "Đã tải xong: $count phiên",
+    "job_title": "Phiên lúc $time",
+    "job_waiting": "Đang chờ đến lượt",
+    "retry_now": "Thử lại ngay",
+    "remove_job": "Bỏ khỏi hàng chờ (file vẫn còn trong zip trên máy)"
   },
   "gallery": {
     "title": "Khoảnh khắc của bạn",
@@ -153,6 +160,8 @@
     "key_m": "Bật / tắt gương",
     "key_v": "Bật / tắt video recap",
     "key_r": "Bắt đầu lại",
-    "key_f": "Toàn màn hình"
+    "key_f": "Toàn màn hình",
+    "key_enter": "Sang bước tiếp: Tiếp tục → Hoàn tất → Tiếp tục lào",
+    "key_esc": "Quay lại từ màn chỉnh sửa"
   }
 }

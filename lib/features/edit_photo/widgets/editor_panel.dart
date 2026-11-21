@@ -1,11 +1,11 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart'; // Import kIsWeb
 import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:th_photobooth/components/expressive_button_group.dart';
 import 'package:th_photobooth/components/primary_button.dart';
 import 'package:th_photobooth/components/secondary_button.dart';
+import 'package:th_photobooth/components/shortcut_keycap.dart';
 import 'package:th_photobooth/features/edit_photo/widgets/filter_selector.dart';
 import 'package:th_photobooth/i18n/strings.g.dart';
 import 'package:th_photobooth/models/frame_data.dart';
@@ -27,12 +27,13 @@ class EditorPanel extends StatefulWidget {
   final double filterIntensity;
   final void Function(String) onFilterSelected;
   final void Function(double) onFilterIntensityChanged;
+
+  /// Shows the save button; null hides it (completing already saves).
   final VoidCallback? onSaveRequested;
   final VoidCallback onCompleteRequested;
 
-  /// Names what "complete" actually does here: create a QR or print.
+  /// Names what "complete" actually does here: finish and share, or print.
   final String completeLabel;
-  final bool requiresQr;
   final bool photoIsMirrored;
 
   /// Where the gallery QR sits on the print. The picker is hidden when
@@ -57,7 +58,6 @@ class EditorPanel extends StatefulWidget {
     this.onSaveRequested,
     required this.onCompleteRequested,
     required this.completeLabel,
-    this.requiresQr = false,
     this.photoIsMirrored = false,
     this.qrCorner = QrCorner.fallback,
     this.onQrCornerChanged,
@@ -117,31 +117,6 @@ class _EditorPanelState extends State<EditorPanel> {
               isMobile: widget.isMobile,
             ),
 
-          if (widget.requiresQr)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 16,
-                    color: colorScheme.secondary,
-                  ),
-                  const Gap(8),
-                  Expanded(
-                    child: Text(
-                      t.editor.completeEditingHint,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface.withValues(alpha: 0.65),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
           (() {
             final bool isLandscape =
                 MediaQuery.orientationOf(context) == Orientation.landscape;
@@ -153,46 +128,26 @@ class _EditorPanelState extends State<EditorPanel> {
                     : const EdgeInsets.all(24.0),
                 child: Row(
                   children: [
-                    if (kIsWeb) ...[
-                      if (widget.onSaveRequested != null ||
-                          widget.requiresQr) ...[
-                        Expanded(
-                          flex: 1,
-                          child: Tooltip(
-                            message: widget.onSaveRequested == null
-                                ? t.editor.completeBeforeDownload
-                                : t.editor.saveToDevice,
-                            child: SecondaryButton(
-                              onTap: widget.onSaveRequested,
-                              semanticLabel: t.editor.saveToDevice,
-                              icon: Icons.save_alt_rounded,
-                              height: btnHeight,
-                            ),
+                    if (widget.onSaveRequested != null) ...[
+                      Expanded(
+                        flex: 1,
+                        child: Tooltip(
+                          message: t.editor.saveToDevice,
+                          child: SecondaryButton(
+                            onTap: widget.onSaveRequested,
+                            semanticLabel: t.editor.saveToDevice,
+                            icon: Icons.save_alt_rounded,
+                            height: btnHeight,
                           ),
                         ),
-                        const SizedBox(width: 16),
-                      ],
-                    ] else ...[
-                      if (widget.onSaveRequested != null) ...[
-                        Expanded(
-                          flex: 1,
-                          child: Tooltip(
-                            message: t.editor.saveToDevice,
-                            child: SecondaryButton(
-                              onTap: widget.onSaveRequested!,
-                              semanticLabel: t.editor.saveToDevice,
-                              icon: Icons.save_alt_rounded,
-                              height: btnHeight,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
+                      ),
+                      const SizedBox(width: 16),
                     ],
                     Expanded(
                       flex: 3,
                       child: PrimaryButton(
                         onTap: widget.onCompleteRequested,
+                        shortcut: ShortcutKey.enter,
                         label: widget.completeLabel,
                         height: btnHeight,
                       ),

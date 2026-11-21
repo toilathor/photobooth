@@ -8,13 +8,14 @@
     "photoCount": "Mode",
     "modeGroup": "Group Shot",
     "modeStandard": "Standard",
+    "modeGroupHint": "Best for larger groups, about 5 people or more",
+    "modeStandardHint": "Best for 1–4 people",
     "countdown": "Countdown",
     "seconds": "sec",
     "language": "Language",
     "mirror": "Mirror",
     "veryHighResolution": "FullHD",
     "saveVideo": "Save video recap",
-    "photos": "$count photos",
     "open": "Settings"
   },
   "actions": {
@@ -46,7 +47,7 @@
     "title": "Edit",
     "watchVideoRecap": "Watch video recap",
     "completeEditing": "Done",
-    "completeEditingHint": "Create the QR code to unlock Download",
+    "nextGuest": "Keep going",
     "frame_mode": "With frame",
     "full_mode": "Full view",
     "frames": "Frames",
@@ -56,19 +57,17 @@
     "saveError": "Failed to save: $error",
     "viewNow": "View now",
     "saveToDevice": "Download",
-    "completeBeforeDownload": "Complete editing before downloading",
     "copyLink": "Copy link",
     "linkCopied": "Link copied",
     "saveToDeviceSuccess": "Saved all photos and videos to device!",
-    "saveToDeviceCancel": "Save cancelled.",
     "chooseFrame": "Choose frame",
     "all": "All",
     "printing": "Preparing to print...",
     "printSuccess": "Print job sent successfully!",
     "printError": "Print error: $error",
-    "createQr": "Create QR code",
     "printPhoto": "Print",
     "processing": "Processing your photos…",
+    "savingToDevice": "Saving to this device…",
     "genericError": "Couldn't save your photos. Please try again.",
     "printFailed": "Couldn't print. Check the printer and try again.",
     "retry": "Try again",
@@ -107,10 +106,11 @@
     }
   },
   "google_drive": {
-    "uploading": "Uploading to Google Drive...",
     "creating_recap": "Creating framed video recap...",
     "preparing_data": "Preparing data...",
     "uploading_files": "Uploading file $current/$total...",
+    "upload_retrying": "Weak network, the upload will retry by itself…",
+    "upload_pending": "Sessions uploading to Drive: $count",
     "preparing": "Preparing",
     "success": "Uploaded successfully!",
     "error": "Upload error: $error",
@@ -120,7 +120,14 @@
     "folder_framed": "Framed Photos",
     "folder_video_framed": "Framed Videos",
     "folder_video_full": "Raw Videos",
-    "failed": "Upload didn't finish. Check the connection and try again."
+    "failed": "Upload didn't finish. Check the connection and try again.",
+    "manager_title": "Drive uploads",
+    "manager_empty": "No sessions waiting to upload.",
+    "manager_done": "Uploaded: $count sessions",
+    "job_title": "Session at $time",
+    "job_waiting": "Waiting for its turn",
+    "retry_now": "Retry now",
+    "remove_job": "Remove from the queue (the zip stays on this device)"
   },
   "gallery": {
     "title": "Your moments",
@@ -153,6 +160,8 @@
     "key_m": "Toggle mirror",
     "key_v": "Toggle Video Recap",
     "key_r": "Start over",
-    "key_f": "Toggle Fullscreen"
+    "key_f": "Toggle Fullscreen",
+    "key_enter": "Next step: Continue → Done → Keep going",
+    "key_esc": "Go back from the editor"
   }
 }
