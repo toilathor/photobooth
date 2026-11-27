@@ -30,11 +30,24 @@ void main() {
       capturePrintContent: () async => png,
     );
 
-    expect(files, contains('session_test_anh_dem_di_in.png'));
+    expect(files, contains('session_test_anh_dem_di_in.jpg'));
     expect(files!['session_test_anh_goc_01.png'], orderedEquals(png));
     expect(files['session_test_anh_goc_02.jpg'], orderedEquals(jpeg));
     expect(files.keys.any((name) => name.contains('gia_lap_ban_in')), isFalse);
-    expect(img.decodePng(files['session_test_anh_dem_di_in.png']!), isNotNull);
+    expect(files['session_test_anh_dem_di_in.jpg'], orderedEquals(png));
+  });
+
+  test('print JPG is full size and tagged 600 dpi', () async {
+    final png = Uint8List.fromList(
+      img.encodePng(img.Image(width: 248, height: 368)),
+    );
+    final jpg = (await EditPhotoProvider.toPrintJpg(png))!;
+    final decoded = img.decodeJpg(jpg)!;
+    expect([decoded.width, decoded.height], [248, 368]);
+    final header = ByteData.sublistView(jpg);
+    expect(jpg[13], 1);
+    expect(header.getUint16(14), 600);
+    expect(header.getUint16(16), 600);
   });
 
   test(

@@ -247,7 +247,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
       // the guest wait. A finished session reuses the page it already made.
       final done = provider.completedFiles;
       final printBytes =
-          (done == null ? null : _findFileBytes(done, 'anh_dem_di_in.png')) ??
+          (done == null ? null : _findFileBytes(done, 'anh_dem_di_in.jpg')) ??
           await _capturePrintContentIndependent(provider);
 
       if (printBytes != null) {
@@ -403,11 +403,12 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
         showQrPlaceholder: StorageConfig.activeStorage != StorageType.none,
       );
 
-      return await _paperController.captureFromWidget(
+      final png = await _paperController.captureFromWidget(
         Material(color: Colors.white, child: widget),
         targetSize: AppConfig.printPixelSize,
         pixelRatio: 1.0,
       );
+      return await EditPhotoProvider.toPrintJpg(png);
     } catch (e) {
       debugPrint('Error capturing print content independently: $e');
       return null;

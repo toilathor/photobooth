@@ -18,6 +18,26 @@ import 'package:th_photobooth/services/storage_service_interface.dart';
 import 'package:th_photobooth/services/upload_queue.dart';
 import 'package:th_photobooth/services/video_recap_service.dart';
 
+/// The print page as a full-quality JPG tagged 600 dpi, so printers and print
+/// shops size it to the 10.5x15.61 cm page instead of guessing.
+Future<Uint8List?> _encodePrintJpg(Uint8List pngBytes) async {
+  try {
+    final image = img.decodeImage(pngBytes);
+    if (image == null) return null;
+    final jpg = img.encodeJpg(image, quality: 100);
+    // JFIF APP0 (bytes 6–10 "JFIF"): units at 13, x/y density at 14–17.
+    if (String.fromCharCodes(jpg.sublist(6, 10)) == 'JFIF') {
+      jpg[13] = 1; // dots per inch
+      jpg.buffer.asByteData().setUint16(14, 600);
+      jpg.buffer.asByteData().setUint16(16, 600);
+    }
+    return jpg;
+  } catch (error) {
+    debugPrint('Error converting print page to JPG: $error');
+    return null;
+  }
+}
+
 Future<Uint8List?> _encodeJpg(Uint8List pngBytes) async {
   try {
     final image = img.decodeImage(pngBytes);
@@ -294,7 +314,7 @@ class EditPhotoProvider with ChangeNotifier {
       // 2. Chụp ảnh đem đi in (không có viền/perforation/indicator)
       final Uint8List? printContentCapture = await capturePrintContent();
       if (printContentCapture != null) {
-        filesToUpload['${sessionId}_anh_dem_di_in.png'] = printContentCapture;
+        filesToUpload['${sessionId}_anh_dem_di_in.jpg'] = printContentCapture;
       }
       // 3. Chụp Ảnh đã ghép vào frame
       try {
@@ -465,6 +485,10 @@ class EditPhotoProvider with ChangeNotifier {
     if (path.endsWith('.mov')) return 'video/quicktime';
     return null;
   }
+
+  /// Converts the captured print page (PNG) to the JPG that is printed.
+  static Future<Uint8List?> toPrintJpg(Uint8List pngBytes) =>
+      compute(_encodePrintJpg, pngBytes);
 
   Future<Uint8List?> _convertToJpg(Uint8List pngBytes) {
     return compute(_encodeJpg, pngBytes);
