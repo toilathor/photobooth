@@ -173,6 +173,9 @@
         {
             "id": 7,
             "filename": "group/group_5.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_5",
             "frame": "group",
             "layout_type": "group",
@@ -198,6 +201,9 @@
         {
             "id": 8,
             "filename": "group/group_6.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_6",
             "frame": "group",
             "layout_type": "group",
@@ -280,6 +286,9 @@
         {
             "id": 12,
             "filename": "group/group_7.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_7",
             "frame": "group",
             "layout_type": "group",
@@ -305,6 +314,9 @@
         {
             "id": 13,
             "filename": "group/group_8.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_8",
             "frame": "group",
             "layout_type": "group",
@@ -330,6 +342,9 @@
         {
             "id": 14,
             "filename": "group/group_9.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_9",
             "frame": "group",
             "layout_type": "group",
@@ -355,6 +370,9 @@
         {
             "id": 15,
             "filename": "group/group_10.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_10",
             "frame": "group",
             "layout_type": "group",
@@ -380,6 +398,9 @@
         {
             "id": 16,
             "filename": "group/group_11.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_11",
             "frame": "group",
             "layout_type": "group",
@@ -405,6 +426,9 @@
         {
             "id": 17,
             "filename": "group/group_12.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_12",
             "frame": "group",
             "layout_type": "group",
@@ -430,6 +454,9 @@
         {
             "id": 18,
             "filename": "group/group_13.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_13",
             "frame": "group",
             "layout_type": "group",
@@ -480,6 +507,9 @@
         {
             "id": 20,
             "filename": "group/group_15.png",
+            "blocked_qr_corners": [
+                "bottomRight"
+            ],
             "name": "group_15",
             "frame": "group",
             "layout_type": "group",
