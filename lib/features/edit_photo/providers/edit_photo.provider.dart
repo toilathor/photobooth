@@ -102,6 +102,7 @@ class EditPhotoProvider with ChangeNotifier {
     filteredFrames = allFrames.where((f) => f.photoSlots == count).toList();
     if (filteredFrames.isNotEmpty) {
       selectedFrame = filteredFrames.first;
+      qrCorner = selectedFrame.fitQrCorner(qrCorner);
     }
     notifyListeners();
   }
@@ -129,6 +130,7 @@ class EditPhotoProvider with ChangeNotifier {
   void setSelectedFrame(FrameData frame) {
     if (isEditorLocked) return;
     selectedFrame = frame;
+    qrCorner = frame.fitQrCorner(qrCorner);
     notifyListeners();
   }
 
@@ -146,7 +148,11 @@ class EditPhotoProvider with ChangeNotifier {
   }
 
   void setQrCorner(QrCorner corner) {
-    if (isEditorLocked || corner == qrCorner) return;
+    if (isEditorLocked ||
+        corner == qrCorner ||
+        !selectedFrame.qrCorners.contains(corner)) {
+      return;
+    }
     qrCorner = corner;
     notifyListeners();
   }
