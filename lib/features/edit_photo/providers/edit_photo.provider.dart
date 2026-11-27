@@ -325,6 +325,20 @@ class EditPhotoProvider with ChangeNotifier {
         var originalExt = _getVideoExtension(videoRecapFile!);
         Uint8List finalOriginalBytes;
 
+        // Both videos record in real time, so render them side by side: the
+        // wait becomes the longer one instead of their sum.
+        final framedFuture = VideoRecapService.exportFramedVideo(
+          videoUrl: videoRecapFile?.path ?? '',
+          frame: selectedFrame,
+          timestamps: photoTimestamps,
+          recapDurationSeconds:
+              AppConfig.recapClipDuration.inMilliseconds / 1000.0,
+          preferredMimeType: _getVideoMimeType(videoRecapFile),
+          isMirrored: videoIsMirrored,
+        );
+        // Handled below; this keeps an early failure from going unhandled.
+        unawaited(framedFuture.then((_) {}, onError: (Object _) {}));
+
         // 4.1. Xử lý video gốc (flip nếu cần)
         try {
           final flippedResult = await VideoRecapService.flipVideo(
@@ -350,15 +364,7 @@ class EditPhotoProvider with ChangeNotifier {
             finalOriginalBytes;
 
         try {
-          final result = await VideoRecapService.exportFramedVideo(
-            videoUrl: videoRecapFile?.path ?? '',
-            frame: selectedFrame,
-            timestamps: photoTimestamps,
-            recapDurationSeconds:
-                AppConfig.recapClipDuration.inMilliseconds / 1000.0,
-            preferredMimeType: _getVideoMimeType(videoRecapFile),
-            isMirrored: videoIsMirrored,
-          );
+          final result = await framedFuture;
 
           if (result != null) {
             final extension = _getExtensionFromMimeType(result.mimeType);

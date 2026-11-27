@@ -99,8 +99,9 @@ void main() {
   test('group prints lose about 2.5 mm per side to the page crop', () {
     final group = FrameData.group();
     final inset = PrintLayout.safeInset(group);
-    // Old fixed inset was 55 px; the crop + trim + margin needs ~124 px.
-    expect(inset.dx, closeTo(123.8, 1));
+    // Old fixed inset was 55 px; the crop + trim + margin needs ~111 px
+    // on the 10.5x15.61 cm page.
+    expect(inset.dx, closeTo(111.4, 1));
     expect(inset.dy, closeTo(76, 2));
   });
 }
