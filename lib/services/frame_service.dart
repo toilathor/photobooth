@@ -67,6 +67,9 @@ class FrameService {
           for (final name in imgData['blocked_qr_corners'] as List? ?? const [])
             ...QrCorner.values.where((c) => c.name == name),
         },
+        defaultQrCorner: QrCorner.values
+            .where((c) => c.name == imgData['default_qr_corner'])
+            .firstOrNull,
       );
     }
     return null;

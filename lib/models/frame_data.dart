@@ -14,6 +14,10 @@ class FrameData {
   /// from `blocked_qr_corners` in data.json.
   final Set<QrCorner> blockedQrCorners;
 
+  /// Corner the QR moves to when this frame is picked, from
+  /// `default_qr_corner` in data.json. Null keeps the guest's last choice.
+  final QrCorner? defaultQrCorner;
+
   const FrameData({
     this.filename = '',
     required this.photoSlots,
@@ -22,6 +26,7 @@ class FrameData {
     this.categoryId = '',
     this.categoryName = '',
     this.blockedQrCorners = const {},
+    this.defaultQrCorner,
   });
 
   /// Factory for standard frames. The slot count follows the flavor
@@ -61,6 +66,7 @@ class FrameData {
     String categoryName = '',
     Rect? slot,
     Set<QrCorner> blockedQrCorners = const {},
+    QrCorner? defaultQrCorner,
   }) {
     return FrameData(
       filename: filename,
@@ -79,6 +85,7 @@ class FrameData {
       categoryId: categoryId,
       categoryName: categoryName,
       blockedQrCorners: blockedQrCorners,
+      defaultQrCorner: defaultQrCorner,
     );
   }
 
@@ -89,9 +96,10 @@ class FrameData {
   List<QrCorner> get qrCorners =>
       QrCorner.values.where((c) => !blockedQrCorners.contains(c)).toList();
 
-  /// [preferred] when allowed here, else the nearest allowed corner
-  /// (same row first, then same column).
-  QrCorner fitQrCorner(QrCorner preferred) {
+  /// The QR corner on this frame: [defaultQrCorner], else [current], moved to
+  /// the nearest allowed corner (same row first, then same column) if blocked.
+  QrCorner fitQrCorner(QrCorner current) {
+    final preferred = defaultQrCorner ?? current;
     final allowed = qrCorners;
     if (allowed.isEmpty || allowed.contains(preferred)) return preferred;
     return allowed.firstWhere(

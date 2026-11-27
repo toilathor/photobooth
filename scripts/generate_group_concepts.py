@@ -234,39 +234,6 @@ def _diagonal_card(cv, d, gold):
     return cv, hole, (angle, (cx, cy))
 
 
-def c_stamp_column(groom, bride, photos=("couple/timeline_1.webp", "couple/timeline_2.webp", "couple/timeline_3.webp")):
-    """Bưu thiếp với ba tem dọc kể chuyện tình (ảnh ngày xưa) bên phải ảnh nhóm."""
-    ink, paper, pm = (96, 72, 52, 255), (248, 242, 229, 255), (140, 70, 60, 255)
-    cv = new_canvas((212, 188, 148))
-    d = ImageDraw.Draw(cv)
-    d.rectangle((S(70), S(70), S(W - 70), S(H - 70)), fill=paper)
-    hole = (190, 270, 1560, 1170)
-    x, y, w, h = hole
-    punch(cv, rrect_mask(hole, 6))
-    d = ImageDraw.Draw(cv)
-    perforate(d, hole, 17, 58, paper)
-    punch(cv, rrect_mask((x + 17, y + 17, w - 34, h - 34), 6))
-    for i, photo in enumerate(photos):
-        stamp = (2010, 190 + i * 470, 560, 400)
-        d = ImageDraw.Draw(cv)
-        d.rectangle((S(stamp[0] - 26), S(stamp[1] - 26), S(stamp[0] + stamp[2] + 26), S(stamp[1] + stamp[3] + 26)), fill=(255, 253, 247, 255))
-        sm = Image.new("L", cv.size, 0)
-        ImageDraw.Draw(sm).rectangle((S(stamp[0]), S(stamp[1]), S(stamp[0] + stamp[2]), S(stamp[1] + stamp[3])), fill=255)
-        paste_photo(cv, photo, stamp, sm, (0.5, 0.35))
-        d = ImageDraw.Draw(cv)
-        perforate(d, (stamp[0] - 26, stamp[1] - 26, stamp[2] + 52, stamp[3] + 52), 12, 44, paper)
-    cx, cy = 1900, 1560
-    d.ellipse((S(cx - 130), S(cy - 130), S(cx + 130), S(cy + 130)), outline=pm, width=S(5))
-    d.ellipse((S(cx - 102), S(cy - 102), S(cx + 102), S(cy + 102)), outline=pm, width=S(3))
-    text_mid(d, "28.11.26", cx, cy, PLAYFAIR, 38, pm)
-    for k in range(4):
-        yy = cy - 54 + k * 36
-        d.line([(S(cx - 140 - t), S(yy + 12 * math.sin(t / 22))) for t in range(0, 360, 6)], fill=pm, width=S(4))
-    text_mid(d, "Chuyện của chúng mình,", 940, 1620, PINYON, 100, (140, 112, 84, 255))
-    text_mid(d, g.NAMES, 940, 1800, PINYON, 150, ink)
-    return cv, hole, 0
-
-
 def c_postcard_stamp(groom, bride, photo="couple/banner_left.webp"):
     """Bưu thiếp có tem cặp đôi: ảnh nhóm bên trái, tem dọc bên phải."""
     ink, paper, pm = (96, 72, 52, 255), (248, 242, 229, 255), (140, 70, 60, 255)
@@ -471,8 +438,6 @@ CONCEPTS = [
      partial(c_diagonal, photo="gallery/album_11.webp", focus=(0.5, 0.3)), {"file": "group_12.png", "category": (105, "Poster Chéo"), "slot": [1178, 386, 1504, 1128]}),
     ("V19_cheo_co_dau", "Poster chéo · ảnh cô dâu", "Poster chéo với ảnh cô dâu cầm hoa trong vườn.",
      partial(c_diagonal, photo="gallery/album_7.webp", focus=(0.5, 0.2)), {"file": "group_13.png", "category": (105, "Poster Chéo"), "slot": [1178, 386, 1504, 1128]}),
-    ("V20_tem_chuyen_tinh", "Bưu thiếp · 3 tem chuyện tình", "Ba tem dọc: ảnh tự sướng, nhẫn cầu hôn và ngày đám ngỏ.",
-     c_stamp_column, {"file": "group_14.png", "category": (104, "Bưu Thiếp"), "slot": [160, 247.5, 1620, 1215]}),
     ("V21_tem_ben_phun_nuoc", "Bưu thiếp tem · ảnh bên đài phun nước", "Tem cặp đôi dùng ảnh cô dâu bên đài phun nước.",
      partial(c_postcard_stamp, photo="gallery/album_2.webp"), {"file": "group_15.png", "category": (104, "Bưu Thiếp"), "slot": [160, 247.5, 1620, 1215]}),
     # --- Bản tin trực tiếp HỶ TV (chờ duyệt): ảnh khách phủ kín khung, publish kèm "slot": TV_SLOT.
