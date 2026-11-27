@@ -66,6 +66,7 @@
     "printSuccess": "Đã gửi lệnh in thành công!",
     "printError": "Lỗi khi in: $error",
     "printPhoto": "In ảnh",
+    "printNow": "In ngay",
     "processing": "Đang xử lý ảnh…",
     "savingToDevice": "Đang lưu về máy…",
     "genericError": "Chưa lưu được ảnh. Vui lòng thử lại.",

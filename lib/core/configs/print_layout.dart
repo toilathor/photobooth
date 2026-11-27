@@ -4,18 +4,18 @@ import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
 
-/// Where two copies of a frame land on the 4x6" print page, and how much of
-/// each frame edge survives on the paper.
+/// Where two copies of a frame land on the 10.5x15.61 cm (6x4) print page, and
+/// how much of each frame edge survives on the paper.
 ///
 /// [PhotoPrintPreview] lays the page out from these values, so keep the two
 /// in sync (a widget test checks it).
 class PrintLayout {
   PrintLayout._();
 
-  /// The print page: 4x6" portrait at 600 dpi.
+  /// The print page: 10.5x15.61 cm portrait at 600 dpi.
   static const Size page = AppConfig.printPixelSize;
 
-  static double get pxPerMm => page.width / 101.6;
+  static double get pxPerMm => page.width / 105.0;
 
   /// Gap between the two copies, in frame px.
   static const double copyGap = 4;

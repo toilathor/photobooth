@@ -62,7 +62,10 @@ void main() {
       final expected = AppConfig.flavor == AppFlavor.personal ? 2 : 4;
 
       expect(AppConfig.photoCounts, [1, expected]);
-      expect(AppConfig.defaultPhotoCount, expected);
     },
   );
+
+  test('group shot is the default mode', () {
+    expect(AppConfig.defaultPhotoCount, 1);
+  });
 }

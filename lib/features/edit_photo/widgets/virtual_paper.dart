@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:th_photobooth/core/configs/app_config.dart';
 
 class VirtualPaper extends StatelessWidget {
   final Widget child;
@@ -12,7 +13,10 @@ class VirtualPaper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double paperAspectRatio = isLandscape ? 3 / 2 : 2 / 3;
+    final Size print = AppConfig.printPixelSize;
+    final double paperAspectRatio = isLandscape
+        ? print.height / print.width
+        : print.width / print.height;
 
     return AspectRatio(
       aspectRatio: paperAspectRatio,

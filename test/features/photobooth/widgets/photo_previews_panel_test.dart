@@ -13,7 +13,7 @@ void main() {
     AppConfig.cameras = [];
   });
 
-  testWidgets('PhotoPreviewsPanel renders a placeholder per standard photo', (
+  testWidgets('PhotoPreviewsPanel renders a placeholder per default photo', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(

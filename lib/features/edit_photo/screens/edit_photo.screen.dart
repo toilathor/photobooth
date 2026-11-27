@@ -243,23 +243,20 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
     bool dialogPopped = false;
 
     try {
-      final files = await provider.generateAllFiles(
-        captureStrip: () => _captureStripIndependent(provider),
-        capturePrintContent: () => _capturePrintContentIndependent(provider),
-      );
+      // Only the print page is needed: rendering the videos here only made
+      // the guest wait. A finished session reuses the page it already made.
+      final done = provider.completedFiles;
+      final printBytes =
+          (done == null ? null : _findFileBytes(done, 'anh_dem_di_in.png')) ??
+          await _capturePrintContentIndependent(provider);
 
-      if (files != null && files.isNotEmpty) {
-        final printBytes =
-            _findFileBytes(files, 'anh_dem_di_in.png') ??
-            _findFileBytes(files, 'anh_dem_di_in.jpg') ??
-            _findFileBytes(files, 'anh_da_ghep_khung.jpg');
-
+      if (printBytes != null) {
         if (context.mounted && Navigator.canPop(context)) {
           Navigator.pop(context);
           dialogPopped = true;
         }
 
-        if (context.mounted && printBytes != null) {
+        if (context.mounted) {
           final printSuccess = await PrintService.printImage(
             printBytes,
             name: provider.sessionId ?? AppConfig.sessionPrefix,
@@ -284,7 +281,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
           Navigator.pop(context);
           dialogPopped = true;
         }
-        debugPrint('Print failed: no files generated');
+        debugPrint('Print failed: no print page captured');
         if (context.mounted) {
           _showMessage(
             context,
@@ -463,6 +460,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
               uploadStatus: _uploadStatus(provider),
               // The pop handler reports the session as finished.
               onNextGuest: () => Navigator.maybePop(context),
+              onPrint: () => _handlePrintRequest(context),
               isMobile: isMobile,
             ),
           )
