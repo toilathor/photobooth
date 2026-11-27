@@ -1,9 +1,9 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,A={
-bnS(d,e,f){var x=new B.DN(C.ox),w=new A.a9s(x)
-x.r=A.bMc(w)
+bfy(d,e,f){var x=new B.BU(C.nA),w=new A.a5Z(x)
+x.r=A.bD1(w)
 return w},
-bMa(d,e){var x="Settings",w="Video recap",v="Switch camera",u="Download",t="Try again",s="Start over",r="Cancel"
+bD_(d,e){var x="Settings",w="Video recap",v="Switch camera",u="Download",t="Try again",s="Start over",r="Cancel"
 switch(e){case"header.titlePersonal":r="Thuy Hen \u2764\ufe0f Quang To"
 break
 case"header.titleCommercial":r="PhotoBooth"
@@ -49,7 +49,7 @@ case"actions.switchCamera":r=v
 break
 case"actions.mirror":r="Mirror"
 break
-case"preview.captured":r=new A.b7Z()
+case"preview.captured":r=new A.b02()
 break
 case"preview.continue_btn":r="Continue"
 break
@@ -67,7 +67,7 @@ case"preview.landscape":r="Landscape"
 break
 case"preview.portrait":r="Portrait"
 break
-case"preview.remaining":r=new A.b8_()
+case"preview.remaining":r=new A.b03()
 break
 case"preview.photoRemoved":r="Photo removed"
 break
@@ -95,7 +95,7 @@ case"editor.savePhoto":r="Save photo"
 break
 case"editor.saveSuccess":r="Saved to gallery successfully!"
 break
-case"editor.saveError":r=new A.b80()
+case"editor.saveError":r=new A.b04()
 break
 case"editor.viewNow":r="View now"
 break
@@ -115,9 +115,11 @@ case"editor.printing":r="Preparing to print..."
 break
 case"editor.printSuccess":r="Print job sent successfully!"
 break
-case"editor.printError":r=new A.b81()
+case"editor.printError":r=new A.b05()
 break
 case"editor.printPhoto":r="Print"
+break
+case"editor.printNow":r="Print now"
 break
 case"editor.processing":r="Processing your photos\u2026"
 break
@@ -141,7 +143,7 @@ case"editor.qrCorners.bottomRight":r="Bottom right"
 break
 case"dialogs.photoSelection.title":r="Select photos to keep"
 break
-case"dialogs.photoSelection.subtitle":r=new A.b82()
+case"dialogs.photoSelection.subtitle":r=new A.b06()
 break
 case"dialogs.photoSelection.cancel":break
 case"dialogs.photoSelection.confirm":r="Confirm"
@@ -169,17 +171,17 @@ case"google_drive.creating_recap":r="Creating framed video recap..."
 break
 case"google_drive.preparing_data":r="Preparing data..."
 break
-case"google_drive.uploading_files":r=new A.b83()
+case"google_drive.uploading_files":r=new A.b07()
 break
 case"google_drive.upload_retrying":r=y.X
 break
-case"google_drive.upload_pending":r=new A.b84()
+case"google_drive.upload_pending":r=new A.b08()
 break
 case"google_drive.preparing":r="Preparing"
 break
 case"google_drive.success":r="Uploaded successfully!"
 break
-case"google_drive.error":r=new A.b85()
+case"google_drive.error":r=new A.b09()
 break
 case"google_drive.qr_title":r="Scan to download"
 break
@@ -199,9 +201,9 @@ case"google_drive.manager_title":r="Drive uploads"
 break
 case"google_drive.manager_empty":r="No sessions waiting to upload."
 break
-case"google_drive.manager_done":r=new A.b86()
+case"google_drive.manager_done":r=new A.b0a()
 break
-case"google_drive.job_title":r=new A.b87()
+case"google_drive.job_title":r=new A.b0b()
 break
 case"google_drive.job_waiting":r="Waiting for its turn"
 break
@@ -221,7 +223,7 @@ case"gallery.emptyTitle":r="Gallery is empty"
 break
 case"gallery.emptyMessage":r=y.L
 break
-case"gallery.openFile":r=new A.b88()
+case"gallery.openFile":r=new A.b0c()
 break
 case"gallery.previous":r="Previous file"
 break
@@ -269,276 +271,275 @@ case"shortcuts.key_esc":r="Go back from the editor"
 break
 default:r=null
 break}return r},
-bMc(d){return new A.b8a(d)},
-a9s:function a9s(d){var _=this
+bD1(d){return new A.b0e(d)},
+a5Z:function a5Z(d){var _=this
 _.a=d
 _.at=_.as=_.Q=_.z=_.y=_.x=_.w=_.r=_.f=_.e=_.d=_.c=_.b=$},
-b6e:function b6e(){},
-b6g:function b6g(){},
-b64:function b64(){},
-b6f:function b6f(){},
-b69:function b69(d){this.a=d
+aZf:function aZf(){},
+aZh:function aZh(){},
+aZ5:function aZ5(){},
+aZg:function aZg(){},
+aZa:function aZa(d){this.a=d
 this.b=$},
-b66:function b66(d){this.a=d
+aZ7:function aZ7(d){this.a=d
 this.c=this.b=$},
-b6b:function b6b(){},
-b6j:function b6j(d){this.a=d
+aZc:function aZc(){},
+aZk:function aZk(d){this.a=d
 this.b=$},
-b6d:function b6d(){},
-b6c:function b6c(){},
-b65:function b65(){},
-b6h:function b6h(){},
-b6a:function b6a(){},
-b67:function b67(){},
-b68:function b68(){},
-b6i:function b6i(){},
-b8a:function b8a(d){this.a=d},
-b7Z:function b7Z(){},
-b8_:function b8_(){},
-b80:function b80(){},
-b81:function b81(){},
-b82:function b82(){},
-b83:function b83(){},
-b84:function b84(){},
-b85:function b85(){},
-b86:function b86(){},
-b87:function b87(){},
-b88:function b88(){},
-alU:function alU(){}}
+aZe:function aZe(){},
+aZd:function aZd(){},
+aZ6:function aZ6(){},
+aZi:function aZi(){},
+aZb:function aZb(){},
+aZ8:function aZ8(){},
+aZ9:function aZ9(){},
+aZj:function aZj(){},
+b0e:function b0e(d){this.a=d},
+b02:function b02(){},
+b03:function b03(){},
+b04:function b04(){},
+b05:function b05(){},
+b06:function b06(){},
+b07:function b07(){},
+b08:function b08(){},
+b09:function b09(){},
+b0a:function b0a(){},
+b0b:function b0b(){},
+b0c:function b0c(){},
+aho:function aho(){}}
 B=c[0]
 C=c[2]
 A=a.updateHolder(c[3],A)
-A.a9s.prototype={
-gNK(){return this.a},
-h(d,e){return this.a.ZJ(e)},
-gmq(){var x=this.b
+A.a5Z.prototype={
+gKO(){return this.a},
+h(d,e){return this.a.We(e)},
+glz(){var x=this.b
 return x===$?this.b=this:x},
-gEe(){var x=this,w=x.c
-if(w===$){x.gmq()
-x.c!==$&&B.ae()
-w=x.c=new A.b6e()}return w},
-gkd(){var x=this,w=x.d
-if(w===$){x.gmq()
-x.d!==$&&B.ae()
-w=x.d=new A.b6g()}return w},
-gqm(){var x=this,w=x.e
-if(w===$){x.gmq()
-x.e!==$&&B.ae()
-w=x.e=new A.b64()}return w},
-guc(){var x=this,w=x.f
-if(w===$){x.gmq()
-x.f!==$&&B.ae()
-w=x.f=new A.b6f()}return w},
-gdi(){var x,w=this,v=w.r
-if(v===$){x=w.gmq()
-w.r!==$&&B.ae()
-v=w.r=new A.b69(x)}return v},
-gqE(){var x,w=this,v=w.w
-if(v===$){x=w.gmq()
-w.w!==$&&B.ae()
-v=w.w=new A.b66(x)}return v},
-gzs(){var x=this,w=x.x
-if(w===$){x.gmq()
-x.x!==$&&B.ae()
-w=x.x=new A.b6b()}return w},
-gFu(){var x,w=this,v=w.y
-if(v===$){x=w.gmq()
-w.y!==$&&B.ae()
-v=w.y=new A.b6j(x)}return v},
-ghJ(){var x=this,w=x.z
-if(w===$){x.gmq()
-x.z!==$&&B.ae()
-w=x.z=new A.b6d()}return w},
-glx(){var x=this,w=x.Q
-if(w===$){x.gmq()
-x.Q!==$&&B.ae()
-w=x.Q=new A.b6c()}return w},
-gtq(){var x=this,w=x.as
-if(w===$){x.gmq()
-x.as!==$&&B.ae()
-w=x.as=new A.b65()}return w},
-gi3(){var x=this,w=x.at
-if(w===$){x.gmq()
-x.at!==$&&B.ae()
-w=x.at=new A.b6h()}return w},
-$ijR:1}
-A.b6e.prototype={
-gaka(){return"Thuy Hen \u2764\ufe0f Quang To"},
-gak9(){return"PhotoBooth"}}
-A.b6g.prototype={
-gfP(){return"Settings"},
-gaiG(){return"Mode"},
-gai5(){return"Group Shot"},
-gai7(){return"Standard"},
-gai6(){return y.j},
-gai8(){return"Best for 1\u20134 people"},
-gaeg(){return"Countdown"},
-ga_5(){return"sec"},
-gYW(){return"FullHD"},
-gO8(){return"Save video recap"},
-gXN(){return"Settings"}}
-A.b64.prototype={
-gahR(){return"Manual"},
-gad5(){return"Auto"},
-gajX(){return"Retake"},
-gXZ(){return"Prepare"},
-gtt(){return"Cancel"},
-ga0N(){return"Switch camera"},
-gai3(){return"Mirror"}}
-A.b6f.prototype={
-adz(d,e){return"Captured "+d+"/"+e},
-gae_(){return"Continue"},
-gfP(){return"Preview"},
-ajr(d){return""+d+" more to go"},
-gaiH(){return"Photo removed"},
-gFp(){return"Undo"},
-gajy(){return"Remove photo"}}
-A.b69.prototype={
-gZ7(){return"Watch video recap"},
-gUR(){return"Done"},
-gaid(){return"Keep going"},
-gafZ(){return"With frame"},
-gag2(){return"Full view"},
-ghv(){return"Frames"},
-gzs(){return"Filters"},
-gAG(){return"Download"},
-gae3(){return"Copy link"},
-gahG(){return"Link copied"},
-gZW(){return"Saved all photos and videos to device!"},
-gacE(){return"All"},
-gaiU(){return"Print job sent successfully!"},
-gY0(){return"Print"},
-gaiZ(){return"Processing your photos\u2026"},
-gZX(){return"Saving to this device\u2026"},
-gFC(){return y.p},
-gMT(){return y.M},
-gof(){return"Try again"},
-gY1(){return"QR position"},
-gF1(){var x=this.b
-return x===$?this.b=new A.b6a():x}}
-A.b66.prototype={
-gET(){var x=this.b
-return x===$?this.b=new A.b67():x},
-gFa(){var x=this.c
-return x===$?this.c=new A.b68():x}}
-A.b6b.prototype={
-gfP(){return"Filters"},
-gaig(){return"Normal"}}
-A.b6j.prototype={
-gfP(){return"Video recap"},
-gKf(){var x=this.b
-return x===$?this.b=new A.b6i():x}}
-A.b6d.prototype={
-gaep(){return"Creating framed video recap..."},
-gaiR(){return"Preparing data..."},
-YT(d,e){return"Uploading file "+d+"/"+e+"..."},
-gND(){return y.X},
-akF(d){return"Sessions uploading to Drive: "+d},
-gaiQ(){return"Preparing"},
-ga_I(){return"Uploaded successfully!"},
-gaj8(){return"Scan to download"},
-gaj7(){return y.K},
-gafr(){return y.Y},
-gahQ(){return"Drive uploads"},
-gahP(){return"No sessions waiting to upload."},
-ahO(d){return"Uploaded: "+d+" sessions"},
-aht(d){return"Session at "+d},
-gahu(){return"Waiting for its turn"},
-gajY(){return"Retry now"},
-gajE(){return y.v}}
-A.b6c.prototype={
-gfP(){return"Your moments"},
-gafn(){return"Unable to open gallery"},
-gafm(){return y.o},
-gof(){return"Try again"},
-gafa(){return"Gallery is empty"},
-gaf9(){return y.L},
-aix(d){return"Open "+d},
-gEZ(){return"Previous file"},
-gps(){return"Next file"},
-gEU(){return"Play"},
-gu7(){return"Pause"},
-gaeY(){return"Download"}}
-A.b65.prototype={
-gfP(){return"Account authentication"},
-gDB(){return y.I},
-gad7(){return"Back"},
-gZP(){return"Grant access"},
-gZN(){return y.A},
-gZM(){return"Grant access and continue"},
-gZO(){return y.z}}
-A.b6h.prototype={
-gfP(){return"Keyboard Shortcuts"},
-gDB(){return y.k},
-ga_E(){return"Start / Cancel capturing"},
-gahA(){return"Switch camera"},
-gahy(){return"Toggle mirror"},
-gahB(){return"Toggle Video Recap"},
-gahz(){return"Start over"},
-gahx(){return"Toggle Fullscreen"},
-gahv(){return"Next step: Continue \u2192 Done \u2192 Keep going"},
-gahw(){return"Go back from the editor"}}
-A.b6a.prototype={
-gakn(){return"Top left"},
-gako(){return"Top right"},
-gadg(){return"Bottom left"},
-gadh(){return"Bottom right"}}
-A.b67.prototype={
-gfP(){return"Select photos to keep"},
-a_H(d){return"Please select exactly "+d+" photos to continue."},
-gtt(){return"Cancel"},
-gDm(){return"Confirm"}}
-A.b68.prototype={
-gfP(){return"Start over?"},
-gadW(){return y.F},
-gtt(){return"Cancel"},
-gDm(){return"Start over"}}
-A.b6i.prototype={
-gEU(){return"Play"},
-gu7(){return"Pause"},
-gajR(){return"Restart"}}
-A.alU.prototype={}
+gCd(){var x=this,w=x.c
+if(w===$){x.glz()
+x.c!==$&&B.ac()
+w=x.c=new A.aZf()}return w},
+gjg(){var x=this,w=x.d
+if(w===$){x.glz()
+x.d!==$&&B.ac()
+w=x.d=new A.aZh()}return w},
+gpa(){var x=this,w=x.e
+if(w===$){x.glz()
+x.e!==$&&B.ac()
+w=x.e=new A.aZ5()}return w},
+grL(){var x=this,w=x.f
+if(w===$){x.glz()
+x.f!==$&&B.ac()
+w=x.f=new A.aZg()}return w},
+gcQ(){var x,w=this,v=w.r
+if(v===$){x=w.glz()
+w.r!==$&&B.ac()
+v=w.r=new A.aZa(x)}return v},
+gpr(){var x,w=this,v=w.w
+if(v===$){x=w.glz()
+w.w!==$&&B.ac()
+v=w.w=new A.aZ7(x)}return v},
+gxF(){var x=this,w=x.x
+if(w===$){x.glz()
+x.x!==$&&B.ac()
+w=x.x=new A.aZc()}return w},
+gDq(){var x,w=this,v=w.y
+if(v===$){x=w.glz()
+w.y!==$&&B.ac()
+v=w.y=new A.aZk(x)}return v},
+gh1(){var x=this,w=x.z
+if(w===$){x.glz()
+x.z!==$&&B.ac()
+w=x.z=new A.aZe()}return w},
+gkG(){var x=this,w=x.Q
+if(w===$){x.glz()
+x.Q!==$&&B.ac()
+w=x.Q=new A.aZd()}return w},
+gqZ(){var x=this,w=x.as
+if(w===$){x.glz()
+x.as!==$&&B.ac()
+w=x.as=new A.aZ6()}return w},
+ghn(){var x=this,w=x.at
+if(w===$){x.glz()
+x.at!==$&&B.ac()
+w=x.at=new A.aZi()}return w},
+$ijm:1}
+A.aZf.prototype={
+gaeO(){return"Thuy Hen \u2764\ufe0f Quang To"},
+gaeN(){return"PhotoBooth"}}
+A.aZh.prototype={
+gfb(){return"Settings"},
+gadp(){return"Mode"},
+gacS(){return"Group Shot"},
+gacU(){return"Standard"},
+gacT(){return y.j},
+gacV(){return"Best for 1\u20134 people"},
+ga9i(){return"Countdown"},
+gWz(){return"sec"},
+gVt(){return"FullHD"},
+gLc(){return"Save video recap"},
+gUk(){return"Settings"}}
+A.aZ5.prototype={
+gacB(){return"Manual"},
+ga8e(){return"Auto"},
+gaeA(){return"Retake"},
+gUx(){return"Prepare"},
+gr1(){return"Cancel"},
+gY7(){return"Switch camera"},
+gacQ(){return"Mirror"}}
+A.aZg.prototype={
+a8E(d,e){return"Captured "+d+"/"+e},
+ga92(){return"Continue"},
+gfb(){return"Preview"},
+ae7(d){return""+d+" more to go"},
+gadq(){return"Photo removed"},
+gaf1(){return"Undo"},
+gaee(){return"Remove photo"}}
+A.aZa.prototype={
+gVF(){return"Watch video recap"},
+gRk(){return"Done"},
+gacY(){return"Keep going"},
+gaaU(){return"With frame"},
+gaaY(){return"Full view"},
+gfN(){return"Frames"},
+gxF(){return"Filters"},
+gyR(){return"Download"},
+gWq(){return"Saved all photos and videos to device!"},
+ga7O(){return"All"},
+gadB(){return"Print job sent successfully!"},
+gUB(){return"Print"},
+gadA(){return"Print now"},
+gadG(){return"Processing your photos\u2026"},
+gWr(){return"Saving to this device\u2026"},
+gDy(){return y.p},
+gK_(){return y.M},
+gnn(){return"Try again"},
+gUD(){return"QR position"},
+gD_(){var x=this.b
+return x===$?this.b=new A.aZb():x}}
+A.aZ7.prototype={
+gCQ(){var x=this.b
+return x===$?this.b=new A.aZ8():x},
+gD7(){var x=this.c
+return x===$?this.c=new A.aZ9():x}}
+A.aZc.prototype={
+gfb(){return"Filters"},
+gad0(){return"Normal"}}
+A.aZk.prototype={
+gfb(){return"Video recap"},
+gHC(){var x=this.b
+return x===$?this.b=new A.aZj():x}}
+A.aZe.prototype={
+ga9r(){return"Creating framed video recap..."},
+gady(){return"Preparing data..."},
+Vq(d,e){return"Uploading file "+d+"/"+e+"..."},
+gKH(){return y.X},
+aff(d){return"Sessions uploading to Drive: "+d},
+gadx(){return"Preparing"},
+gX7(){return"Uploaded successfully!"},
+gadQ(){return"Scan to download"},
+gadP(){return y.K},
+gaar(){return y.Y},
+gacA(){return"Drive uploads"},
+gacz(){return"No sessions waiting to upload."},
+acy(d){return"Uploaded: "+d+" sessions"},
+ace(d){return"Session at "+d},
+gacf(){return"Waiting for its turn"},
+gaeB(){return"Retry now"},
+gaei(){return y.v}}
+A.aZd.prototype={
+gfb(){return"Your moments"},
+gaan(){return"Unable to open gallery"},
+gaam(){return y.o},
+gnn(){return"Try again"},
+gaaa(){return"Gallery is empty"},
+gaa9(){return y.L},
+adh(d){return"Open "+d},
+gCV(){return"Previous file"},
+gof(){return"Next file"},
+gCR(){return"Play"},
+grI(){return"Pause"},
+ga9Y(){return"Download"}}
+A.aZ6.prototype={
+gfb(){return"Account authentication"},
+gBA(){return y.I},
+ga8g(){return"Back"},
+gWj(){return"Grant access"},
+gWh(){return y.A},
+gWg(){return"Grant access and continue"},
+gWi(){return y.z}}
+A.aZi.prototype={
+gfb(){return"Keyboard Shortcuts"},
+gBA(){return y.k},
+gX3(){return"Start / Cancel capturing"},
+gacl(){return"Switch camera"},
+gacj(){return"Toggle mirror"},
+gacm(){return"Toggle Video Recap"},
+gack(){return"Start over"},
+gaci(){return"Toggle Fullscreen"},
+gacg(){return"Next step: Continue \u2192 Done \u2192 Keep going"},
+gach(){return"Go back from the editor"}}
+A.aZb.prototype={
+gaeX(){return"Top left"},
+gaeY(){return"Top right"},
+ga8m(){return"Bottom left"},
+ga8n(){return"Bottom right"}}
+A.aZ8.prototype={
+gfb(){return"Select photos to keep"},
+X6(d){return"Please select exactly "+d+" photos to continue."},
+gr1(){return"Cancel"},
+gBj(){return"Confirm"}}
+A.aZ9.prototype={
+gfb(){return"Start over?"},
+ga8Z(){return y.F},
+gr1(){return"Cancel"},
+gBj(){return"Start over"}}
+A.aZj.prototype={
+gCR(){return"Play"},
+grI(){return"Pause"},
+gaeu(){return"Restart"}}
+A.aho.prototype={}
 var z=a.updateTypes([])
-A.b8a.prototype={
-$1(d){return A.bMa(this.a,d)},
-$S:101}
-A.b7Z.prototype={
+A.b0e.prototype={
+$1(d){return A.bD_(this.a,d)},
+$S:83}
+A.b02.prototype={
 $2$current$total(d,e){return"Captured "+B.i(d)+"/"+B.i(e)},
-$S:96}
-A.b8_.prototype={
+$S:95}
+A.b03.prototype={
 $1$count(d){return B.i(d)+" more to go"},
-$S:58}
-A.b80.prototype={
+$S:52}
+A.b04.prototype={
 $1$error(d){return"Failed to save: "+B.i(d)},
-$S:73}
-A.b81.prototype={
+$S:69}
+A.b05.prototype={
 $1$error(d){return"Print error: "+B.i(d)},
-$S:73}
-A.b82.prototype={
+$S:69}
+A.b06.prototype={
 $1$count(d){return"Please select exactly "+B.i(d)+" photos to continue."},
-$S:58}
-A.b83.prototype={
+$S:52}
+A.b07.prototype={
 $2$current$total(d,e){return"Uploading file "+B.i(d)+"/"+B.i(e)+"..."},
-$S:96}
-A.b84.prototype={
+$S:95}
+A.b08.prototype={
 $1$count(d){return"Sessions uploading to Drive: "+B.i(d)},
-$S:58}
-A.b85.prototype={
+$S:52}
+A.b09.prototype={
 $1$error(d){return"Upload error: "+B.i(d)},
-$S:73}
-A.b86.prototype={
+$S:69}
+A.b0a.prototype={
 $1$count(d){return"Uploaded: "+B.i(d)+" sessions"},
-$S:58}
-A.b87.prototype={
+$S:52}
+A.b0b.prototype={
 $1$time(d){return"Session at "+B.i(d)},
-$S:283}
-A.b88.prototype={
+$S:202}
+A.b0c.prototype={
 $1$name(d){return"Open "+B.i(d)},
-$S:284};(function inheritance(){var x=a.mixin,w=a.inheritMany,v=a.inherit
-w(B.J,[A.alU,A.b6e,A.b6g,A.b64,A.b6f,A.b69,A.b66,A.b6b,A.b6j,A.b6d,A.b6c,A.b65,A.b6h,A.b6a,A.b67,A.b68,A.b6i])
-v(A.a9s,A.alU)
-w(B.oZ,[A.b8a,A.b7Z,A.b8_,A.b80,A.b81,A.b82,A.b83,A.b84,A.b85,A.b86,A.b87,A.b88])
-x(A.alU,B.kZ)})()
-B.bpg(b.typeUniverse,JSON.parse('{"a9s":{"jR":[],"kZ":["fh","jR"]}}'))
+$S:192};(function inheritance(){var x=a.mixin,w=a.inheritMany,v=a.inherit
+w(B.G,[A.aho,A.aZf,A.aZh,A.aZ5,A.aZg,A.aZa,A.aZ7,A.aZc,A.aZk,A.aZe,A.aZd,A.aZ6,A.aZi,A.aZb,A.aZ8,A.aZ9,A.aZj])
+v(A.a5Z,A.aho)
+w(B.o9,[A.b0e,A.b02,A.b03,A.b04,A.b05,A.b06,A.b07,A.b08,A.b09,A.b0a,A.b0b,A.b0c])
+x(A.aho,B.ks)})()
+B.bgN(b.typeUniverse,JSON.parse('{"a5Z":{"jm":[],"ks":["f4","jm"]}}'))
 var y={F:"All current photos will be deleted. Are you sure you want to start a new session?",j:"Best for larger groups, about 5 people or more",M:"Couldn't print. Check the printer and try again.",p:"Couldn't save your photos. Please try again.",z:"Failed to grant access. Please try again.",o:"Photos and videos cannot be loaded right now. Please try again.",L:"Photos and videos will appear here after upload.",A:"Please grant Google Drive access so the app can create folders and store your photos/videos.",v:"Remove from the queue (the zip stays on this device)",K:"Save your favorite moments with a single scan",I:"To ensure your photos are stored privately and securely on your Google Drive.",Y:"Upload didn't finish. Check the connection and try again.",k:"Use keyboard shortcuts to navigate quickly",X:"Weak network, the upload will retry by itself\u2026"}};
-(a=>{a["TH2q1dT/nxTbPD4uP6wgP6mH2uc="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["jPtRmDH0aajyYNjJ3hkrHhWxP+Q="]=a.current})($__dart_deferred_initializers__);
