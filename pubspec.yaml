@@ -2,7 +2,7 @@ name: th_photobooth
 description: "Lưu giữ mọi khoảnh khắc"
 publish_to: "none"
 
-version: 1.4.2+11
+version: 1.4.3+12
 environment:
   sdk: ^3.14.0
 

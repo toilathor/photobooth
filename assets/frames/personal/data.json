@@ -764,7 +764,12 @@
                 2666.67,
                 2000
             ],
-            "default_qr_corner": "bottomRight"
+            "default_qr_corner": "bottomRight",
+            "blocked_qr_corners": [
+                "topLeft",
+                "topRight",
+                "bottomLeft"
+            ]
         },
         {
             "id": 34,
@@ -790,7 +795,12 @@
                 2666.67,
                 2000
             ],
-            "default_qr_corner": "bottomRight"
+            "default_qr_corner": "bottomRight",
+            "blocked_qr_corners": [
+                "topLeft",
+                "topRight",
+                "bottomLeft"
+            ]
         },
         {
             "id": 35,
@@ -882,7 +892,12 @@
                 2666.67,
                 2000
             ],
-            "default_qr_corner": "bottomRight"
+            "default_qr_corner": "bottomRight",
+            "blocked_qr_corners": [
+                "topLeft",
+                "topRight",
+                "bottomLeft"
+            ]
         },
         {
             "id": 38,
@@ -908,7 +923,12 @@
                 2666.67,
                 2000
             ],
-            "default_qr_corner": "bottomRight"
+            "default_qr_corner": "bottomRight",
+            "blocked_qr_corners": [
+                "topLeft",
+                "topRight",
+                "bottomLeft"
+            ]
         },
         {
             "id": 39,
