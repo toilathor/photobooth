@@ -56,7 +56,7 @@ class AppConfig {
   static List<int> get photoCounts => [1, standardPhotoCount];
   static const List<int> countdowns = [3, 5, 10];
   static const Duration recapClipDuration = Duration(seconds: 3);
-  static const Size printPixelSize = Size(2400, 3600);
+  static const Size printPixelSize = Size(2480, 3688);
 
   /// Frame folder under `assets/frames/`, one per flavor so that frames of
   /// different builds never mix.
