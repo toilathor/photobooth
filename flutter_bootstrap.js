@@ -53,7 +53,7 @@ if ('serviceWorker' in navigator && location.hostname !== 'localhost' &&
   // One cache per build. The token expands to a quoted build number plus a
   // comment with an apostrophe; inside a template literal neither that nor a
   // later Flutter dropping the token can break the page.
-  const build = `"202432506" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */`.match(/\d+/)?.[0] ?? '0';
+  const build = `"926504996" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */`.match(/\d+/)?.[0] ?? '0';
   // Ask whichever worker controls the page to fetch every frame. Asked again
   // when a new build's worker takes over: it starts with an empty cache.
   const warmUp = () => navigator.serviceWorker.controller?.postMessage(
