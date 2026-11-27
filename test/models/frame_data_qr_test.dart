@@ -19,8 +19,17 @@ void main() {
     expect(frame.fitQrCorner(QrCorner.topRight), QrCorner.topRight);
   });
 
+  test('default_qr_corner wins over the last choice', () {
+    final frame = FrameService.frameFromJson({
+      'layout_type': 'group',
+      'default_qr_corner': 'topRight',
+    })!;
+    expect(frame.fitQrCorner(QrCorner.bottomLeft), QrCorner.topRight);
+  });
+
   test('frames without blocked_qr_corners allow all corners', () {
     final frame = FrameService.frameFromJson({'layout_type': 'group'})!;
     expect(frame.qrCorners, QrCorner.values);
+    expect(frame.fitQrCorner(QrCorner.bottomLeft), QrCorner.bottomLeft);
   });
 }
