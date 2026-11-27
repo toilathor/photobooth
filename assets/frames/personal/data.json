@@ -172,7 +172,7 @@
                 1560,
                 1170
             ],
-            "default_qr_corner": "topRight"
+            "default_qr_corner": "topLeft"
         },
         {
             "id": 7,
@@ -229,7 +229,8 @@
                 247.5,
                 1620,
                 1215
-            ]
+            ],
+            "default_qr_corner": "bottomLeft"
         },
         {
             "id": 9,
@@ -370,7 +371,8 @@
                 247.5,
                 1620,
                 1215
-            ]
+            ],
+            "default_qr_corner": "bottomLeft"
         },
         {
             "id": 15,
@@ -398,7 +400,8 @@
                 247.5,
                 1620,
                 1215
-            ]
+            ],
+            "default_qr_corner": "bottomLeft"
         },
         {
             "id": 16,
@@ -482,7 +485,8 @@
                 386,
                 1504,
                 1128
-            ]
+            ],
+            "default_qr_corner": "bottomLeft"
         },
         {
             "id": 20,
@@ -510,7 +514,8 @@
                 247.5,
                 1620,
                 1215
-            ]
+            ],
+            "default_qr_corner": "bottomLeft"
         },
         {
             "id": 21,
