@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
 import 'package:th_photobooth/models/frame_data.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 class FrameService {
   static Future<List<FrameData>> loadFrames() async {
@@ -60,6 +61,12 @@ class FrameService {
         categoryId: categoryId,
         categoryName: categoryName,
         slot: _rectFromJson(imgData['slot']),
+        // Optional ["bottomRight", ...]: corners where the QR would cover the
+        // artwork. Unknown names are ignored.
+        blockedQrCorners: {
+          for (final name in imgData['blocked_qr_corners'] as List? ?? const [])
+            ...QrCorner.values.where((c) => c.name == name),
+        },
       );
     }
     return null;

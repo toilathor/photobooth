@@ -39,6 +39,9 @@ class EditorPanel extends StatefulWidget {
   /// Where the gallery QR sits on the print. The picker is hidden when
   /// [onQrCornerChanged] is null (no QR is printed).
   final QrCorner qrCorner;
+
+  /// Corners offered in the picker; the selected frame may block some.
+  final List<QrCorner> qrCorners;
   final ValueChanged<QrCorner>? onQrCornerChanged;
 
   const EditorPanel({
@@ -60,6 +63,7 @@ class EditorPanel extends StatefulWidget {
     required this.completeLabel,
     this.photoIsMirrored = false,
     this.qrCorner = QrCorner.fallback,
+    this.qrCorners = QrCorner.values,
     this.onQrCornerChanged,
     this.isMobile = false,
   });
@@ -113,6 +117,7 @@ class _EditorPanelState extends State<EditorPanel> {
           if (widget.onQrCornerChanged != null)
             _QrCornerPicker(
               selected: widget.qrCorner,
+              corners: widget.qrCorners,
               onChanged: widget.onQrCornerChanged!,
               isMobile: widget.isMobile,
             ),
@@ -247,11 +252,13 @@ class _EditorPanelState extends State<EditorPanel> {
 
 class _QrCornerPicker extends StatelessWidget {
   final QrCorner selected;
+  final List<QrCorner> corners;
   final ValueChanged<QrCorner> onChanged;
   final bool isMobile;
 
   const _QrCornerPicker({
     required this.selected,
+    required this.corners,
     required this.onChanged,
     required this.isMobile,
   });
@@ -291,7 +298,7 @@ class _QrCornerPicker extends StatelessWidget {
               ),
             ),
           ),
-          for (final corner in QrCorner.values)
+          for (final corner in corners)
             Padding(
               padding: const EdgeInsets.only(left: 4),
               child: Tooltip(

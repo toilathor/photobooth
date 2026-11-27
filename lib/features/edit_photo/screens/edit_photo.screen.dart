@@ -490,6 +490,7 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
                 : t.editor.printPhoto,
             photoIsMirrored: provider.photoIsMirrored,
             qrCorner: provider.qrCorner,
+            qrCorners: provider.selectedFrame.qrCorners,
             onQrCornerChanged: StorageConfig.activeStorage != StorageType.none
                 ? provider.setQrCorner
                 : null,

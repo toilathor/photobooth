@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:th_photobooth/core/configs/app_config.dart';
+import 'package:th_photobooth/models/qr_corner.dart';
 
 class FrameData {
   final String filename;
@@ -9,6 +10,10 @@ class FrameData {
   final String categoryId;
   final String categoryName;
 
+  /// QR corners that would cover the frame's artwork (e.g. the couple's names),
+  /// from `blocked_qr_corners` in data.json.
+  final Set<QrCorner> blockedQrCorners;
+
   const FrameData({
     this.filename = '',
     required this.photoSlots,
@@ -16,6 +21,7 @@ class FrameData {
     this.slots = const [],
     this.categoryId = '',
     this.categoryName = '',
+    this.blockedQrCorners = const {},
   });
 
   /// Factory for standard frames. The slot count follows the flavor
@@ -54,6 +60,7 @@ class FrameData {
     String categoryId = '',
     String categoryName = '',
     Rect? slot,
+    Set<QrCorner> blockedQrCorners = const {},
   }) {
     return FrameData(
       filename: filename,
@@ -71,11 +78,30 @@ class FrameData {
       ],
       categoryId: categoryId,
       categoryName: categoryName,
+      blockedQrCorners: blockedQrCorners,
     );
   }
 
   /// Check if the frame layout is for a group shot (1 slot)
   bool get isGroup => photoSlots == 1;
+
+  /// Corners the guest may put the QR in on this frame.
+  List<QrCorner> get qrCorners =>
+      QrCorner.values.where((c) => !blockedQrCorners.contains(c)).toList();
+
+  /// [preferred] when allowed here, else the nearest allowed corner
+  /// (same row first, then same column).
+  QrCorner fitQrCorner(QrCorner preferred) {
+    final allowed = qrCorners;
+    if (allowed.isEmpty || allowed.contains(preferred)) return preferred;
+    return allowed.firstWhere(
+      (c) => c.isTop == preferred.isTop,
+      orElse: () => allowed.firstWhere(
+        (c) => c.isLeft == preferred.isLeft,
+        orElse: () => allowed.first,
+      ),
+    );
+  }
 
   /// Asset path of the frame image (bundled with the app). [filename] is
   /// relative to the flavor folder, e.g. `standard/standard_1.png`.
