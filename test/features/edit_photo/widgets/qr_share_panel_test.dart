@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:th_photobooth/components/branded_qr_code.dart';
@@ -12,20 +11,8 @@ void main() {
   testWidgets('keeps the uploaded QR panel branded', (tester) async {
     const url =
         'https://toilathor.github.io/photobooth/#/gallery/section_123456';
-    String? copiedText;
     var nextGuest = 0;
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-      if (call.method == 'Clipboard.setData') {
-        copiedText =
-            (call.arguments as Map<Object?, Object?>)['text'] as String?;
-      }
-      return null;
-    });
-    addTearDown(
-      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
-    );
+    var printed = 0;
 
     await tester.pumpWidget(
       testApp(
@@ -33,7 +20,11 @@ void main() {
           body: SizedBox(
             width: 600,
             height: 600,
-            child: QrSharePanel(url: url, onNextGuest: () => nextGuest++),
+            child: QrSharePanel(
+              url: url,
+              onNextGuest: () => nextGuest++,
+              onPrint: () => printed++,
+            ),
           ),
         ),
       ),
@@ -57,12 +48,12 @@ void main() {
 
     await tester.tap(find.text(t.editor.nextGuest));
     expect(nextGuest, 1);
-    expect(find.text(url), findsOneWidget);
-    expect(find.byTooltip(t.editor.copyLink), findsOneWidget);
+    // The link field is hidden for now.
+    expect(find.text(url), findsNothing);
+    expect(find.byTooltip(t.editor.copyLink), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.copy_rounded));
-    await tester.pump();
-    expect(copiedText, url);
+    await tester.tap(find.text(t.editor.printNow));
+    expect(printed, 1);
   });
 
   testWidgets('says how the background upload is going', (tester) async {

@@ -21,10 +21,17 @@ class QrSharePanel extends StatelessWidget {
   /// Ends the session and goes back to capture for the next guest.
   final VoidCallback onNextGuest;
 
+  /// Prints the finished photo; the button is hidden when null.
+  final VoidCallback? onPrint;
+
+  // shortcut: the link field is hidden for now; flip to bring it back.
+  static const _showLink = false;
+
   const QrSharePanel({
     super.key,
     required this.url,
     required this.onNextGuest,
+    this.onPrint,
     this.uploadStatus,
     this.isMobile = false,
   });
@@ -46,6 +53,21 @@ class QrSharePanel extends StatelessWidget {
       shortcut: ShortcutKey.enter,
       icon: Icons.add_a_photo_rounded,
       height: 56,
+    ),
+  );
+
+  Widget _printNow(ColorScheme colorScheme) => SizedBox(
+    height: 56,
+    child: OutlinedButton.icon(
+      onPressed: onPrint,
+      icon: const Icon(Icons.print_rounded),
+      label: Text(t.editor.printNow),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colorScheme.secondary,
+        side: BorderSide(color: colorScheme.secondary, width: 1.5),
+        textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
     ),
   );
 
@@ -138,21 +160,36 @@ class QrSharePanel extends StatelessWidget {
                   Column(
                     children: [
                       SizedBox(width: double.infinity, child: _nextGuest()),
-                      const Gap(12),
-                      _LinkField(url: url, onCopy: () => _copyLink(context)),
+                      if (onPrint != null) ...[
+                        const Gap(12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: _printNow(colorScheme),
+                        ),
+                      ],
+                      if (_showLink) ...[
+                        const Gap(12),
+                        _LinkField(url: url, onCopy: () => _copyLink(context)),
+                      ],
                     ],
                   )
                 else
                   Row(
                     children: [
-                      SizedBox(width: 220, child: _nextGuest()),
-                      const Gap(12),
-                      Expanded(
-                        child: _LinkField(
-                          url: url,
-                          onCopy: () => _copyLink(context),
+                      Expanded(child: _nextGuest()),
+                      if (onPrint != null) ...[
+                        const Gap(12),
+                        Expanded(child: _printNow(colorScheme)),
+                      ],
+                      if (_showLink) ...[
+                        const Gap(12),
+                        Expanded(
+                          child: _LinkField(
+                            url: url,
+                            onCopy: () => _copyLink(context),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
               ],

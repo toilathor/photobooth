@@ -47,10 +47,11 @@ class AppConfig {
 
   // Photo settings
   /// Photo count of the "standard" mode: the 2-photo layout for personal and
-  /// the 4-photo strip for commercial. It is also the default selection.
+  /// the 4-photo strip for commercial.
   static int get standardPhotoCount => flavor == AppFlavor.personal ? 2 : 4;
 
-  static int get defaultPhotoCount => standardPhotoCount;
+  /// Group shot first: most guests come in groups.
+  static int get defaultPhotoCount => 1;
 
   /// Photo counts the flavor can offer (group shot and standard).
   static List<int> get photoCounts => [1, standardPhotoCount];

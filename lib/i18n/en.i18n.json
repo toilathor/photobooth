@@ -66,6 +66,7 @@
     "printSuccess": "Print job sent successfully!",
     "printError": "Print error: $error",
     "printPhoto": "Print",
+    "printNow": "Print now",
     "processing": "Processing your photos…",
     "savingToDevice": "Saving to this device…",
     "genericError": "Couldn't save your photos. Please try again.",
