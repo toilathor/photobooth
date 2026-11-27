@@ -422,12 +422,6 @@ STANDARD_CONCEPTS = [
     ("V10_phim_vom", "Dải phim · ảnh cổng vòm", "Khung phim thứ ba dùng ảnh nắm tay trước cổng vòm.",
      partial(s_film, photo="gallery/album_6.webp"), {"file": "standard_11.png", "category": (106, "Dải Phim")}),
     # --- Phiên bản dùng thêm ảnh còn lại trong wedding-invitation (chờ duyệt).
-    ("V11_buu_thiep_tinh_yeu", "Bưu thiếp dọc · 3 tem chuyện tình", "Ba tem nhỏ: ảnh chụp tự sướng, nhẫn cầu hôn và ngày đám ngỏ.",
-     partial(s_postcard_stamps, [
-         ("couple/timeline_1.webp", (110, 1400, 400, 520), (0.4, 0.5)),
-         ("couple/timeline_2.webp", (565, 1400, 205, 235), (0.5, 0.5)),
-         ("couple/timeline_3.webp", (565, 1685, 205, 235), (0.5, 0.4)),
-     ], "Chuyện của chúng mình,", text_y=2200), {"file": "standard_12.png", "category": (104, "Bưu Thiếp")}),
     ("V12_buu_thiep_doi", "Bưu thiếp dọc · tem chú rể & cô dâu", "Hai tem chân dung: chú rể bên trái, cô dâu bên phải.",
      partial(s_postcard_stamps, [
          ("couple/groom.webp", (95, 1380, 330, 560), (0.55, 0.15)),
