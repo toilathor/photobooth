@@ -627,25 +627,6 @@
             }
         },
         {
-            "id": 27,
-            "filename": "standard/standard_12.png",
-            "name": "standard_12",
-            "frame": "square",
-            "layout_type": "standard",
-            "created_at": "2026-11-19T14:55:45.136846",
-            "visible_locales": [
-                "vn"
-            ],
-            "updated_at": "2026-11-19T16:20:32.938510",
-            "category_id": "104",
-            "category": {
-                "id": 104,
-                "name": "Bưu Thiếp",
-                "created_at": "2026-11-19T16:20:32.938510",
-                "updated_at": "2026-11-19T16:20:32.938510"
-            }
-        },
-        {
             "id": 28,
             "filename": "standard/standard_13.png",
             "name": "standard_13",
